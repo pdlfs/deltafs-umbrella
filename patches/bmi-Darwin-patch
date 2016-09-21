@@ -1,0 +1,13 @@
+diff --git a/Makefile.in b/Makefile.in
+index f22ab91..0be7b41 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -720,7 +720,7 @@ lib/libbmi.a: $(LIBBMIOBJS)
+ lib/libbmi.so: $(LIBBMIPICOBJS)
+ 	$(Q) "  LDSO		$@"
+ 	$(E)$(INSTALL) -d lib
+-	$(E)$(LDSHARED) -Wl,-soname,libbmi.so -o $@ $(LIBBMIPICOBJS) $(DEPLIBS)
++	$(E)$(LDSHARED) -install_name @rpath/libbmi.so -o $@ $(LIBBMIPICOBJS) $(DEPLIBS)
+ endif
+ 
+ # rule for building the pvfs2 library
