@@ -9,7 +9,7 @@ to build deltafs and install it in a directory (e.g. /tmp/deltafs):
 
    mkdir -p build
    cd build
-   cmake -DCMAKE_INSTALL_PATH=/tmp/deltafs ..
+   cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs ..
    make
 
 
