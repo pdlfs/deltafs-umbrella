@@ -3,16 +3,18 @@
 # 20-Sep-2016  chuck@ece.cmu.edu
 #
 
-# config:
+# command line config:
 #
 # -DCMAKE_INSTALL_PREFIX=/tmp/delta       # where to install
 #
 
-# [optional]
-# -DCMAKE_INCLUDE_PATH='/pkg/include'     # extra include directories
-# -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
+#
+# [optional config vars]
 # -DCMAKE_PREFIX_PATH='/pkg'              # look for additional installs here
 #
+# the following also applies for configure scripts:
+# -DCMAKE_INCLUDE_PATH='/pkg/include'     # extra include directories
+# -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
 # 
 
 cmake_minimum_required (VERSION 3.0)      # glog requires 3.0
@@ -20,7 +22,25 @@ project (deltafs-umbrella NONE)
 include (ExternalProject)
 
 #
-# build CPPFLAGS and LDFLAGS for configure scripts
+# determine all the places to look for packaged software...  we add
+# the install prefix to the places we look.
+#
+list (APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+list (REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+foreach (prefix ${CMAKE_PREFIX_PATH})
+    list (APPEND CMAKE_INCLUDE_PATH "${prefix}/include")
+    list (APPEND CMAKE_LIBRARY_PATH "${prefix}/lib")
+endforeach ()
+list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
+list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
+
+#
+# generate a prefix path with an alternate LIST_SEPARATOR for ExternalProject
+#
+string (REPLACE ";" "^^" CMAKE_QUOTED_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
+
+#
+# use vars to build build CPPFLAGS and LDFLAGS for configure scripts
 #
 if (CMAKE_INCLUDE_PATH)
   foreach (inc ${CMAKE_INCLUDE_PATH})
@@ -100,9 +120,11 @@ set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
 ExternalProject_Add (mercury
     DEPENDS cci bmi
+    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DNA_USE_MPI=OFF -DNA_USE_CCI=ON -DNA_USE_BMI=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
@@ -144,9 +166,11 @@ ExternalProject_Add_Step(snappy prepare
 #
 
 ExternalProject_Add (gflags
+    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     GIT_REPOSITORY "https://github.com/gflags/gflags"
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON
     UPDATE_COMMAND ""
 )
@@ -158,9 +182,11 @@ ExternalProject_Add (gflags
 
 ExternalProject_Add (glog
     DEPENDS gflags
+    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     GIT_REPOSITORY "https://github.com/google/glog"
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON
     UPDATE_COMMAND ""
 )
@@ -170,9 +196,11 @@ ExternalProject_Add (glog
 #
 ExternalProject_Add (deltafs
     DEPENDS mercury gflags glog snappy
+    LIST_SEPARATOR ^^
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=1 -DPDLFS_SNAPPY=1 
                -DDELTAFS_MPI=ON
