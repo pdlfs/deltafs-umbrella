@@ -143,24 +143,26 @@ ExternalProject_Add (mercury
 )
 
 #
-# Snappy
+# Snappy (XXX: using tar file, as aclocal on nerc is broken)
 #
 
 ExternalProject_Add (snappy
-    GIT_REPOSITORY "https://github.com/google/snappy"
+    URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
+    ###GIT_REPOSITORY "https://github.com/google/snappy"
     # GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
 )
 
-ExternalProject_Add_Step(snappy prepare
-    COMMAND <SOURCE_DIR>/autogen.sh
-    COMMENT "preparing source for configure"
-    DEPENDEES update
-    DEPENDERS configure
-    WORKING_DIRECTORY <SOURCE_DIR>
-)
+# XXX: only needed if building from github
+#ExternalProject_Add_Step(snappy prepare
+#    COMMAND <SOURCE_DIR>/autogen.sh
+#    COMMENT "preparing source for configure"
+#    DEPENDEES update
+#    DEPENDERS configure
+#    WORKING_DIRECTORY <SOURCE_DIR>
+#)
 
 #
 # gflags
