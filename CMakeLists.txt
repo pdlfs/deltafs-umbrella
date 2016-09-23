@@ -15,7 +15,7 @@
 # the following also applies for configure scripts:
 # -DCMAKE_INCLUDE_PATH='/pkg/include'     # extra include directories
 # -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
-# 
+#
 
 cmake_minimum_required (VERSION 3.0)      # glog requires 3.0
 project (deltafs-umbrella NONE)
@@ -98,7 +98,7 @@ ExternalProject_Add (bmi
     GIT_REPOSITORY "http://git.mcs.anl.gov/bmi.git"
     # GIT_TAG master
     PATCH_COMMAND ${bmipatchcmd}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX} 
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
     UPDATE_COMMAND ""
 )
@@ -125,6 +125,7 @@ ExternalProject_Add (mercury
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
                -DNA_USE_MPI=OFF -DNA_USE_CCI=ON -DNA_USE_BMI=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
@@ -149,7 +150,7 @@ ExternalProject_Add (snappy
     GIT_REPOSITORY "https://github.com/google/snappy"
     # GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
-         --prefix=${CMAKE_INSTALL_PREFIX} 
+         --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
 )
 
@@ -171,6 +172,7 @@ ExternalProject_Add (gflags
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
                -DBUILD_SHARED_LIBS=ON
     UPDATE_COMMAND ""
 )
@@ -187,6 +189,7 @@ ExternalProject_Add (glog
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
                -DBUILD_SHARED_LIBS=ON
     UPDATE_COMMAND ""
 )
@@ -202,10 +205,9 @@ ExternalProject_Add (deltafs
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
-               -DPDLFS_MERCURY_RPC=1 -DPDLFS_SNAPPY=1 
+               -DPDLFS_MERCURY_RPC=1 -DPDLFS_SNAPPY=1
+               -DPDLFS_GFLAGS=1 -DPDLFS_GLOG=1
                -DDELTAFS_MPI=ON
-               # XXX tmp disable these, add back to DEPENDS when enabled
-               ### -DPDLFS_GFLAGS=1 -DPDLFS_GLOG=1 
     UPDATE_COMMAND ""
     TEST_COMMAND ctest
 )
