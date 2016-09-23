@@ -71,20 +71,25 @@ endif ()
 message (STATUS "CCI ibverbs setting: ${ibv}")
 
 ExternalProject_Add (cci
-    GIT_REPOSITORY "https://github.com/CCI/cci"
+    # avoiding aclocal problem, build from tar
+    # XXX: no configure script @ github tar
+    ###URL https://github.com/CCI/cci/archive/v2.0.tar.gz
+    URL http://yogi.pdl.cmu.edu/~chuck/tmp/cci-2.0.tgz
+    ### GIT_REPOSITORY "https://github.com/CCI/cci"
     # GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX} ${ibv}
     UPDATE_COMMAND ""
 )
 
-ExternalProject_Add_Step(cci prepare
-    COMMAND <SOURCE_DIR>/autogen.pl
-    COMMENT "preparing source for configure"
-    DEPENDEES update
-    DEPENDERS configure
-    WORKING_DIRECTORY <SOURCE_DIR>
-)
+# only needed if building from github
+#ExternalProject_Add_Step(cci prepare
+#    COMMAND <SOURCE_DIR>/autogen.pl
+#    COMMENT "preparing source for configure"
+#    DEPENDEES update
+#    DEPENDERS configure
+#    WORKING_DIRECTORY <SOURCE_DIR>
+#)
 
 #
 # BMI
