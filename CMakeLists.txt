@@ -40,7 +40,7 @@ list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
 string (REPLACE ";" "^^" CMAKE_QUOTED_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 
 #
-# use vars to build build CPPFLAGS and LDFLAGS for configure scripts
+# use vars to build CPPFLAGS and LDFLAGS for configure scripts
 #
 if (CMAKE_INCLUDE_PATH)
   foreach (inc ${CMAKE_INCLUDE_PATH})
@@ -60,7 +60,6 @@ endif ()
 #
 # CCI
 #
-
 find_library (LIBIBVERBS NAMES ibverbs)
 find_path (RDMA_INCLUDE rdma/rdma_cma.h HINTS ${RDMA_INCLUDE_DIR})
 if (LIBIBVERBS AND RDMA_INCLUDE)
@@ -146,13 +145,11 @@ ExternalProject_Add (mercury
 # XXX: not all tests run, so no TEST_COMMAND for now
 #ctest -E 'mercury_bulk_cci_tcp|mercury_bulk_seg_cci_tcp|mercury_posix_cci_tcp'
 # some issues with cci/tcp transport
-
 )
 
 #
-# Snappy (XXX: using tar file, as aclocal on nerc is broken)
+# Snappy (XXX: using tar file, as aclocal on nersc is broken)
 #
-
 ExternalProject_Add (snappy
     URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
     URL_MD5 7358c82f133dc77798e4c2062a749b73
@@ -176,7 +173,6 @@ ExternalProject_Add (snappy
 #
 # gflags
 #
-
 ExternalProject_Add (gflags
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     GIT_REPOSITORY "https://github.com/gflags/gflags"
@@ -192,7 +188,6 @@ ExternalProject_Add (gflags
 #
 # glog
 #
-
 ExternalProject_Add (glog
     DEPENDS gflags
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
