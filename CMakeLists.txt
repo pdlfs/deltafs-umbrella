@@ -75,8 +75,10 @@ ExternalProject_Add (cci
     # XXX: no configure script @ github tar
     ###URL https://github.com/CCI/cci/archive/v2.0.tar.gz
     URL http://yogi.pdl.cmu.edu/~chuck/tmp/cci-2.0.tgz
+    URL_MD5 a7f5c6054a4f47ff369b5271dc94f46e
+    TIMEOUT 5
     ### GIT_REPOSITORY "https://github.com/CCI/cci"
-    # GIT_TAG master
+    ### GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX} ${ibv}
     UPDATE_COMMAND ""
@@ -153,8 +155,10 @@ ExternalProject_Add (mercury
 
 ExternalProject_Add (snappy
     URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
-    ###GIT_REPOSITORY "https://github.com/google/snappy"
-    # GIT_TAG master
+    URL_MD5 7358c82f133dc77798e4c2062a749b73
+    TIMEOUT 5
+    ### GIT_REPOSITORY "https://github.com/google/snappy"
+    ### GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
@@ -208,6 +212,7 @@ ExternalProject_Add (deltafs
     DEPENDS mercury gflags glog snappy
     LIST_SEPARATOR ^^
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
+    GIT_SUBMODULES "deps/openpa"
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
