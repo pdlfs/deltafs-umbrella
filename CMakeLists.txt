@@ -75,7 +75,7 @@ ExternalProject_Add (cci
     ###URL https://github.com/CCI/cci/archive/v2.0.tar.gz
     URL http://yogi.pdl.cmu.edu/~chuck/tmp/cci-2.0.tgz
     URL_MD5 a7f5c6054a4f47ff369b5271dc94f46e
-    TIMEOUT 5
+    TIMEOUT 300
     ### GIT_REPOSITORY "https://github.com/CCI/cci"
     ### GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
@@ -153,7 +153,7 @@ ExternalProject_Add (mercury
 ExternalProject_Add (snappy
     URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
     URL_MD5 7358c82f133dc77798e4c2062a749b73
-    TIMEOUT 5
+    TIMEOUT 300
     ### GIT_REPOSITORY "https://github.com/google/snappy"
     ### GIT_TAG master
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
