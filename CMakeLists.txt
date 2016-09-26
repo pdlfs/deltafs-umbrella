@@ -213,7 +213,7 @@ ExternalProject_Add (deltafs
     LIST_SEPARATOR ^^
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
     GIT_SUBMODULES "deps/openpa"
-    # GIT_TAG master
+    GIT_TAG "v0.9.1"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
