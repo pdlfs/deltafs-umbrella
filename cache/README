@@ -1,0 +1,3 @@
+cached archives of distributions may be placed in this directory
+to avoid downloading (e.g. if there is no internet available or
+if bandwidth is limited).

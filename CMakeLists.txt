@@ -17,13 +17,33 @@
 # -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
 #
 
-cmake_minimum_required (VERSION 3.0)      # glog requires 3.0
+cmake_minimum_required (VERSION 3.0)
 project (deltafs-umbrella NONE)
 include (ExternalProject)
 
 #
-# determine all the places to look for packaged software...  we add
-# the install prefix to the places we look.
+# GenDownloadConfig (result target local-file remote-args ...)
+#
+# get file locally if present, otherwise download it using remote-args.
+#
+function (GenDownloadConfig result target local)
+    if (EXISTS "${CMAKE_SOURCE_DIR}/cache/${local}")
+        message (STATUS "${target}: using cache (${local})")
+        # assume correct, but set URL_MD5 to quiet warning
+        file (MD5 "${CMAKE_SOURCE_DIR}/cache/${local}" localmd5)
+        set (${result} URL "${CMAKE_SOURCE_DIR}/cache/${local}"
+                       URL_MD5 ${localmd5} PARENT_SCOPE)
+    else ()
+        set (${result} ${ARGN} PARENT_SCOPE)
+    endif ()
+endfunction ()
+
+#
+# set up the prefix path for packaged software that we may want to
+# link to (e.g. third party libraries).   this will get added to
+# the configure command line (for autotools-based projects).
+# we want our install prefix to be in the prefix path too (it isn't
+# be default).
 #
 list (APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 list (REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
@@ -35,12 +55,13 @@ list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
 list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
 
 #
-# generate a prefix path with an alternate LIST_SEPARATOR for ExternalProject
+# generate a prefix path with an alternate LIST_SEPARATOR for cmake-based
+# projects.  needed for ExternalProject because CMAKE_ARGS eats ";"'s.
 #
 string (REPLACE ";" "^^" CMAKE_QUOTED_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 
 #
-# use vars to build build CPPFLAGS and LDFLAGS for configure scripts
+# use above vars to build build CPPFLAGS and LDFLAGS for configure scripts
 #
 if (CMAKE_INCLUDE_PATH)
   foreach (inc ${CMAKE_INCLUDE_PATH})
@@ -58,9 +79,13 @@ if (CMAKE_LIBRARY_PATH)
 endif ()
 
 #
-# CCI
+# now we are ready to start building packages
 #
 
+#
+# CCI.   note that we enable verbs if we detect the necessary header
+# files and libraries.   (note: the find calls below respect the prefix path.)
+#
 find_library (LIBIBVERBS NAMES ibverbs)
 find_path (RDMA_INCLUDE rdma/rdma_cma.h HINTS ${RDMA_INCLUDE_DIR})
 if (LIBIBVERBS AND RDMA_INCLUDE)
@@ -70,28 +95,28 @@ else ()
 endif ()
 message (STATUS "CCI ibverbs setting: ${ibv}")
 
-ExternalProject_Add (cci
-    # avoiding aclocal problem, build from tar
-    # XXX: no configure script @ github tar
-    ###URL https://github.com/CCI/cci/archive/v2.0.tar.gz
-    URL http://yogi.pdl.cmu.edu/~chuck/tmp/cci-2.0.tgz
-    URL_MD5 a7f5c6054a4f47ff369b5271dc94f46e
-    TIMEOUT 5
+GenDownloadConfig (cci_download cci cci-2.0.tar.gz
+    URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
+    URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
+    TIMEOUT 10
     ### GIT_REPOSITORY "https://github.com/CCI/cci"
     ### GIT_TAG master
+)
+
+ExternalProject_Add (cci
+    ${cci_download}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX} ${ibv}
     UPDATE_COMMAND ""
 )
 
-# only needed if building from github
-#ExternalProject_Add_Step(cci prepare
-#    COMMAND <SOURCE_DIR>/autogen.pl
-#    COMMENT "preparing source for configure"
-#    DEPENDEES update
-#    DEPENDERS configure
-#    WORKING_DIRECTORY <SOURCE_DIR>
-#)
+ExternalProject_Add_Step(cci prepare
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/autogen.pl
+    COMMENT "preparing source for configure"
+    DEPENDEES update
+    DEPENDERS configure
+    WORKING_DIRECTORY <SOURCE_DIR>
+)
 
 #
 # BMI
@@ -101,9 +126,13 @@ if (EXISTS ${bmipatch})
     set (bmipatchcmd patch -i ${bmipatch} -d <SOURCE_DIR>)
 endif ()
 
-ExternalProject_Add (bmi
+GenDownloadConfig (bmi_download bmi bmi.tar.gz
     GIT_REPOSITORY "http://git.mcs.anl.gov/bmi.git"
-    # GIT_TAG master
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (bmi
+    ${bmi_download}
     PATCH_COMMAND ${bmipatchcmd}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
@@ -111,7 +140,7 @@ ExternalProject_Add (bmi
 )
 
 ExternalProject_Add_Step(bmi prepare
-    COMMAND <SOURCE_DIR>/prepare
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/prepare
     COMMENT "preparing source for configure"
     DEPENDEES update
     DEPENDERS configure
@@ -121,14 +150,18 @@ ExternalProject_Add_Step(bmi prepare
 #
 # mercury
 #
-
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
+
+GenDownloadConfig (mercury_download mercury mercury.tar.gz
+    GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
+    ### GIT_TAG master
+)
 
 ExternalProject_Add (mercury
     DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
+    ${mercury_download}
     # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
@@ -150,37 +183,42 @@ ExternalProject_Add (mercury
 )
 
 #
-# Snappy (XXX: using tar file, as aclocal on nerc is broken)
+# Snappy (XXX: using tar file, having aclocal issues on nerc)
 #
-
-ExternalProject_Add (snappy
+GenDownloadConfig (snappy_download snappy snappy-1.1.3.tar.gz
     URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
     URL_MD5 7358c82f133dc77798e4c2062a749b73
-    TIMEOUT 5
+    TIMEOUT 10
     ### GIT_REPOSITORY "https://github.com/google/snappy"
     ### GIT_TAG master
+)
+
+ExternalProject_Add (snappy
+    ${snappy_download}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
 )
 
-# XXX: only needed if building from github
-#ExternalProject_Add_Step(snappy prepare
-#    COMMAND <SOURCE_DIR>/autogen.sh
-#    COMMENT "preparing source for configure"
-#    DEPENDEES update
-#    DEPENDERS configure
-#    WORKING_DIRECTORY <SOURCE_DIR>
-#)
+ExternalProject_Add_Step(snappy prepare
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/autogen.sh
+    COMMENT "preparing source for configure"
+    DEPENDEES update
+    DEPENDERS configure
+    WORKING_DIRECTORY <SOURCE_DIR>
+)
 
 #
 # gflags
 #
+GenDownloadConfig (gflags_download gflags gflags.tar.gz
+    GIT_REPOSITORY "https://github.com/gflags/gflags"
+    ### GIT_TAG master
+)
 
 ExternalProject_Add (gflags
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    GIT_REPOSITORY "https://github.com/gflags/gflags"
-    # GIT_TAG master
+    ${gflags_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
@@ -188,16 +226,18 @@ ExternalProject_Add (gflags
     UPDATE_COMMAND ""
 )
 
-
 #
 # glog
 #
+GenDownloadConfig (glog_download glog glog.tar.gz
+    GIT_REPOSITORY "https://github.com/google/glog"
+    ### GIT_TAG master
+)
 
 ExternalProject_Add (glog
     DEPENDS gflags
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    GIT_REPOSITORY "https://github.com/google/glog"
-    # GIT_TAG master
+    ${glog_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
@@ -208,12 +248,16 @@ ExternalProject_Add (glog
 #
 # deltafs
 #
-ExternalProject_Add (deltafs
-    DEPENDS mercury gflags glog snappy
-    LIST_SEPARATOR ^^
+GenDownloadConfig (deltafs_download deltafs deltafs.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
     GIT_SUBMODULES "deps/openpa"
     GIT_TAG "v0.9.1"
+)
+
+ExternalProject_Add (deltafs
+    DEPENDS mercury gflags glog snappy
+    LIST_SEPARATOR ^^
+    ${deltafs_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
