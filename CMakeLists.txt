@@ -98,7 +98,7 @@ message (STATUS "CCI ibverbs setting: ${ibv}")
 GenDownloadConfig (cci_download cci cci-2.0.tar.gz
     URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
     URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
-    TIMEOUT 10
+    TIMEOUT 100
     ### GIT_REPOSITORY "https://github.com/CCI/cci"
     ### GIT_TAG master
 )
@@ -153,7 +153,7 @@ ExternalProject_Add_Step(bmi prepare
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-b20160927.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
     ### GIT_TAG master
 )
@@ -162,7 +162,6 @@ ExternalProject_Add (mercury
     DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
-    # GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
@@ -188,7 +187,7 @@ ExternalProject_Add (mercury
 GenDownloadConfig (snappy_download snappy snappy-1.1.3.tar.gz
     URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
     URL_MD5 7358c82f133dc77798e4c2062a749b73
-    TIMEOUT 10
+    TIMEOUT 100
     ### GIT_REPOSITORY "https://github.com/google/snappy"
     ### GIT_TAG master
 )
@@ -211,7 +210,7 @@ ExternalProject_Add_Step(snappy prepare
 #
 # gflags
 #
-GenDownloadConfig (gflags_download gflags gflags.tar.gz
+GenDownloadConfig (gflags_download gflags gflags-b20160927.tar.gz
     GIT_REPOSITORY "https://github.com/gflags/gflags"
     ### GIT_TAG master
 )
@@ -229,7 +228,7 @@ ExternalProject_Add (gflags
 #
 # glog
 #
-GenDownloadConfig (glog_download glog glog.tar.gz
+GenDownloadConfig (glog_download glog glog-b20160927.tar.gz
     GIT_REPOSITORY "https://github.com/google/glog"
     ### GIT_TAG master
 )
@@ -248,7 +247,7 @@ ExternalProject_Add (glog
 #
 # deltafs
 #
-GenDownloadConfig (deltafs_download deltafs deltafs.tar.gz
+GenDownloadConfig (deltafs_download deltafs deltafs-0.9.1.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
     GIT_SUBMODULES "deps/openpa"
     GIT_TAG "v0.9.1"
