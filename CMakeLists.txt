@@ -266,3 +266,22 @@ ExternalProject_Add (deltafs
     UPDATE_COMMAND ""
     TEST_COMMAND ctest
 )
+
+#
+# vpic
+#
+GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
+    ### GIT_TAG
+)
+
+ExternalProject_Add (vpic
+    LIST_SEPARATOR ^^
+    ${vpic_download}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_BUILD_TYPE="Release"
+               -DENABLE_MPI="ON"
+    UPDATE_COMMAND ""
+)
+
