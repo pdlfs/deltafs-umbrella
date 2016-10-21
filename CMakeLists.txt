@@ -251,7 +251,7 @@ ExternalProject_Add (glog
 GenDownloadConfig (deltafs_download deltafs deltafs.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
     GIT_SUBMODULES "deps/openpa"
-    GIT_TAG "v0.9.1"
+    GIT_TAG "v0.9.2"
 )
 
 ExternalProject_Add (deltafs
