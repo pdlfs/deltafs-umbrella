@@ -9,8 +9,8 @@ On Ubuntu 16.04 LTS, these requirements may be installed by:
 
 ```
 sudo apt-get update
-sudo apt-get install g++ make cmake
-sudo apt-get install pkg-config autoconf automake libtool
+sudo apt-get install g++ make cmake pkg-config
+sudo apt-get install git
 ```
 
 To build deltafs and install it in a directory (e.g. /tmp/deltafs):
