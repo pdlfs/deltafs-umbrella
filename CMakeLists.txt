@@ -267,6 +267,24 @@ ExternalProject_Add (deltafs
 )
 
 #
+# pdlfs-preload
+#
+GenDownloadConfig (pdlfs_preload_download pdlfs_preload pdlfs-preload-0.1.0.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-preload.git"
+    GIT_TAG "v0.1.0"
+)
+
+ExternalProject_Add (pdlfs-preload
+    DEPENDS deltafs glog
+    LIST_SEPARATOR ^^
+    ${pdlfs_preload_download}
+    CONFIGURE_COMMAND ""
+    BUILD_IN_SOURCE 1
+    BUILD_COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX}
+    INSTALL_COMMAND ""
+)
+
+#
 # vpic
 #
 GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
