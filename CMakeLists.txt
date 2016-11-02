@@ -269,9 +269,9 @@ ExternalProject_Add (deltafs
 #
 # pdlfs-preload
 #
-GenDownloadConfig (pdlfs_preload_download pdlfs_preload pdlfs-preload-0.1.0.tar.gz
+GenDownloadConfig (pdlfs_preload_download pdlfs_preload pdlfs-preload-0.2.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-preload.git"
-    GIT_TAG "v0.1.0"
+    GIT_TAG "v0.2"
 )
 
 ExternalProject_Add (pdlfs-preload
