@@ -282,6 +282,12 @@ ExternalProject_Add (pdlfs-preload
     BUILD_IN_SOURCE 1
     BUILD_COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX}
     INSTALL_COMMAND ""
+
+    # TODO: replace following commands with a proper INSTALL_COMMAND
+
+    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload-deltafs.so ${CMAKE_INSTALL_PREFIX}/lib/
+    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload-posix.so ${CMAKE_INSTALL_PREFIX}/lib/
+    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload.so ${CMAKE_INSTALL_PREFIX}/lib/
 )
 
 #
