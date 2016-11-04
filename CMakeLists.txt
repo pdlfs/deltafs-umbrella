@@ -295,16 +295,23 @@ ExternalProject_Add (pdlfs-preload
 #
 GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    ### GIT_TAG
+    ### GIT_TAG master
 )
 
 ExternalProject_Add (vpic
     LIST_SEPARATOR ^^
     ${vpic_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_BUILD_TYPE="Release"
-               -DENABLE_MPI=ON
+
+    # TODO: This code makes me sad, but then again this VPIC version
+    #       also makes me sad. Feel free to fix.
+
+    CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
+        COMMAND CC=mpicc CXX=mpicxx <SOURCE_DIR>/configure
+                --with-machine=<SOURCE_DIR>/narwhal.conf
+    BUILD_COMMAND make
+        COMMAND cd <SOURCE_DIR> && <BINARY_DIR>/build.op input/turbulence.cxx
+
+    INSTALL_COMMAND cp <SOURCE_DIR>/input/turbulence.op ${CMAKE_INSTALL_PREFIX}/bin/
     UPDATE_COMMAND ""
 )
 
