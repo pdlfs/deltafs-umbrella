@@ -182,69 +182,6 @@ ExternalProject_Add (mercury
 )
 
 #
-# Snappy (XXX: using tar file, having aclocal issues on nerc)
-#
-GenDownloadConfig (snappy_download snappy snappy-1.1.3.tar.gz
-    URL https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
-    URL_MD5 7358c82f133dc77798e4c2062a749b73
-    TIMEOUT 100
-    ### GIT_REPOSITORY "https://github.com/google/snappy"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (snappy
-    ${snappy_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
-         --prefix=${CMAKE_INSTALL_PREFIX}
-    UPDATE_COMMAND ""
-)
-
-ExternalProject_Add_Step(snappy prepare
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/autogen.sh
-    COMMENT "preparing source for configure"
-    DEPENDEES update
-    DEPENDERS configure
-    WORKING_DIRECTORY <SOURCE_DIR>
-)
-
-#
-# gflags
-#
-GenDownloadConfig (gflags_download gflags gflags-b20160927.tar.gz
-    GIT_REPOSITORY "https://github.com/gflags/gflags"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (gflags
-    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    ${gflags_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DBUILD_SHARED_LIBS=ON
-    UPDATE_COMMAND ""
-)
-
-#
-# glog
-#
-GenDownloadConfig (glog_download glog glog-b20160927.tar.gz
-    GIT_REPOSITORY "https://github.com/google/glog"
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (glog
-    DEPENDS gflags
-    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
-    ${glog_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DBUILD_SHARED_LIBS=ON
-    UPDATE_COMMAND ""
-)
-
-#
 # deltafs
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
@@ -253,14 +190,14 @@ GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
 )
 
 ExternalProject_Add (deltafs
-    DEPENDS mercury gflags glog snappy
+    DEPENDS mercury
     LIST_SEPARATOR ^^
     ${deltafs_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
-               -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=ON
-               -DPDLFS_GFLAGS=ON -DPDLFS_GLOG=ON
+               -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
+               -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                -DDELTAFS_MPI=ON
     UPDATE_COMMAND ""
     TEST_COMMAND ctest
@@ -275,7 +212,7 @@ GenDownloadConfig (pdlfs_preload_download pdlfs_preload pdlfs-preload-0.2.tar.gz
 )
 
 ExternalProject_Add (pdlfs-preload
-    DEPENDS deltafs glog
+    DEPENDS deltafs
     LIST_SEPARATOR ^^
     ${pdlfs_preload_download}
     CONFIGURE_COMMAND ""
@@ -290,6 +227,9 @@ ExternalProject_Add (pdlfs-preload
     COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload.so ${CMAKE_INSTALL_PREFIX}/lib/
 )
 
+# remove pdlfs-preload from the 'all' target .. replace w/deltafs-vpic-preload
+set_property (TARGET pdlfs-preload PROPERTY EXCLUDE_FROM_ALL True)
+
 #
 # vpic
 #
@@ -299,6 +239,7 @@ GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
 )
 
 ExternalProject_Add (vpic
+    DEPENDS deltafs           # XXX: just to make it build deltafs first
     LIST_SEPARATOR ^^
     ${vpic_download}
 
