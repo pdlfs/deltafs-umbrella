@@ -154,8 +154,9 @@ ExternalProject_Add_Step(bmi prepare
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury-b20160927.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-6d069df1.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
+    GIT_TAG 6d069df1		# Dec 2016
     ### GIT_TAG master
 )
 
