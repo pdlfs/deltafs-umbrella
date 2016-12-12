@@ -126,8 +126,9 @@ if (EXISTS ${bmipatch})
     set (bmipatchcmd patch -i ${bmipatch} -d <SOURCE_DIR>)
 endif ()
 
-GenDownloadConfig (bmi_download bmi bmi.tar.gz
+GenDownloadConfig (bmi_download bmi bmi-cb70e870.tar.gz
     GIT_REPOSITORY "http://git.mcs.anl.gov/bmi.git"
+    GIT_TAG cb70e870		# Dec 2016
     ### GIT_TAG master
 )
 
