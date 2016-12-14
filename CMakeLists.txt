@@ -184,6 +184,31 @@ ExternalProject_Add (mercury
 )
 
 #
+# ch-placement
+#
+GenDownloadConfig (chp_download ch-placement ch-placement-0b706ca06.tar.gz
+    GIT_REPOSITORY "http://xgitlab.cels.anl.gov/codes/ch-placement.git"
+    GIT_TAG 0b706ca06		# Dec 2016
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (ch-placement
+    ${chp_download}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+                      --enable-shared
+    UPDATE_COMMAND ""
+    TEST_COMMAND make check
+)
+
+ExternalProject_Add_Step(ch-placement prepare
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/prepare
+    COMMENT "preparing source for configure"
+    DEPENDEES update
+    DEPENDERS configure
+    WORKING_DIRECTORY <SOURCE_DIR>
+)
+
+#
 # deltafs
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
