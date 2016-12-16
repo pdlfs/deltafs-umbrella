@@ -276,11 +276,11 @@ ExternalProject_Add (vpic
                 --with-machine=<SOURCE_DIR>/narwhal.conf
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
-		<BINARY_DIR>/build.op decks/trecon-proc/turbulence-sheet-tracer.cxx &&
-		<BINARY_DIR>/build.op decks/trecon-part/turbulence-sheet-tracer.cxx
+		<BINARY_DIR>/build.op decks/trecon-proc/turbulence-proc.cxx &&
+		<BINARY_DIR>/build.op decks/trecon-part/turbulence-part.cxx
 
-    INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-sheet-tracer.op ${CMAKE_INSTALL_PREFIX}/bin/ &&
-	cp <SOURCE_DIR>/decks/trecon-part/turbulence-sheet-tracer.op ${CMAKE_INSTALL_PREFIX}/bin/
+    INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-proc.op ${CMAKE_INSTALL_PREFIX}/bin/ &&
+	cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op ${CMAKE_INSTALL_PREFIX}/bin/
     UPDATE_COMMAND ""
 )
 
