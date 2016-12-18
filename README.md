@@ -4,7 +4,7 @@
 
 This package is designed to help our collaborators to quickly setup deltafs on various computing platforms ranging from commodity NFS PRObE clusters to highly-specialized Cray systems customized by different national labs. The package features a highly-automated process that downloads, builds, and installs deltafs (including many of its friends and all their dependencies) along with a demo application (VPIC) that has been preloaded to use deltafs to perform file system activities.
 
-Written on top of cmake, deltafs-umbrella is expected to work with most major computing platforms. We have successfully run deltafs-umbrella on CMU PDL Narwhal, NERSC Edison, and NERSC Cori.
+Written on top of cmake, deltafs-umbrella is expected to work with most major computing platforms. We have successfully tested deltafs-umbrella on CMU PDL Narwhal, NERSC Edison, as well as NERSC Cori.
 
 ### Modules
 
@@ -36,10 +36,14 @@ sudo apt-get install git
 To build deltafs and install it in a directory (e.g. /tmp/deltafs):
 
 ```
+git clone https://github.com/pdlfs/deltafs-umbrella.git
+cd deltafs-umbrella
+
 mkdir -p build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs ..
+
 make
 ```
 
-Enjoy :-)
+## Enjoy :-)
