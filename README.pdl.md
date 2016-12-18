@@ -15,13 +15,29 @@ properly setting up the repository and syncing the mirrors at both github.com an
 
 ## Install git-lfs client
 
-**// still work-in-progress**
+```
+// First, get latest git-lfs from https://git-lfs.github.com/
+// The latest version may be higher than 1.5.3.
+//
+// For example, on 64-bit Ubuntu:
+wget https://github.com/git-lfs/git-lfs/releases/download/v1.5.3/git-lfs-linux-amd64-1.5.3.tar.gz
+tar xzf git-lfs-linux-amd64-1.5.3.tar.gz -C .
+
+cd git-lfs-1.5.3
+
+sudo ./install.sh
+
+// Second and optionally, add a convenient git-lfs config
+git config --global --add lfs.skipdownloaderrors true
+```
 
 ## Local repository setup guide
 
 We will use dev.pdl.cmu.edu as our primary git repository, and github.com as our secondary repository.
 For git-lfs, however, both will use the service provided by github.com.
 This ensures our external collaborators can `git-lfs pull` files without knowing the existence of dev.pdl.cmu.edu. 
+
+Here, it is assumed that git-lfs has been installed.
 
 ```
 // First, git-clone from dev.pdl.cmu.edu but avoid fetching
