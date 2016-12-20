@@ -11,7 +11,8 @@ addons:
     packages:
       - libboost-dev
       - libibverbs-dev
-      - librdmacm-dev 
+      - librdmacm-dev
+      - libmpich-dev
       - cmake
       - cmake-data
 script:
