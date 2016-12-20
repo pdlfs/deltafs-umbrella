@@ -18,8 +18,13 @@
 #
 
 cmake_minimum_required (VERSION 3.0)
-project (deltafs-umbrella NONE)
+project (deltafs-umbrella C CXX)   # XXXCDC: SHOULD BE "NONE":TMP FOR VPIC
 include (ExternalProject)
+
+#
+# XXXCDC: FOR OLD VPIC WE NEED TO PASS MPICC ON CMD LINE
+#
+find_package (MPI MODULE REQUIRED)
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -275,7 +280,8 @@ ExternalProject_Add (vpic
     #       also makes me sad. Feel free to fix.
 
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
-        COMMAND CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER} <SOURCE_DIR>/configure
+        COMMAND CC=${MPI_C_COMPILER}
+                CXX=${MPI_CXX_COMPILER} <SOURCE_DIR>/configure
                 --with-machine=<SOURCE_DIR>/narwhal.conf
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
