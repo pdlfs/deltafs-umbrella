@@ -17,6 +17,8 @@ script:
 - make
 git:
   submodules: false
+env:
+- GIT_SSL_NO_VERIFY=true
 branches:
   only:
     - master
