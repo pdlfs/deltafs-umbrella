@@ -1,5 +1,7 @@
 **// This file is written for deltafs adoptors that want to experiment with deltafs on a Cray system**
 
+[![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
+
 # deltafs-umbrella
 
 Download, build, and install deltafs, deltafs friends, and their dependencies in a single highly-automated step.

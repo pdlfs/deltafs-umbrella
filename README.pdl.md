@@ -1,4 +1,6 @@
-**This file is for pdlfs internal developers**
+**// This file is for PDL internal developers**
+
+[![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
 # deltafs-umbrella
 

@@ -13,7 +13,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 ### Modules
 
 * deltafs dependencies
-  * libch-placement ("http://xgitlab.cels.anl.gov/codes/ch-placement.git)
+  * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
   * mercury rpc (https://github.com/mercury-hpc/mercury.git)
   * cci (http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz)
   * bmi (http://git.mcs.anl.gov/bmi.git)
