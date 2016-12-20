@@ -13,6 +13,7 @@ addons:
       - libibverbs-dev
       - librdmacm-dev
       - libopenmpi-dev
+      - openmpi-bin
       - cmake
       - cmake-data
 script:
