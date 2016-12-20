@@ -12,7 +12,7 @@ addons:
       - libboost-dev
       - libibverbs-dev
       - librdmacm-dev
-      - libmpich-dev
+      - libopenmpi-dev
       - cmake
       - cmake-data
 script:
