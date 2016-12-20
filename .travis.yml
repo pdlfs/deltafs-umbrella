@@ -9,6 +9,9 @@ addons:
     sources:
       - george-edison55-precise-backports
     packages:
+      - libboost-dev
+      - libibverbs-dev
+      - librdmacm-dev 
       - cmake
       - cmake-data
 script:
