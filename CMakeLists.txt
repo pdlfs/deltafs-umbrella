@@ -255,7 +255,7 @@ ExternalProject_Add (deltafs-vpic-preload
                -DPLFS_DIRMODE_BYPASS=OFF     # XXXCDC: TESTING ONLY
 
     UPDATE_COMMAND ""
-    TEST_COMMAND ctest
+    TEST_COMMAND ctest -V
 )
 
 #
