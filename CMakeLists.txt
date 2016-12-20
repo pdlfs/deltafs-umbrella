@@ -208,6 +208,9 @@ ExternalProject_Add_Step(ch-placement prepare
     WORKING_DIRECTORY <SOURCE_DIR>
 )
 
+# XXX: tmp disable
+set_property (TARGET ch-placement PROPERTY EXCLUDE_FROM_ALL True)
+
 #
 # deltafs
 #
