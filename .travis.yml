@@ -1,0 +1,15 @@
+language: cpp
+compiler:
+- gcc
+os:
+- linux
+sudo: false
+script:
+- mkdir -p /tmp/deltafs
+- cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
+- make
+git:
+  submodules: false
+branches:
+  only:
+    - master
