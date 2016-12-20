@@ -25,25 +25,29 @@ A recent CXX compiler with standard building tools including make, cmake (used b
 On Ubuntu 16.04, these requirements can be obtained by:
 
 ```
-sudo apt-get update # Optional, but recommended
+sudo apt-get update  # Optional, but recommended
 
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
+sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci
 sudo apt-get install libboost-dev libltdl-dev
 sudo apt-get install git
 ```
 
-To build deltafs and install it in a directory (e.g. /tmp/deltafs):
+To build deltafs and install it in a directory (e.g. $HOME/deltafs):
 
 ```
+mkdir -p $HOME/deltafs/src
+
+cd $HOME/deltafs/src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
 cd deltafs-umbrella
 
 mkdir -p build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs ..
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ..
 
 make
 ```
 
-## Enjoy :-)
+**Enjoy** :-)
