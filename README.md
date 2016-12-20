@@ -13,15 +13,15 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 ### Modules
 
 * deltafs dependencies
-  * libch-placement
-  * mercury rpc
-  * cci
-  * bmi
+  * libch-placement ("http://xgitlab.cels.anl.gov/codes/ch-placement.git)
+  * mercury rpc (https://github.com/mercury-hpc/mercury.git)
+  * cci (http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz)
+  * bmi (http://git.mcs.anl.gov/bmi.git)
 * deltafs
-  * deltafs
+  * deltafs (https://github.com/pdlfs/deltafs.git)
 * vpic
-  * deltafs-vpic-preload
-  * vpic
+  * deltafs-vpic-preload (https://github.com/pdlfs/deltafs-vpic-preload.git)
+  * vpic (https://github.com/pdlfs/vpic.git)
 
 ### Installation
 
@@ -34,9 +34,9 @@ sudo apt-get update  # Optional, but recommended
 
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
+sudo apt-get install libboost-dev libltdl-dev libopenmpi-dev
 sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci
-sudo apt-get install libboost-dev libltdl-dev
-sudo apt-get install git
+sudo apt-get install openmpi-bin git
 ```
 
 To build deltafs and install it in a directory (e.g. $HOME/deltafs):
