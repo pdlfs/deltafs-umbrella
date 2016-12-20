@@ -1,0 +1,28 @@
+language: cpp
+compiler:
+- gcc
+os:
+- linux
+sudo: false
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - libboost-dev
+      - libibverbs-dev
+      - librdmacm-dev
+      - libopenmpi-dev
+      - cmake
+      - cmake-data
+script:
+- mkdir -p /tmp/deltafs
+- cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
+- make
+git:
+  submodules: false
+env:
+- GIT_SSL_NO_VERIFY=true
+branches:
+  only:
+    - master
