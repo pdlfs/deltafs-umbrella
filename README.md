@@ -1,6 +1,6 @@
 **Download, build, and install deltafs, its friends, and their minimum dependencies in a single step.**
 
-[README for Cray](README.cray.md)
+[[README for Cray]](README.cray.md) | [[README for PDL]](README.pdl.md)
 
 # deltafs-umbrella
 
