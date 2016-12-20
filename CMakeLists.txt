@@ -208,6 +208,9 @@ ExternalProject_Add_Step(ch-placement prepare
     WORKING_DIRECTORY <SOURCE_DIR>
 )
 
+# XXX: tmp disable
+set_property (TARGET ch-placement PROPERTY EXCLUDE_FROM_ALL True)
+
 #
 # deltafs
 #
@@ -232,31 +235,28 @@ ExternalProject_Add (deltafs
 )
 
 #
-# pdlfs-preload
+# deltafs-vpic-preload
 #
-GenDownloadConfig (pdlfs_preload_download pdlfs_preload pdlfs-preload-0.2.tar.gz
-    GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-preload.git"
-    GIT_TAG "v0.2"
+GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
+                   deltafs-vpic-preload.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
+    # XXX: switch this off until we decide we want to tag it off
+    ###GIT_TAG master
 )
 
-ExternalProject_Add (pdlfs-preload
+ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs
     LIST_SEPARATOR ^^
-    ${pdlfs_preload_download}
-    CONFIGURE_COMMAND ""
-    BUILD_IN_SOURCE 1
-    BUILD_COMMAND make PREFIX=${CMAKE_INSTALL_PREFIX}
-    INSTALL_COMMAND ""
+    ${deltafs-vpic-preload_download}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DBUILD_SHARED_LIBS=ON
+               -DSHUFFLE_BYPASS=OFF          # XXXCDC: TESTING ONLY
+               -DPLFS_DIRMODE_BYPASS=OFF     # XXXCDC: TESTING ONLY
 
-    # TODO: replace following commands with a proper INSTALL_COMMAND
-
-    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload-deltafs.so ${CMAKE_INSTALL_PREFIX}/lib/
-    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload-posix.so ${CMAKE_INSTALL_PREFIX}/lib/
-    COMMAND cp <SOURCE_DIR>/build/libpdlfs-preload.so ${CMAKE_INSTALL_PREFIX}/lib/
+    UPDATE_COMMAND ""
+    TEST_COMMAND ctest -V
 )
-
-# remove pdlfs-preload from the 'all' target .. replace w/deltafs-vpic-preload
-set_property (TARGET pdlfs-preload PROPERTY EXCLUDE_FROM_ALL True)
 
 #
 # vpic
