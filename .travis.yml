@@ -4,6 +4,13 @@ compiler:
 os:
 - linux
 sudo: false
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
+      - cmake-data
 script:
 - mkdir -p /tmp/deltafs
 - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
