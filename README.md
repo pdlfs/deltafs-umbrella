@@ -39,7 +39,7 @@ sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci
 sudo apt-get install openmpi-bin git
 ```
 
-To build deltafs and install it in a given prefix (e.g. $HOME/deltafs):
+To build deltafs and install it under a specific prefix (e.g. $HOME/deltafs):
 
 ```
 mkdir -p $HOME/deltafs/src
@@ -57,7 +57,7 @@ make
 
 *// We have used openmpi's command line syntax. Different mpi distributions usually have slightly different syntaxes.*
 
-First, start a single deltafs metadata server processes:
+First, start a single deltafs metadata server process:
 
 ```
 rm -rf $HOME/deltafs/var && mkdir -p $HOME/deltafs/var
@@ -70,7 +70,7 @@ export DELTAFS_FioName="posix"
 
 mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf \
        -x DELTAFS_Outputs -x DELTAFS_RunDir \
-       $ROOT/bin/deltafs-srvr
+       $HOME/deltafs/bin/deltafs-srvr
 
 ```
 
@@ -82,5 +82,7 @@ mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_MetadataSrvAddrs=<
        -x "PDLFS_Root=particle" \
        $HOME/deltafs/bin/turbulence-part.op 
 ```
+
+Note: it is assumed that $HOME is backed by a shared file system that can be accessed by all mpi nodes.
 
 **Enjoy** :-)
