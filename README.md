@@ -53,11 +53,11 @@ cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ../deltafs-umbrella
 make
 ```
 
-### Run vpic with mpi
-
-First, start deltafs metadata server processes:
+### Run vpic with mpi on top of deltafs
 
 *// We have used openmpi's command line syntax. Different mpi distributions usually have slightly different syntaxes.*
+
+First, start a single deltafs metadata server processes:
 
 ```
 rm -rf $HOME/deltafs/var && mkdir -p $HOME/deltafs/var
@@ -68,17 +68,19 @@ export DELTAFS_MetadataSrvAddrs="<node_ip>:10101"
 export DELTAFS_FioConf="root=$HOME/deltafs/var/data"
 export DELTAFS_FioName="posix"
 
-mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf -x DELTAFS_Outputs -x DELTAFS_RunDir \
-        $ROOT/bin/deltafs-srvr
+mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf \
+       -x DELTAFS_Outputs -x DELTAFS_RunDir \
+       $ROOT/bin/deltafs-srvr
 
 ```
 
 Second, start vpic app:
 
 ```
-mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "PDLFS_Root=particle" -x "DELTAFS_MetadataSrvAddrs=<node_ip>:10101" \
-        -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
-        $HOME/deltafs/bin/turbulence-part.op 
+mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_MetadataSrvAddrs=<node_ip>:10101" \
+       -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
+       -x "PDLFS_Root=particle" \
+       $HOME/deltafs/bin/turbulence-part.op 
 ```
 
 **Enjoy** :-)
