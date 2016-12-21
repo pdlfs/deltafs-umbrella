@@ -123,6 +123,9 @@ ExternalProject_Add_Step(cci prepare
     WORKING_DIRECTORY <SOURCE_DIR>
 )
 
+# TMP disable for testing
+set_property (TARGET cci PROPERTY EXCLUDE_FROM_ALL True)
+
 #
 # BMI
 #
@@ -172,15 +175,17 @@ ExternalProject_Add (mercury
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DNA_USE_MPI=OFF -DNA_USE_CCI=ON -DNA_USE_BMI=ON
+               -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=OFF
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
-               -DNA_CCI_USE_POLL:BOOL=ON
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
-               -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
-               -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
     UPDATE_COMMAND ""
+
+# XXX: CCI: turn on NA_USE_CCI, add:
+#               -DNA_CCI_USE_POLL:BOOL=ON
+#               -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
+#               -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
 
 # XXX: not all tests run, so no TEST_COMMAND for now
 #ctest -E 'mercury_bulk_cci_tcp|mercury_bulk_seg_cci_tcp|mercury_posix_cci_tcp'
