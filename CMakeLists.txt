@@ -169,7 +169,8 @@ GenDownloadConfig (mercury_download mercury mercury-6d069df1.tar.gz
 )
 
 ExternalProject_Add (mercury
-    DEPENDS cci bmi
+    DEPENDS bmi
+    ###DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
