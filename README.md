@@ -64,12 +64,13 @@ rm -rf $HOME/deltafs/var && mkdir -p $HOME/deltafs/var
 
 export DELTAFS_RunDir="$HOME/deltafs/var/run"
 export DELTAFS_Outputs="$HOME/deltafs/var/metadata"
-export DELTAFS_MetadataSrvAddrs="<node_ip>:10101"
 export DELTAFS_FioConf="root=$HOME/deltafs/var/data"
 export DELTAFS_FioName="posix"
 
-mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf \
-       -x DELTAFS_Outputs -x DELTAFS_RunDir \
+mpirun -n 1 -x DELTAFS_FioName \
+       -x DELTAFS_FioConf \
+       -x DELTAFS_Outputs \
+       -x DELTAFS_RunDir \
        $HOME/deltafs/bin/deltafs-srvr
 
 ```
@@ -77,7 +78,7 @@ mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf \
 Second, start vpic app:
 
 ```
-mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_MetadataSrvAddrs=<node_ip>:10101" \
+mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_RunDir=$HOME/deltafs/var/run" \
        -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
        -x "PDLFS_Root=particle" \
        $HOME/deltafs/bin/turbulence-part.op 
