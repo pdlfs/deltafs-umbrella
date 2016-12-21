@@ -39,20 +39,46 @@ sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci
 sudo apt-get install openmpi-bin git
 ```
 
-To build deltafs and install it in a directory (e.g. $HOME/deltafs):
+To build deltafs and install it in a given prefix (e.g. $HOME/deltafs):
 
 ```
 mkdir -p $HOME/deltafs/src
 
 cd $HOME/deltafs/src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
-cd deltafs-umbrella
-
-mkdir -p build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ..
+mkdir -p deltafs-umbrella-build
+cd deltafs-umbrella-build
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ../deltafs-umbrella
 
 make
+```
+
+### Run vpic with mpi
+
+First, start deltafs metadata server processes:
+
+*// We have used openmpi's command line syntax. Different mpi distributions usually have slightly different syntaxes.*
+
+```
+rm -rf $HOME/deltafs/var && mkdir -p $HOME/deltafs/var
+
+export DELTAFS_RunDir="$HOME/deltafs/var/run"
+export DELTAFS_Outputs="$HOME/deltafs/var/metadata"
+export DELTAFS_MetadataSrvAddrs="<node_ip>:10101"
+export DELTAFS_FioConf="root=$HOME/deltafs/var/data"
+export DELTAFS_FioName="posix"
+
+mpirun -n 1 -x DELTAFS_MetadataSrvAddrs -x DELTAFS_FioName -x DELTAFS_FioConf -x DELTAFS_Outputs -x DELTAFS_RunDir \
+        $ROOT/bin/deltafs-srvr
+
+```
+
+Second, start vpic app:
+
+```
+mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "PDLFS_Root=particle" -x "DELTAFS_MetadataSrvAddrs=<node_ip>:10101" \
+        -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
+        $HOME/deltafs/bin/turbulence-part.op 
 ```
 
 **Enjoy** :-)
