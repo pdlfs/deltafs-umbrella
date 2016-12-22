@@ -165,7 +165,8 @@ GenDownloadConfig (bmi_download bmi bmi-cb70e870.tar.gz
 ExternalProject_Add (bmi
     ${bmi_download}
     PATCH_COMMAND ${bmipatchcmd}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
+                      <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
     UPDATE_COMMAND ""
 )
@@ -195,9 +196,8 @@ ExternalProject_Add (mercury
     ###DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
+    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
@@ -260,9 +260,8 @@ ExternalProject_Add (deltafs
     DEPENDS mercury
     LIST_SEPARATOR ^^
     ${deltafs_download}
+    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
@@ -287,9 +286,8 @@ ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs
     LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
+    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_BUILD_TYPE=Debug
@@ -318,15 +316,14 @@ ExternalProject_Add (vpic
     #       also makes me sad. Feel free to fix.
 
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
-        COMMAND CC=${MPI_C_COMPILER}
-                CXX=${MPI_CXX_COMPILER} <SOURCE_DIR>/configure
+        COMMAND CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER} <SOURCE_DIR>/configure
                 --with-machine=<SOURCE_DIR>/narwhal.conf
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
-		<BINARY_DIR>/build.op decks/trecon-proc/turbulence-proc.cxx &&
-		<BINARY_DIR>/build.op decks/trecon-part/turbulence-part.cxx
+        <BINARY_DIR>/build.op decks/trecon-proc/turbulence-proc.cxx &&
+        <BINARY_DIR>/build.op decks/trecon-part/turbulence-part.cxx
 
     INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-proc.op ${CMAKE_INSTALL_PREFIX}/bin/ &&
-	cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op ${CMAKE_INSTALL_PREFIX}/bin/
+    cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op ${CMAKE_INSTALL_PREFIX}/bin/
     UPDATE_COMMAND ""
 )
