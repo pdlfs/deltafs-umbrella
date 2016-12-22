@@ -28,12 +28,25 @@ include (ExternalProject)
 find_package (MPI MODULE REQUIRED)
 
 #
-# print global umbrella setting
+# set build type and insert it to cache
 #
-message (STATUS "Host OS: ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION}")
-message (STATUS "Target OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+if (NOT CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE RelWithDebInfo
+         CACHE STRING "Choose the type of build." FORCE)
+    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+                  "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+endif ()
 
-message (STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+#
+# check global umbrella setting
+#
+message (STATUS "Umbrella target OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+message (STATUS "Umbrella host OS: ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION}")
+message (STATUS "Umbrella build type: ${CMAKE_BUILD_TYPE}")
+message (STATUS "Umbrella CXX compiler info: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message (STATUS "Umbrella CXX compiler: ${CMAKE_CXX_COMPILER}")
+message (STATUS "Umbrella C compiler info: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
+message (STATUS "Umbrella C compiler: ${CMAKE_C_COMPILER}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
