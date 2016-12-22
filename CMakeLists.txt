@@ -6,6 +6,7 @@
 # command line config:
 #
 # -DCMAKE_INSTALL_PREFIX=/tmp/delta       # where to install
+# -DCMAKE_BUILD_TYPE=Release              # Debug, Release, RelWithDebInfo
 #
 
 #
@@ -25,6 +26,14 @@ include (ExternalProject)
 # XXXCDC: FOR OLD VPIC WE NEED TO PASS MPICC ON CMD LINE
 #
 find_package (MPI MODULE REQUIRED)
+
+#
+# print global umbrella setting
+#
+message (STATUS "Host OS: ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION}")
+message (STATUS "Target OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+
+message (STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -173,7 +182,10 @@ ExternalProject_Add (mercury
     ###DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
+               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
                -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=OFF
@@ -235,9 +247,11 @@ ExternalProject_Add (deltafs
     DEPENDS mercury
     LIST_SEPARATOR ^^
     ${deltafs_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
+               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_BUILD_TYPE=Debug
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
@@ -260,7 +274,10 @@ ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs
     LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+               -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+               -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION}
+               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_BUILD_TYPE=Debug
                -DBUILD_SHARED_LIBS=ON
