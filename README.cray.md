@@ -11,17 +11,23 @@ This guide assumes a cray-based computing system.
 ### Step-1: prepare programming env
 
 ```
-// First, set cray link type to dynamic (required step)
+// First, set cray link type to dynamic (required to compile deltafs)
 export CRAYPE_LINK_TYPE="dynamic"
 
-// Second, load related modules in addition to make, automake, pkg-config which should be
-// present by default.  The C and CXX compiler are expected to be `cc` and `CC`,
-// which are likely wrappers built on top of `icc` and `icpc`, which in turn may
-// be wrappers built on top of `gcc` and `g++`.  Deltafs and its friends and
-// dependencies can work with them.  The underlying gcc can be either 4.4+,
-// 5.x, or 6.x.  c++11 is not required.
-module load cmake  # v3.0 is required, the newer the better
-module load boost
+// If CRAYOS_VERSION is not in the env, we have to explicitly set it.
+export CRAYOS_VERSION=6
+
+// Make sure the desired processor-targeting module (craype-sandybridge,
+// craype-haswell, craype-mic-knl, etc.) and the desired PrgEnv-*
+// compiling environment (Cray, Intel, GNU, etc.) has been loaded.
+
+// These targeting modules will configure the compiler driver scripts
+// (cc, CC, ftn) to compile code optimized for the processor
+// on the compute node.
+
+// Second, load a few addition modules needed by deltafs umbrella. 
+module load cmake  # v3.5.0+ is required, the newer the better
+module load boost  # needed by mercury rpc
 ```
 
 ### Step-2: build deltafs suite
@@ -33,9 +39,9 @@ mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
 
 // First, wget a recent deltafs-umbrella release from github
-wget https://github.com/pdlfs/deltafs-umbrella/releases/download/1.0-alpha/deltafs-umbrella-1.0-alpha.tar.gz
-tar xzf deltafs-umbrella-1.0-alpha.tar.gz -C .
-cd deltafs-umbrella-1.0-alpha
+wget https://github.com/pdlfs/deltafs-umbrella/releases/download/<release>/deltafs-umbrella-<release>.tar.gz
+tar xzf deltafs-umbrella-<release>.tar.gz -C .
+cd deltafs-umbrella-<release>
 
 // Second, prepolute the cache directory
 cd cache
@@ -45,7 +51,11 @@ cd ..
 // Finally, kick-off the building process
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ..
+
+CC=cc CXX=CC cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
+      -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+
 make
 ```
 
