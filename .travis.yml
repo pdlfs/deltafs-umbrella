@@ -8,6 +8,7 @@ addons:
   apt:
     sources:
       - george-edison55-precise-backports
+      - ubuntu-toolchain-r-test
     packages:
       - libboost-dev
       - libibverbs-dev
@@ -16,6 +17,10 @@ addons:
       - openmpi-bin
       - cmake
       - cmake-data
+      - gcc-4.8
+      - g++-4.8
+install:
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 script:
 - mkdir -p /tmp/deltafs
 - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
