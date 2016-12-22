@@ -237,6 +237,7 @@ ExternalProject_Add (deltafs
     ${deltafs_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_BUILD_TYPE=Debug
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
@@ -261,6 +262,7 @@ ExternalProject_Add (deltafs-vpic-preload
     ${deltafs-vpic-preload_download}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
+               -DCMAKE_BUILD_TYPE=Debug
                -DBUILD_SHARED_LIBS=ON
                -DSHUFFLE_BYPASS=OFF          # XXXCDC: TESTING ONLY
                -DPLFS_DIRMODE_BYPASS=OFF     # XXXCDC: TESTING ONLY
