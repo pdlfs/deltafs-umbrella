@@ -264,8 +264,8 @@ ExternalProject_Add (deltafs-vpic-preload
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
                -DCMAKE_BUILD_TYPE=Debug
                -DBUILD_SHARED_LIBS=ON
-               -DSHUFFLE_BYPASS=OFF          # XXXCDC: TESTING ONLY
-               -DPLFS_DIRMODE_BYPASS=OFF     # XXXCDC: TESTING ONLY
+               -DSHUFFLE_BYPASS=ON          # XXXCDC: TESTING ONLY
+               -DPLFS_DIRMODE_BYPASS=ON     # XXXCDC: TESTING ONLY
 
     UPDATE_COMMAND ""
     TEST_COMMAND ctest -V || echo "OK"
