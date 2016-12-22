@@ -47,6 +47,7 @@ message (STATUS "Umbrella CXX compiler info: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CX
 message (STATUS "Umbrella CXX compiler: ${CMAKE_CXX_COMPILER}")
 message (STATUS "Umbrella C compiler info: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
 message (STATUS "Umbrella C compiler: ${CMAKE_C_COMPILER}")
+message (STATUS "Umbrella crosscompiling: ${CMAKE_CROSSCOMPILING}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -62,6 +63,19 @@ function (GenDownloadConfig result target local)
                        URL_MD5 ${localmd5} PARENT_SCOPE)
     else ()
         set (${result} ${ARGN} PARENT_SCOPE)
+    endif ()
+endfunction ()
+
+#
+# MaybeRunTests (result, remote-args ...)
+#
+# avoid running unit tests during cross compiling
+#
+function (MaybeRunTests result)
+    if (NOT ${CMAKE_CROSSCOMPILING})
+        set (${result} ${ARGN} PARENT_SCOPE)
+    else ()
+        set (${result} "" PARENT_SCOPE)
     endif ()
 endfunction ()
 
@@ -256,6 +270,10 @@ GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
     ###GIT_TAG "v0.9.2"
 )
 
+MaybeRunTests (deltafs_test
+    TEST_COMMAND ctest
+)
+
 ExternalProject_Add (deltafs
     DEPENDS mercury
     LIST_SEPARATOR ^^
@@ -269,7 +287,7 @@ ExternalProject_Add (deltafs
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                -DDELTAFS_MPI=ON
     UPDATE_COMMAND ""
-    TEST_COMMAND ctest
+    ${deltafs_test}
 )
 
 #
@@ -280,6 +298,10 @@ GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
     # XXX: switch this off until we decide we want to tag it off
     ###GIT_TAG master
+)
+
+MaybeRunTests (deltafs-vpic-preload_test
+    TEST_COMMAND ctest -V || echo "OK"
 )
 
 ExternalProject_Add (deltafs-vpic-preload
@@ -296,7 +318,7 @@ ExternalProject_Add (deltafs-vpic-preload
                -DPLFS_DIRMODE_BYPASS=ON     # XXXCDC: TESTING ONLY
 
     UPDATE_COMMAND ""
-    TEST_COMMAND ctest -V || echo "OK"
+    ${deltafs-vpic-preload_test}
 )
 
 #
