@@ -48,7 +48,7 @@ cd $HOME/deltafs/src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
 mkdir -p deltafs-umbrella-build
 cd deltafs-umbrella-build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ../deltafs-umbrella
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ..
 
 make
 ```
