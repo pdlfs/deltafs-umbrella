@@ -259,7 +259,31 @@ ExternalProject_Add_Step(ch-placement prepare
 )
 
 # XXX: tmp disable
-set_property (TARGET ch-placement PROPERTY EXCLUDE_FROM_ALL True)
+#set_property (TARGET ch-placement PROPERTY EXCLUDE_FROM_ALL True)
+
+#
+# ssg
+#
+GenDownloadConfig (ssg_download ssg ssg-TBD.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/ssg.git"
+    GIT_TAG master
+)
+
+ExternalProject_Add (ssg
+    DEPENDS mercury
+    ${ssg_download}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+                      PKG_CONFIG_PATH=${CMAKE_LIBRARY_PATH}/pkgconfig
+                      --enable-shared
+    UPDATE_COMMAND ""
+)
+
+ExternalProject_Add_Step (ssg prepare
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen <SOURCE_DIR>/prepare.sh
+    COMMENT "preparing source for configure"
+    DEPENDEES update
+    WORKING_DIRECTORY <SOURCE_DIR>
+)
 
 #
 # deltafs
@@ -306,6 +330,7 @@ MaybeRunTests (deltafs-vpic-preload_test
 
 ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs
+    DEPENDS ssg
     LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
     CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
