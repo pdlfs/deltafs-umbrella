@@ -272,9 +272,9 @@ GenDownloadConfig (ssg_download ssg ssg-TBD.tar.gz
 ExternalProject_Add (ssg
     DEPENDS mercury
     ${ssg_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND CC=${MPI_C_COMPILER} <SOURCE_DIR>/configure
                       PKG_CONFIG_PATH=${CMAKE_LIBRARY_PATH}/pkgconfig
-                      --enable-shared
+                      --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared
     UPDATE_COMMAND ""
 )
 
