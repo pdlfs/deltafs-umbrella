@@ -330,6 +330,7 @@ MaybeRunTests (deltafs-vpic-preload_test
 
 ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs
+    DEPENDS ch-placement
     DEPENDS ssg
     LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
