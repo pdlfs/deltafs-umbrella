@@ -56,6 +56,15 @@ git lfs install --local
 git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
 git config --add lfs.pushurl git@github.com:pdlfs/deltafs-umbrella.git
 
-// Last and optionally, fetch all git-lfs files
+// Next and optionally, fetch all git-lfs files
 git lfs pull
+
+// Finally, add a push alias "all" that pushes to both dev.pdl and github
+git remote add all git@github.com:pdlfs/deltafs-umbrella.git
+git remote set-url --add --push all git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
+git remote set-url --add --push all git@github.com:pdlfs/deltafs-umbrella.git
+
+// verify settings
+git remote -v
+
 ```
