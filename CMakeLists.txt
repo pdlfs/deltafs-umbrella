@@ -6,29 +6,61 @@
 # command line config:
 #
 # -DCMAKE_INSTALL_PREFIX=/tmp/delta       # where to install
-# -DCMAKE_BUILD_TYPE=Release              # Debug, Release, RelWithDebInfo
+#                                         # defaults to /usr/local
 #
 
 #
 # [optional config vars]
+#
+# -DCMAKE_BUILD_TYPE=RelWithDebInfo       # or Release, Debug, etc.
+#     (this only gets reflected to cmake-based external builds, 
+#      it isn't applied to autotools-based builds...)
+#
+# finding dependencies:
+#
 # -DCMAKE_PREFIX_PATH='/pkg'              # look for additional installs here
 #
 # the following also applies for configure scripts:
 # -DCMAKE_INCLUDE_PATH='/pkg/include'     # extra include directories
 # -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
 #
+# note these are all cmake lists (so more than one directory can
+# be specified).
+#
+# specifying alternate compilers (overrides CC/CXX environment variables):
+# -DCC=/bin/cc
+# -DCXX=/bin/cxx 
+#
+# specifying which mpi to use wrappers by pointing at the wrappers:
+# -DMPI_C_COMPILER=mpicc
+# -DMPI_CXX_COMPILER=mpicxx
+#
 
 cmake_minimum_required (VERSION 3.0)
-project (deltafs-umbrella C CXX)   # XXXCDC: SHOULD BE "NONE":TMP FOR VPIC
-include (ExternalProject)
 
 #
-# XXXCDC: FOR OLD VPIC WE NEED TO PASS MPICC ON CMD LINE
+# set ENV{CC}/ENV{CXX} early if specified on the command line (or 
+# retained from the command line from the cache).
 #
+if (CC)
+   set (ENV{CC} ${CC})
+endif ()
+if (CXX)
+   set (ENV{CXX} ${CXX})
+endif ()
+
+#
+# XXX: we are marking the deltafs-umbrella as using C/CXX because we
+# need that in order to probe for MPI.  and we need to probe for MPI
+# in order to pass the MPI compiler wrapper programs in on configuration
+# command lines....   that's why we also find the MPI package.
+#
+project (deltafs-umbrella C CXX)
+include (ExternalProject)
 find_package (MPI MODULE REQUIRED)
 
 #
-# set build type and insert it to cache
+# set default build type and insert it to cache
 #
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE RelWithDebInfo
@@ -38,16 +70,21 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 #
-# check global umbrella setting
+# print the current config so users are aware of the current settings...
 #
-message (STATUS "Umbrella target OS: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
-message (STATUS "Umbrella host OS: ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION}")
-message (STATUS "Umbrella build type: ${CMAKE_BUILD_TYPE}")
-message (STATUS "Umbrella CXX compiler info: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-message (STATUS "Umbrella CXX compiler: ${CMAKE_CXX_COMPILER}")
-message (STATUS "Umbrella C compiler info: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
-message (STATUS "Umbrella C compiler: ${CMAKE_C_COMPILER}")
-message (STATUS "Umbrella crosscompiling: ${CMAKE_CROSSCOMPILING}")
+message (STATUS "Current Umbrella settings:")
+message (STATUS "  target OS: ${CMAKE_SYSTEM_NAME} "
+                             "${CMAKE_SYSTEM_VERSION}")
+message (STATUS "  host OS: ${CMAKE_HOST_SYSTEM_NAME} "
+                           "${CMAKE_HOST_SYSTEM_VERSION}")
+message (STATUS "  build type: ${CMAKE_BUILD_TYPE}")
+message (STATUS "  CXX compiler: ${CMAKE_CXX_COMPILER} "
+                  "(${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION})")
+message (STATUS "  MPI CXX wrapper:  ${MPI_CXX_COMPILER}")
+message (STATUS "  C compiler: ${CMAKE_C_COMPILER} "
+                  "(${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION})")
+message (STATUS "  MPI C wrapper:  ${MPI_C_COMPILER}")
+message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -67,9 +104,10 @@ function (GenDownloadConfig result target local)
 endfunction ()
 
 #
-# MaybeRunTests (result, remote-args ...)
+# MaybeRunTests (result test-args ...)
 #
-# avoid running unit tests during cross compiling
+# generate test-args output only if we are not cross compiling (so we
+# can avoid trying to run target crosscompiled binaries on the host).
 #
 function (MaybeRunTests result)
     if (NOT ${CMAKE_CROSSCOMPILING})
@@ -83,8 +121,9 @@ endfunction ()
 # set up the prefix path for packaged software that we may want to
 # link to (e.g. third party libraries).   this will get added to
 # the configure command line (for autotools-based projects).
-# we want our install prefix to be in the prefix path too (it isn't
-# be default).
+#
+# we also want our install prefix to be in the prefix path too (it 
+# isn't by default).
 #
 list (APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 list (REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
@@ -159,7 +198,7 @@ ExternalProject_Add_Step(cci prepare
     WORKING_DIRECTORY <SOURCE_DIR>
 )
 
-# TMP disable for testing
+# XXX: TMP disable for testing
 set_property (TARGET cci PROPERTY EXCLUDE_FROM_ALL True)
 
 #
@@ -179,8 +218,7 @@ GenDownloadConfig (bmi_download bmi bmi-cb70e870.tar.gz
 ExternalProject_Add (bmi
     ${bmi_download}
     PATCH_COMMAND ${bmipatchcmd}
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
-                      <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
     UPDATE_COMMAND ""
 )
@@ -210,7 +248,6 @@ ExternalProject_Add (mercury
     ###DEPENDS cci bmi
     LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
-    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
@@ -222,7 +259,8 @@ ExternalProject_Add (mercury
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
     UPDATE_COMMAND ""
 
-# XXX: CCI: turn on NA_USE_CCI, add:
+# XXX: to turn back on CCI, add it to DEPENDS (above), turn back on
+# NA_USE_CCI, and then add flags:
 #               -DNA_CCI_USE_POLL:BOOL=ON
 #               -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
 #               -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
@@ -242,12 +280,16 @@ GenDownloadConfig (chp_download ch-placement ch-placement-0b706ca06.tar.gz
     ### GIT_TAG master
 )
 
+MaybeRunTests (chp_test
+    TEST_COMMAND make check
+)
+
 ExternalProject_Add (ch-placement
     ${chp_download}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared
     UPDATE_COMMAND ""
-    TEST_COMMAND make check
+    ${chp_test}
 )
 
 ExternalProject_Add_Step(ch-placement prepare
@@ -257,9 +299,6 @@ ExternalProject_Add_Step(ch-placement prepare
     DEPENDERS configure
     WORKING_DIRECTORY <SOURCE_DIR>
 )
-
-# XXX: tmp disable
-#set_property (TARGET ch-placement PROPERTY EXCLUDE_FROM_ALL True)
 
 #
 # ssg
@@ -273,7 +312,7 @@ ExternalProject_Add (ssg
     DEPENDS mercury
     ${ssg_download}
     CONFIGURE_COMMAND CC=${MPI_C_COMPILER} <SOURCE_DIR>/configure
-                      PKG_CONFIG_PATH=${CMAKE_LIBRARY_PATH}/pkgconfig
+                      PKG_CONFIG_PATH=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
                       --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared
     UPDATE_COMMAND ""
 )
@@ -302,7 +341,6 @@ ExternalProject_Add (deltafs
     DEPENDS mercury
     LIST_SEPARATOR ^^
     ${deltafs_download}
-    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
@@ -325,16 +363,14 @@ GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
 )
 
 MaybeRunTests (deltafs-vpic-preload_test
+    # XXXCDC: test failures disabled...
     TEST_COMMAND ctest -V || echo "OK"
 )
 
 ExternalProject_Add (deltafs-vpic-preload
-    DEPENDS deltafs
-    DEPENDS ch-placement
-    DEPENDS ssg
+    DEPENDS deltafs ch-placement ssg
     LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
-    CMAKE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${CMAKE_COMMAND}
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
@@ -364,14 +400,17 @@ ExternalProject_Add (vpic
     #       also makes me sad. Feel free to fix.
 
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
-        COMMAND CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER} <SOURCE_DIR>/configure
+        COMMAND CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER} 
+                  <SOURCE_DIR>/configure
                 --with-machine=<SOURCE_DIR>/narwhal.conf
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
         <BINARY_DIR>/build.op decks/trecon-proc/turbulence-proc.cxx &&
         <BINARY_DIR>/build.op decks/trecon-part/turbulence-part.cxx
 
-    INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-proc.op ${CMAKE_INSTALL_PREFIX}/bin/ &&
-    cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op ${CMAKE_INSTALL_PREFIX}/bin/
+    INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-proc.op 
+        ${CMAKE_INSTALL_PREFIX}/bin/ &&
+    cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op 
+        ${CMAKE_INSTALL_PREFIX}/bin/
     UPDATE_COMMAND ""
 )
