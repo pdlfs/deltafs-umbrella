@@ -201,7 +201,7 @@ set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
 GenDownloadConfig (mercury_download mercury mercury-6d069df1.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
-    GIT_TAG 6d069df1		# Dec 2016
+    GIT_TAG c36ed719    # Jan 2017
     ### GIT_TAG master
 )
 
