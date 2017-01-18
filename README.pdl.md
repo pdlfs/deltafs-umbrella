@@ -48,6 +48,9 @@ git lfs clone --exclude="cache.0" git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
 
 cd deltafs-umbrella
 
+// install git lfs for the repository (if you haven't globally enabled it)
+git lfs install --local
+
 // Secondly, config git-lfs to use github.com as the service provider,
 // which by default will be dev.pdl.cmu.edu
 git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
