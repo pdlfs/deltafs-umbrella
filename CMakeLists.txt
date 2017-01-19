@@ -16,6 +16,13 @@
 #     (this only gets reflected to cmake-based external builds, 
 #      it isn't applied to autotools-based builds...)
 #
+# -DVERBS=OFF                         # build with verbs
+# -DVERBS_PREFIX=dir                  # prefix path (optional)
+# -DVERBS_LIBDIR=dir                  # lib directory override (optional)
+# -DGNI=OFF                           # build with GNI
+# -DGNI_PREFIX=dir                    # prefix path (optional)
+# -DGNI_LIBDIR=dir                    # lib directory override (optional)
+#
 # finding dependencies:
 #
 # -DCMAKE_PREFIX_PATH='/pkg'              # look for additional installs here
@@ -60,7 +67,7 @@ include (ExternalProject)
 find_package (MPI MODULE REQUIRED)
 
 #
-# set default build type and insert it to cache
+# set default build type and insert it to cache.  add additional options.
 #
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE RelWithDebInfo
@@ -68,6 +75,12 @@ if (NOT CMAKE_BUILD_TYPE)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
+set (GNI "OFF" CACHE BOOL "build with GNI")
+set (GNI_PREFIX "" CACHE PATH "GNI prefix path (optional)")
+set (GNI_LIBDIR "" CACHE PATH "GNI lib directory override (optional)")
+set (VERBS "OFF" CACHE BOOL "build with verbs")
+set (VERBS_PREFIX "" CACHE PATH "VERBS prefix path (optional)")
+set (VERBS_LIBDIR "" CACHE PATH "VERBS lib directory override (optional)")
 
 #
 # print the current config so users are aware of the current settings...
@@ -85,6 +98,9 @@ message (STATUS "  C compiler: ${CMAKE_C_COMPILER} "
                   "(${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION})")
 message (STATUS "  MPI C wrapper:  ${MPI_C_COMPILER}")
 message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
+message (STATUS "  transport config: verbs=${VERBS}, GNI=${GNI}")
+message (STATUS "    gni hints: prefix=${GNI_PREFIX}, libs=${GNI_LIBDIR}")
+message (STATUS "    verbs hints: prefix=${VERBS_PREFIX}, libs=${VERBS_LIBDIR}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -163,17 +179,35 @@ endif ()
 #
 
 #
-# CCI.   note that we enable verbs if we detect the necessary header
-# files and libraries.   (note: the find calls below respect the prefix path.)
+# CCI.  we used to enable verbs if we found libs and headers, but that
+# caused problems on the cray, plus we needed to add gni, so now we just
+# let the user specify what do on the command line or via ccmake.
 #
-find_library (LIBIBVERBS NAMES ibverbs)
-find_path (RDMA_INCLUDE rdma/rdma_cma.h HINTS ${RDMA_INCLUDE_DIR})
-if (LIBIBVERBS AND RDMA_INCLUDE)
-   set (ibv "--with-verbs")
+if (GNI)
+    if (GNI_PREFIX)
+        set (cci_gni "--with-gni=${GNI_PREFIX}")
+    else ()
+        set (cci_gni "--with-gni")
+    endif ()
+    if (GNI_LIBDIR)
+        set (cci_gni "${cci_gni} --with-gni-libdir=${GNI_LIBDIR}")
+    endif ()
 else ()
-   set (ibv "--without-verbs")
+    set (cci_gni "--without-gni")
 endif ()
-message (STATUS "CCI ibverbs setting: ${ibv}")
+if (VERBS)
+    if (VERBS_PREFIX)
+        set (cci_verbs "--with-verbs=${VERBS_PREFIX}")
+    else ()
+        set (cci_verbs "--with-verbs")
+    endif ()
+    if (VERBS_LIBDIR)
+        set (cci_verbs "${cci_verbs} --with-verbs-libdir=${VERBS_LIBDIR}")
+    endif ()
+else ()
+    set (cci_verbs "--without-verbs")
+endif ()
+message (STATUS "CCI transport config: ${cci_gni} ${cci_verbs}")
 
 GenDownloadConfig (cci_download cci cci-2.0.tar.gz
     URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
@@ -186,7 +220,7 @@ GenDownloadConfig (cci_download cci cci-2.0.tar.gz
 ExternalProject_Add (cci
     ${cci_download}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
-         --prefix=${CMAKE_INSTALL_PREFIX} ${ibv}
+         --prefix=${CMAKE_INSTALL_PREFIX} ${cci_gni} ${cci_verbs}
     UPDATE_COMMAND ""
 )
 
