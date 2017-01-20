@@ -14,6 +14,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 
 * deltafs dependencies
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
+  * ssg (https://xgitlab.cels.anl.gov/sds/ssg.git)
   * mercury rpc (https://github.com/mercury-hpc/mercury.git)
   * cci (http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz)
   * bmi (http://git.mcs.anl.gov/bmi.git)
@@ -27,7 +28,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 
 A recent CXX compiler with standard building tools including make, cmake (used by deltafs), and automake (used by some of our dependencies), as well as a few other common library packages including libboost (used by mercury rpc) and libltdl (used by cci).
 
-On Ubuntu 16.04, these requirements can be obtained by:
+On Ubuntu 16.04.1, these requirements could be obtained by:
 
 ```
 sudo apt-get update  # Optional, but recommended
@@ -35,21 +36,35 @@ sudo apt-get update  # Optional, but recommended
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
 sudo apt-get install libboost-dev libltdl-dev libopenmpi-dev
-sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci
+sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci in order to enable ibverbs
 sudo apt-get install openmpi-bin git
 ```
 
 To build deltafs and install it under a specific prefix (e.g. $HOME/deltafs):
 
 ```
-mkdir -p $HOME/deltafs/src
+export GIT_SSL_NO_VERIFY=true  # Assuming bash
 
-cd $HOME/deltafs/src
+mkdir -p $HOME/deltafs
+cd $HOME/deltafs
+
+#
+# $HOME/deltafs
+#  -- bin
+#  -- include
+#  -- lib
+#  -- src
+#      -- deltafs-umbrella
+#      -- deltafs-umbrella-build
+#  -- share
+#
+mkdir -p src
+cd src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
 mkdir -p deltafs-umbrella-build
 cd deltafs-umbrella-build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs ..
-
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
+    ../deltafs-umbrella
 make
 ```
 
