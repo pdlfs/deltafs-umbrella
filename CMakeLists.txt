@@ -44,16 +44,21 @@
 #
 
 cmake_minimum_required (VERSION 3.0)
+if(POLICY CMP0054)
+    # avoid warning from CMakeDetermineCompilerABI about an "if" with CXX
+    # can be removed once cmake 3.1 is required
+    cmake_policy(SET CMP0054 NEW)
+endif()
 
 #
 # set ENV{CC}/ENV{CXX} early if specified on the command line (or 
 # retained from the command line from the cache).
 #
 if (CC)
-   set (ENV{CC} ${CC})
+    set (ENV{CC} ${CC})
 endif ()
 if (CXX)
-   set (ENV{CXX} ${CXX})
+    set (ENV{CXX} ${CXX})
 endif ()
 
 #
