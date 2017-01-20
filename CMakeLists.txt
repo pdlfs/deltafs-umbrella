@@ -156,12 +156,6 @@ list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
 list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
 
 #
-# generate a prefix path with an alternate LIST_SEPARATOR for cmake-based
-# projects.  needed for ExternalProject because CMAKE_ARGS eats ";"'s.
-#
-string (REPLACE ";" "^^" CMAKE_QUOTED_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
-
-#
 # use above vars to build build CPPFLAGS and LDFLAGS for configure scripts
 #
 if (CMAKE_INCLUDE_PATH)
@@ -178,6 +172,19 @@ if (CMAKE_LIBRARY_PATH)
   string (SUBSTRING ${ldflags} 1 -1 ldflags)
   set (ldflags "LDFLAGS=${ldflags}")
 endif ()
+
+#
+# setup variables to init the cache of cmake-based projects.   we want
+# these values to propagate from the umbrella on down...
+#
+set (init_cm_cache
+                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+                -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
+                -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_INSTALL_PREFIX}
+                -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
+                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=1
+     )
 
 #
 # now we are ready to start building packages
@@ -285,17 +292,13 @@ GenDownloadConfig (mercury_download mercury mercury-c36ed719.tar.gz
 ExternalProject_Add (mercury
     DEPENDS bmi
     ###DEPENDS cci bmi
-    LIST_SEPARATOR ^^                    # for passing CMAKE_PREFIX_PATH
     ${mercury_download}
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=1
-               -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=OFF
+    CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=OFF
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
+    CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
 
 # XXX: to turn back on CCI, add it to DEPENDS (above), turn back on
@@ -378,15 +381,12 @@ MaybeRunTests (deltafs_test
 
 ExternalProject_Add (deltafs
     DEPENDS mercury
-    LIST_SEPARATOR ^^
     ${deltafs_download}
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                -DDELTAFS_MPI=ON
+    CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
     ${deltafs_test}
 )
@@ -408,15 +408,11 @@ MaybeRunTests (deltafs-vpic-preload_test
 
 ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs ch-placement ssg
-    LIST_SEPARATOR ^^
     ${deltafs-vpic-preload_download}
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-               -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-               -DCMAKE_PREFIX_PATH=${CMAKE_QUOTED_PREFIX_PATH}
-               -DCMAKE_BUILD_TYPE=Debug
-               -DBUILD_SHARED_LIBS=ON
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
                -DSHUFFLE_BYPASS=ON          # XXXCDC: TESTING ONLY
                -DPLFS_DIRMODE_BYPASS=ON     # XXXCDC: TESTING ONLY
+    CMAKE_CACHE_ARGS ${init_cm_cache}
 
     UPDATE_COMMAND ""
     ${deltafs-vpic-preload_test}
@@ -432,7 +428,6 @@ GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
 
 ExternalProject_Add (vpic
     DEPENDS deltafs           # XXX: just to make it build deltafs first
-    LIST_SEPARATOR ^^
     ${vpic_download}
 
     # TODO: This code makes me sad, but then again this VPIC version
