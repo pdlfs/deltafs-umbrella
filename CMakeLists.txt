@@ -253,9 +253,6 @@ ExternalProject_Add_Step(cci prepare
     WORKING_DIRECTORY <SOURCE_DIR>
 )
 
-# XXX: TMP disable for testing
-set_property (TARGET cci PROPERTY EXCLUDE_FROM_ALL True)
-
 #
 # BMI
 #
@@ -300,22 +297,21 @@ GenDownloadConfig (mercury_download mercury mercury-c36ed719.tar.gz
 )
 
 ExternalProject_Add (mercury
-    DEPENDS bmi
-    ###DEPENDS cci bmi
+    DEPENDS cci bmi
     ${mercury_download}
-    CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=OFF
+    CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
+               -DNA_CCI_USE_POLL:BOOL=ON
+               -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
+               -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
 
-# XXX: to turn back on CCI, add it to DEPENDS (above), turn back on
-# NA_USE_CCI, and then add flags:
-#               -DNA_CCI_USE_POLL:BOOL=ON
-#               -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
-#               -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
+# XXX: to turn back off CCI, remove it from DEPENDS (above), turn back off
+# NA_USE_CCI, and then remove flags: NA_CCI_USE_POLL, CCI_*
 
 # XXX: not all tests run, so no TEST_COMMAND for now
 #ctest -E 'mercury_bulk_cci_tcp|mercury_bulk_seg_cci_tcp|mercury_posix_cci_tcp'
