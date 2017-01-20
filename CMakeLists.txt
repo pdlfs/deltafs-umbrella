@@ -181,6 +181,14 @@ endif ()
 set (ac_comp CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
 set (ac_mpicomp CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
 
+# some systems have this set, so we need to add to it
+if (DEFINED ENV{PKG_CONFIG_PATH})
+  set (ac_pkgpath
+    "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+else ()
+  set (ac_pkgpath "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+endif ()
+set (ac_pkgcfgpath "PKG_CONFIG_PATH=${ac_pkgpath}")
 
 #
 # setup variables to init the cache of cmake-based projects.   we want
@@ -360,8 +368,7 @@ GenDownloadConfig (ssg_download ssg ssg-TBD.tar.gz
 ExternalProject_Add (ssg
     DEPENDS mercury
     ${ssg_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
-                      PKG_CONFIG_PATH=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_mpicomp} ${ac_pkgcfgpath}
                       --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared
     UPDATE_COMMAND ""
 )
