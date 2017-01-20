@@ -37,6 +37,7 @@
 # specifying alternate compilers (overrides CC/CXX environment variables):
 # -DCC=/bin/cc
 # -DCXX=/bin/cxx 
+#  (you can also use the long form names CMAKE_C_COMPILER/CMAKE_CXX_COMPILER)
 #
 # specifying which mpi to use wrappers by pointing at the wrappers:
 # -DMPI_C_COMPILER=mpicc
@@ -45,20 +46,22 @@
 
 cmake_minimum_required (VERSION 3.0)
 if(POLICY CMP0054)
-    # avoid warning from CMakeDetermineCompilerABI about an "if" with CXX
+    # avoid warn from CMakeDetermineCompilerABI about an "if" with ${CXX}
     # can be removed once cmake 3.1 is required
     cmake_policy(SET CMP0054 NEW)
 endif()
 
 #
-# set ENV{CC}/ENV{CXX} early if specified on the command line (or 
-# retained from the command line from the cache).
+# if CC/CXX is specified from the command line (vs. environment vars)
+# we copy them to CMAKE_{C,CXX}_COMPILER early (before 'project') so
+# that we probe the desired compiler.   note that cmake already honors
+# ENV{CC}/ENV{CXX} so we don't need to do anything for those vars.
 #
 if (CC)
-    set (ENV{CC} ${CC})
+    set (CMAKE_C_COMPILER ${CC})
 endif ()
 if (CXX)
-    set (ENV{CXX} ${CXX})
+    set (CMAKE_CXX_COMPILER ${CXX})
 endif ()
 
 #
@@ -156,7 +159,9 @@ list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
 list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
 
 #
-# use above vars to build build CPPFLAGS and LDFLAGS for configure scripts
+# build command-line variable settings for autotools configure scripts.
+# we reflect the cmake settings (including prefixes) down to the 
+# configure script via CPPFLAGS, LDFLAGS, CC, AND CXX.
 #
 if (CMAKE_INCLUDE_PATH)
   foreach (inc ${CMAKE_INCLUDE_PATH})
@@ -172,6 +177,10 @@ if (CMAKE_LIBRARY_PATH)
   string (SUBSTRING ${ldflags} 1 -1 ldflags)
   set (ldflags "LDFLAGS=${ldflags}")
 endif ()
+# compiler settings, the second one is to force an mpi wrapper based compile.
+set (ac_comp CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
+set (ac_mpicomp CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
+
 
 #
 # setup variables to init the cache of cmake-based projects.   we want
@@ -231,7 +240,7 @@ GenDownloadConfig (cci_download cci cci-2.0.tar.gz
 
 ExternalProject_Add (cci
     ${cci_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${cppflags} ${ldflags}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_comp} ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX} ${cci_gni} ${cci_verbs}
     UPDATE_COMMAND ""
 )
@@ -264,7 +273,8 @@ GenDownloadConfig (bmi_download bmi bmi-cb70e870.tar.gz
 ExternalProject_Add (bmi
     ${bmi_download}
     PATCH_COMMAND ${bmipatchcmd}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_comp}
+                      --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
     UPDATE_COMMAND ""
 )
@@ -328,7 +338,8 @@ MaybeRunTests (chp_test
 
 ExternalProject_Add (ch-placement
     ${chp_download}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_comp}
+                      --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared
     UPDATE_COMMAND ""
     ${chp_test}
@@ -353,7 +364,7 @@ GenDownloadConfig (ssg_download ssg ssg-TBD.tar.gz
 ExternalProject_Add (ssg
     DEPENDS mercury
     ${ssg_download}
-    CONFIGURE_COMMAND CC=${MPI_C_COMPILER} <SOURCE_DIR>/configure
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
                       PKG_CONFIG_PATH=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
                       --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared
     UPDATE_COMMAND ""
@@ -434,8 +445,7 @@ ExternalProject_Add (vpic
     #       also makes me sad. Feel free to fix.
 
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
-        COMMAND CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER} 
-                  <SOURCE_DIR>/configure
+        COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
                 --with-machine=<SOURCE_DIR>/narwhal.conf
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
