@@ -1,34 +1,57 @@
 language: cpp
+sudo: required
+dist: precise
+
 compiler:
-- gcc
+  - gcc
+
 os:
-- linux
-sudo: false
+  - linux
+
 addons:
   apt:
     sources:
       - george-edison55-precise-backports
       - ubuntu-toolchain-r-test
     packages:
+      - automake
       - libboost-dev
       - libibverbs-dev
       - librdmacm-dev
       - libopenmpi-dev
       - openmpi-bin
-      - cmake
       - cmake-data
-      - gcc-5
+      - cmake
+      - g++-4.4
+      - g++-4.6
+      - g++-4.8
       - g++-5
+      - g++-6
+
+env:
+  global:
+    - GIT_SSL_NO_VERIFY=true
+  matrix:
+    - GCC=4.4
+    - GCC=4.6
+    - GCC=4.8
+    - GCC=5
+    - GCC=6
+
 install:
-- if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+  - export CXX="g++-${GCC}"
+  - ${CXX} --version
+  - export CC="gcc-${GCC}"
+  - ${CC} --version
+
 script:
-- mkdir -p /tmp/deltafs
-- cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
-- make
+  - mkdir -p /tmp/deltafs
+  - cmake -DVERBS=ON -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
+  - make
+
 git:
   submodules: false
-env:
-- GIT_SSL_NO_VERIFY=true
+
 branches:
   only:
     - master
