@@ -45,9 +45,11 @@ install:
   - ${CC} --version
 
 script:
+  - date
   - mkdir -p /tmp/deltafs
   - cmake -DVERBS=ON -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
   - make
+  - date
 
 git:
   submodules: false
