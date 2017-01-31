@@ -437,7 +437,6 @@ ExternalProject_Add (deltafs-vpic-preload
 #
 GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    GIT_TAG 5092435
     ### GIT_TAG master
 )
 
@@ -451,14 +450,16 @@ ExternalProject_Add (vpic
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
         COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
                 --with-machine=<SOURCE_DIR>/narwhal.conf
+
+    # We only compile a sample deck here to ensure build.op was properly
+    # put together.
+
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
-        <BINARY_DIR>/build.op decks/trecon-proc/turbulence-proc.cxx &&
-        <BINARY_DIR>/build.op decks/trecon-part/turbulence-part.cxx
+        <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx
 
-    INSTALL_COMMAND cp <SOURCE_DIR>/decks/trecon-proc/turbulence-proc.op 
-        ${CMAKE_INSTALL_PREFIX}/bin/ &&
-    cp <SOURCE_DIR>/decks/trecon-part/turbulence-part.op 
-        ${CMAKE_INSTALL_PREFIX}/bin/
+    # No installation. Will have to run VPIC through vpic_run.sh
+
+    INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
