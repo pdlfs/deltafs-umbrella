@@ -16,6 +16,7 @@
 #     (this only gets reflected to cmake-based external builds, 
 #      it isn't applied to autotools-based builds...)
 #
+# -DSKIP_TESTS=OFF                    # skip running unit tests
 # -DDELTAFS_VERBOSE=0                 # how verbose deltafs will be
 #     (set to zero to disable verbose prints)
 #
@@ -86,6 +87,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
+set (SKIP_TESTS "OFF" CACHE BOOL "skip running unit tests")
 set (DELTAFS_VERBOSE "0" CACHE STRING "deltafs verbose level")
 set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
               "1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
@@ -136,11 +138,12 @@ endfunction ()
 #
 # MaybeRunTests (result test-args ...)
 #
-# generate test-args output only if we are not cross compiling (so we
-# can avoid trying to run target crosscompiled binaries on the host).
+# generate test-args output only if 1) we are not cross compiling (so we
+# can avoid trying to run target crosscompiled binaries on the host),
+# and 2) skip_tests are not set.
 #
 function (MaybeRunTests result)
-    if (NOT ${CMAKE_CROSSCOMPILING})
+    if (NOT ${CMAKE_CROSSCOMPILING} AND NOT ${SKIP_TESTS})
         set (${result} ${ARGN} PARENT_SCOPE)
     else ()
         set (${result} "" PARENT_SCOPE)
