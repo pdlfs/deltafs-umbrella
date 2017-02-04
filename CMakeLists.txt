@@ -434,8 +434,6 @@ ExternalProject_Add (deltafs-vpic-preload
     DEPENDS deltafs ch-placement ssg
     ${deltafs-vpic-preload_download}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
-               -DSHUFFLE_BYPASS=ON          # XXXCDC: TESTING ONLY
-               -DPLFS_DIRMODE_BYPASS=ON     # XXXCDC: TESTING ONLY
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
     UPDATE_COMMAND ""
