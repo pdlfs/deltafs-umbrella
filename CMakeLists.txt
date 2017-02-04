@@ -16,6 +16,9 @@
 #     (this only gets reflected to cmake-based external builds, 
 #      it isn't applied to autotools-based builds...)
 #
+# -DDELTAFS_VERBOSE=0                 # how verbose deltafs will be
+#     (set to zero to disable verbose prints)
+#
 # -DVERBS=OFF                         # build with verbs
 # -DVERBS_PREFIX=dir                  # prefix path (optional)
 # -DVERBS_LIBDIR=dir                  # lib directory override (optional)
@@ -83,6 +86,9 @@ if (NOT CMAKE_BUILD_TYPE)
     set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
+set (DELTAFS_VERBOSE "0" CACHE STRING "deltafs verbose level")
+set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
+              "1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
 set (GNI "OFF" CACHE BOOL "build with GNI")
 set (GNI_PREFIX "" CACHE PATH "GNI prefix path (optional)")
 set (GNI_LIBDIR "" CACHE PATH "GNI lib directory override (optional)")
@@ -399,6 +405,7 @@ ExternalProject_Add (deltafs
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
+               -DPDLFS_VERBOSE=${DELTAFS_VERBOSE}
                -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
