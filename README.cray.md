@@ -15,19 +15,25 @@ This guide assumes a cray-based computing system.
 export CRAYPE_LINK_TYPE="dynamic"
 
 // If CRAYOS_VERSION is not in the env, we have to explicitly set it.
+// On Nersc Edison, CRAYOS_VERSION is set by the Cray system
+// On Nersc Cori, which has a newer Cray, it is not set.
 export CRAYOS_VERSION=6
 
 // Make sure the desired processor-targeting module (craype-sandybridge,
-// craype-haswell, craype-mic-knl, etc.) and the desired PrgEnv-*
-// compiling environment (Cray, Intel, GNU, etc.) has been loaded.
+// or craype-haswell, or craype-mic-knl, etc.) has been loaded.
 
 // These targeting modules will configure the compiler driver scripts
 // (cc, CC, ftn) to compile code optimized for the processor
 // on the compute node.
 
-// Second, load a few addition modules needed by deltafs umbrella. 
-module load cmake  # v3.5.0+ is required, the newer the better
+// Also make sure the desired compiler (PrgEnv-*
+// such as Intel, GNU, or Cray) has been set.
+
+// Using PrgEnv-intel is recommended.
+
+// Second, load a few addition modules needed by deltafs umbrella.
 module load boost  # needed by mercury rpc
+module load cmake  # at least v3.x
 ```
 
 ### Step-2: build deltafs suite
@@ -39,9 +45,9 @@ mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
 
 // First, wget a recent deltafs-umbrella release from github
-wget https://github.com/pdlfs/deltafs-umbrella/releases/download/<release>/deltafs-umbrella-<release>.tar.gz
-tar xzf deltafs-umbrella-<release>.tar.gz -C .
-cd deltafs-umbrella-<release>
+wget https://github.com/pdlfs/deltafs-umbrella/releases/download/1.0-beta/deltafs-umbrella-1.0-beta.tag.gz
+tar xzf deltafs-umbrella-1.0-beta.tar.gz -C .
+cd deltafs-umbrella-1.0-beta
 
 // Second, prepolute the cache directory
 cd cache
@@ -52,7 +58,7 @@ cd ..
 mkdir build
 cd build
 
-CC=cc CXX=CC cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
+CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
