@@ -247,16 +247,23 @@ else ()
 endif ()
 message (STATUS "CCI transport config: ${cci_gni} ${cci_verbs}")
 
-GenDownloadConfig (cci_download cci cci-2.0.tar.gz
-    URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
-    URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
+set (ccipatch "${CMAKE_SOURCE_DIR}/patches/cci-patch")
+if (EXISTS ${ccipatch})
+    set (ccipatchcmd patch -p1 -i ${ccipatch} -d <SOURCE_DIR>)
+endif ()
+
+GenDownloadConfig (cci_download cci cci-c37fa323.tar.gz
+    ### URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
+    ### URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
     TIMEOUT 100
-    ### GIT_REPOSITORY "https://github.com/CCI/cci"
+    GIT_REPOSITORY "https://github.com/CCI/cci"
+    GIT_TAG c37fa323
     ### GIT_TAG master
 )
 
 ExternalProject_Add (cci
     ${cci_download}
+    PATCH_COMMAND ${ccipatchcmd}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_comp} ${cppflags} ${ldflags}
          --prefix=${CMAKE_INSTALL_PREFIX} ${cci_gni} ${cci_verbs}
     UPDATE_COMMAND ""
@@ -475,9 +482,9 @@ ExternalProject_Add (vpic
 #
 # sndrcv-test
 #
-GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-47a7c598.tar.gz
+GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-878324d4.tar.gz
     GIT_REPOSITORY "https://github.com/chuckcranor/sndrcv-test.git"
-    GIT_TAG 47a7c598		# Feb 2017
+    GIT_TAG 878324d4		# Feb 2017
     ### GIT_TAG master
 )
 
