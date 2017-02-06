@@ -501,9 +501,9 @@ ExternalProject_Add (sndrcv-test
 #
 # deltafs-bb
 #
-GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-2075735b.tar.gz
+GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
-    GIT_TAG 2075735b		# Feb 2017
+    GIT_TAG 03f7da52		# Feb 2017
     ### GIT_TAG master
 )
 
