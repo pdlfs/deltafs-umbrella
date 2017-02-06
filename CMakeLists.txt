@@ -498,3 +498,21 @@ ExternalProject_Add (sndrcv-test
     # this is a test, no test command.
 )
 
+#
+# deltafs-bb
+#
+GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-2075735b.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
+    GIT_TAG 2075735b		# Feb 2017
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (deltafs-bb
+    DEPENDS deltafs-vpic-preload vpic     # to make it compile at the end
+    ${deltafsbb_download}
+    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+)
+
