@@ -484,7 +484,7 @@ ExternalProject_Add (vpic
 #
 GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-0bdb4dcc.tar.gz
     GIT_REPOSITORY "https://github.com/chuckcranor/sndrcv-test.git"
-    GIT_TAG 0bdb4dcc		# Feb 2017
+    ### GIT_TAG 0bdb4dcc		# Feb 2017
     ### GIT_TAG master
 )
 
@@ -503,7 +503,7 @@ ExternalProject_Add (sndrcv-test
 #
 GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
-    GIT_TAG 03f7da52		# Feb 2017
+    ### GIT_TAG 03f7da52		# Feb 2017
     ### GIT_TAG master
 )
 
