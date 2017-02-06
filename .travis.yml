@@ -1,6 +1,6 @@
 language: cpp
 sudo: required
-dist: precise
+dist: trusty
 
 compiler:
   - gcc
@@ -11,7 +11,7 @@ os:
 addons:
   apt:
     sources:
-      - george-edison55-precise-backports
+      - sourceline: 'ppa:george-edison55/cmake-3.x'
       - ubuntu-toolchain-r-test
     packages:
       - automake
@@ -40,9 +40,13 @@ env:
 
 install:
   - export CXX="g++-${GCC}"
-  - ${CXX} --version
   - export CC="gcc-${GCC}"
+  
+before_script:
+  - ${CXX} --version
   - ${CC} --version
+  - automake --version
+  - cmake --version
 
 script:
   - date
