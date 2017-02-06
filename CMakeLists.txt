@@ -471,3 +471,23 @@ ExternalProject_Add (vpic
     INSTALL_COMMAND ""
     UPDATE_COMMAND ""
 )
+
+#
+# sndrcv-test
+#
+GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-47a7c598.tar.gz
+    GIT_REPOSITORY "https://github.com/chuckcranor/sndrcv-test.git"
+    GIT_TAG 47a7c598		# Feb 2017
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (sndrcv-test
+    DEPENDS deltafs-vpic-preload vpic     # to make it compile at the end
+    ${sndrcv_download}
+    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+    # this is a test, no test command.
+)
+
