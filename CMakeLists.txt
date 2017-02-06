@@ -482,9 +482,9 @@ ExternalProject_Add (vpic
 #
 # sndrcv-test
 #
-GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-878324d4.tar.gz
+GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-0bdb4dcc.tar.gz
     GIT_REPOSITORY "https://github.com/chuckcranor/sndrcv-test.git"
-    GIT_TAG 878324d4		# Feb 2017
+    GIT_TAG 0bdb4dcc		# Feb 2017
     ### GIT_TAG master
 )
 
