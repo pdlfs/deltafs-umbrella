@@ -463,8 +463,9 @@ ExternalProject_Add (vpic
     #       also makes me sad. Feel free to fix.
 
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
+        COMMAND <SOURCE_DIR>/prep_conf.sh <SOURCE_DIR>
         COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
-                --with-machine=<SOURCE_DIR>/narwhal.conf
+                --with-machine=<SOURCE_DIR>/machine.conf
 
     # We only compile a sample deck here to ensure build.op was properly
     # put together.
