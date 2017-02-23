@@ -44,7 +44,7 @@ logfile=""
 message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
 
-source ./run_common.sh
+source ./common.sh
 
 rm $logfile
 gen_hosts

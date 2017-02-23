@@ -69,7 +69,7 @@ bb_server="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_s
 message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
 
-source ./run_common.sh
+source ./common.sh
 
 rm $logfile
 gen_hosts

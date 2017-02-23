@@ -5,6 +5,29 @@
 # TODO:
 # - Convert node lists to ranges on CRAY
 
+# Generate hostfile with all hosts
+gen_hostfile() {
+    message "Generating hostfile with all hosts..."
+
+    if [ `which aprun` ]; then
+        # Generate hostfile on CRAY and store on disk
+        cat $PBS_NODEFILE | uniq | sort > $output_dir/hosts.txt || \
+            die "failed to create hosts.txt file"
+
+    else
+        # Generate hostfile on Emulab and store on disk
+        fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
+        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
+                    sed 's/$/'$fqdn_suffix'$/g'`"
+
+        echo $exp_hosts > $output_dir/hosts.txt || \
+            die "failed to create hosts.txt file"
+    fi
+
+    # Populate a variable with hosts
+    all_nodes=$(cat $output_dir/hosts.txt)
+}
+
 # Generate host lists
 gen_hosts() {
     message "Generating host lists..."
@@ -24,7 +47,8 @@ gen_hosts() {
     else
         # Generate host lists on Emulab and store them on disk
         fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
-        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n'`"
+        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
+                    sed 's/$/'$fqdn_suffix'$/g'`"
 
         echo $exp_hosts | head -n 1 | \
             tr '\n' ',' > $output_dir/deltafs.hosts || \
@@ -43,7 +67,7 @@ gen_hosts() {
     bbos_nodes=$(cat $output_dir/bbos.hosts)
 }
 
-# Clear node caches on Narwhal
+# Clear node caches
 clear_caches() {
     message "Clearing node caches..."
 

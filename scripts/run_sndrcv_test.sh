@@ -2,7 +2,7 @@
 #
 #MSUB -N transport-test
 #MSUB -l walltime=0:15:00
-#MSUB -l nodes=1:haswell
+#MSUB -l nodes=2:haswell
 #MSUB -o /users/$USER/joblogs/transport-test-$MOAB_JOBID.out
 #MSUB -j oe
 ##MSUB -V
@@ -10,7 +10,7 @@
 ##MSUB -m $USER@lanl.gov
 
 # Notes on script operation
-# 1) We are only using one node. That's it.
+# 1) We are using two nodes.
 # 2) Any temporary output is directed to /tmp
 
 ######################
@@ -18,19 +18,37 @@
 ######################
 
 umbrella_bin_dir="$HOME/src/deltafs-umbrella/install/bin"
+output_dir="/tmp"
 
 ###############
 # Core script #
 ###############
 
-logfile=$(mktemp)
+logfile=$output_dir/sndrcv-log.txt
 server="$umbrella_bin_dir/sndrcv-srvr"
 client="$umbrella_bin_dir/sndrcv-client"
 
-message () { echo "$@" | tee $logfile; }
+message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
 
-message "Output is available in $logfile"
+source ./common.sh
+
+mkdir -p $output_dir
+rm $logfile
+touch $logfile
+message "Output is available in $output_dir"
+
+gen_hostfile
+
+host1=$(echo $all_nodes | sort | head -n 1)
+host2=$(echo $all_nodes | sort | head -n 2 | tail -n 1)
+
+do_mpirun 1 1 "" $host1 "hostname -i" "$output_dir/host1-ip.txt"
+do_mpirun 1 1 "" $host2 "hostname -i" "$output_dir/host2-ip.txt"
+host1_ip=$(cat $output_dir/host1-ip.txt | head -1)
+host2_ip=$(cat $output_dir/host2-ip.txt | head -1)
+message "Host 1: hostname = $host1, ip = $host1_ip"
+message "Host 2: hostname = $host2, ip = $host2_ip"
 
 protos=("bmi+tcp" "cci+tcp" "cci+gni")
 instances=(1 2 4 8)
@@ -48,18 +66,22 @@ run_one() {
     message "====================================================="
     message ""
 
-    address="${proto}://$(hostname -i):%d"
+    clogfile=$output_dir/client-$proto-$num-$iter-log.txt
+    slogfile=$output_dir/server-$proto-$num-$iter-log.txt
+
+    saddress="${proto}://${host1_ip}:%d"
+    caddress="${proto}://${host2_ip}:%d"
 
     # Start the server
-    message "Starting server (Instances: $num, Address spec: $address)."
-    mpirun.openmpi -np 1 -tag-output $server $num $address 2>&1 > $logfile &
+    message "Starting server (Instances: $num, Address spec: $saddress)."
+    do_mpirun 1 1 "" $host1 "$server $num $saddress" "$slogfile" &
 
     server_pid=$!
 
     # Start the client
-    message "Starting client (Instances: $num, Address spec: $address)."
+    message "Starting client (Instances: $num, Address spec: $caddress)."
     message "Please be patient while the test is in progress..."
-    mpirun.openmpi -np 1 -tag-output $client $num $address $address 2>&1 > $logfile
+    do_mpirun 1 1 "" $host2 "$client $num $caddress $saddress" "$clogfile"
 
     # Collect return codes
     client_ret=$?
@@ -71,7 +93,7 @@ run_one() {
             message "Error: client returned $client_ret."
         fi
         if [ $server_ret != 0 ]; then
-            message "Error: server returned $client_ret."
+            message "Error: server returned $server_ret."
         fi
     else
         message "Test completed successfully."
