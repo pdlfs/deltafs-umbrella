@@ -406,7 +406,7 @@ GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
 )
 
 MaybeRunTests (deltafs_test
-    TEST_COMMAND ctest
+    TEST_COMMAND ctest -E "gigaplus_test|autocompact_test|db_test|index_block_test"
 )
 
 ExternalProject_Add (deltafs
