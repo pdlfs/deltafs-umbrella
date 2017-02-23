@@ -9,10 +9,6 @@
 ##MSUB -m b
 ##MSUB -m $USER@lanl.gov
 
-# Notes on script operation
-# 1) We are using two nodes.
-# 2) Any temporary output is directed to /tmp
-
 ######################
 # Tunable parameters #
 ######################
@@ -33,7 +29,7 @@ die () { message "Error $@"; exit 1; }
 
 source ./common.sh
 
-mkdir -p $output_dir
+mkdir -p $output_dir || die "failed to create $output_dir"
 rm $logfile
 touch $logfile
 message "Output is available in $output_dir"

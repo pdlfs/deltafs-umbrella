@@ -63,7 +63,7 @@ die () { message "Error $@"; exit 1; }
 
 source ./common.sh
 
-rm $logfile
+mkdir -p $output_dir || die "failed to create $output_dir"
 gen_hosts
 
 parts=$cores
