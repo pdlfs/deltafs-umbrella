@@ -47,7 +47,7 @@ mkdir -p $output_dir || die "failed to create $output_dir"
 gen_hosts
 
 procs_per_node=1
-while [ $np -le $cores_per_node ]
+while [ $procs_per_node -le $cores_per_node ]
 do
     cores=$((procs_per_node * (nodes-1)))
     px=$((cores * 30))

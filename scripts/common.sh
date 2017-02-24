@@ -314,7 +314,7 @@ do_run() {
 
         vars=("LD_PRELOAD" "$preload_lib_path"
               "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${output_dir}"
+              "PRELOAD_Local_root" "${output_dir}/plfs"
               "PRELOAD_Bypass_deltafs_namespace" "1"
               "PRELOAD_Enable_verbose_error" "1"
               "SHUFFLE_Virtual_factor" "1024"
@@ -374,7 +374,7 @@ do_run() {
 
         vars=("LD_PRELOAD" "$preload_lib_path"
               "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${output_dir}"
+              "PRELOAD_Local_root" "${output_dir}/plfs"
               "PRELOAD_Bypass_write" "y"
               "PRELOAD_Enable_verbose_error" "y"
               "SHUFFLE_Virtual_factor" "1024"
