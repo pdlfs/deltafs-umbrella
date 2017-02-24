@@ -26,8 +26,8 @@
 
 # Node topology
 cores_per_node=4
-nodes=3
-bbos_buddies=2
+nodes=4
+bbos_buddies=1
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
@@ -69,11 +69,11 @@ gen_hosts
 parts=$cores
 while [ $dpoints -gt 0 ]
 do
-    build_deck "file-per-process" $parts
-    do_run "baseline" $parts
+    build_deck "file-per-process" $parts $parts
+    do_run "baseline" $(((parts**2)*100))
 
-    build_deck "file-per-particle" $parts
-    do_run "deltafs" $parts
+    build_deck "file-per-particle" $parts $parts
+    do_run "deltafs" $(((parts**2)*100))
 
     dpoints=$(( dpoints - 1 ))
     parts=$(( parts * 2 ))

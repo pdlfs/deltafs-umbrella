@@ -55,9 +55,6 @@ do
     cores=$((np * (nodes-1)))
     parts=$((cores * 8))
 
-    #build_deck "file-per-process" $parts
-    #do_run "baseline" $parts
-
     build_deck "file-per-particle" $parts
     do_run "shuffle-test" $parts $np
 

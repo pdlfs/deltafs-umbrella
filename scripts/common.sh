@@ -82,9 +82,11 @@ clear_caches() {
 
 # Configure config.h
 # @1 in {"file-per-process", "file-per-particle"}
-# @2 particles
+# @2 particles on x dimension
+# @3 particles on y dimension
 build_deck() {
-    p=$2
+    px=$2
+    py=$3
 
     cd $deck_dir || die "cd failed"
     mv $deck_dir/config.h $deck_dir/config.bkp || die "mv failed"
@@ -96,8 +98,8 @@ build_deck() {
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
             sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$p'/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$p'/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' > $deck_dir/config.h || \
             die "config.h editing failed"
         ;;
@@ -107,8 +109,8 @@ build_deck() {
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
             sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$p'/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$p'/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' > $deck_dir/config.h || \
             die "config.h editing failed"
         ;;
@@ -204,19 +206,27 @@ do_run() {
     runtype=$1
     p=$2
 
+    if [ $((p / (10**6))) -gt 0 ]; then
+        pp="$((p / (10**6)))M"
+    elif [ $((p / (10**3))) -gt 0 ]; then
+        pp="$((p / (10**3)))K"
+    else
+        pp="$p"
+    fi
+
     cd $output_dir || die "cd failed"
-    mkdir "$output_dir/${runtype}_$p" || die "mkdir failed"
-    cd $output_dir/${runtype}_$p || die "cd failed"
+    mkdir "$output_dir/${runtype}_$pp" || die "mkdir failed"
+    cd $output_dir/${runtype}_$pp || die "cd failed"
 
     # Define logfile before calling message()
-    logfile="$output_dir/${runtype}_$p.log"
+    logfile="$output_dir/${runtype}_$pp.log"
 
     clear_caches
 
     message ""
-    message "=========================================================="
-    message "Running VPIC ($runtype) with $(( p * p * 100 )) particles."
-    message "=========================================================="
+    message "=================================================================="
+    message "Running VPIC ($runtype) with $pp particles on $cores cores."
+    message "=================================================================="
     message ""
 
     case $runtype in
@@ -227,7 +237,7 @@ do_run() {
         fi
 
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/baseline_$p | tail -1 | cut -f1 >> $logfile
+        du -b $output_dir/baseline_$pp | tail -1 | cut -f1 >> $logfile
         ;;
 
     "deltafs")
@@ -275,9 +285,9 @@ do_run() {
         done
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/deltafs_$p/metadata || \
+        mkdir -p $output_dir/deltafs_$pp/metadata || \
             die "deltafs metadata mkdir failed"
-        mkdir -p $output_dir/deltafs_$p/data || \
+        mkdir -p $output_dir/deltafs_$pp/data || \
             die "deltafs data mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
@@ -288,8 +298,8 @@ do_run() {
 
 #        vars=("DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
 #              "DELTAFS_FioName" "posix"
-#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$p/data"
-#              "DELTAFS_Outputs" "$output_dir/deltafs_$p/metadata")
+#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$pp/data"
+#              "DELTAFS_Outputs" "$output_dir/deltafs_$pp/metadata")
 #
 #        do_mpirun 1 0 vars[@] "$deltafs_nodes" "$deltafs_srvr_path" $logfile
 #        if [ $? -ne 0 ]; then
@@ -317,7 +327,7 @@ do_run() {
 #        kill -KILL $srvr_pid
 
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/deltafs_$p | tail -1 | cut -f1 >> $logfile
+        du -b $output_dir/deltafs_$pp | tail -1 | cut -f1 >> $logfile
 
         # Kill BBOS clients and servers
         message ""
@@ -332,9 +342,9 @@ do_run() {
         np=$2
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/deltafs_$p/metadata || \
+        mkdir -p $output_dir/deltafs_$pp/metadata || \
             die "deltafs metadata mkdir failed"
-        mkdir -p $output_dir/deltafs_$p/data || \
+        mkdir -p $output_dir/deltafs_$pp/data || \
             die "deltafs data mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
@@ -345,8 +355,8 @@ do_run() {
 
 #        vars=("DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
 #              "DELTAFS_FioName" "posix"
-#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$p/data"
-#              "DELTAFS_Outputs" "$output_dir/deltafs_$p/metadata")
+#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$pp/data"
+#              "DELTAFS_Outputs" "$output_dir/deltafs_$pp/metadata")
 #
 #        do_mpirun 1 0 vars[@] "$deltafs_nodes" "$deltafs_srvr_path" $logfile
 #        if [ $? -ne 0 ]; then
@@ -375,7 +385,7 @@ do_run() {
 #        kill -KILL $srvr_pid
 
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/deltafs_$p | tail -1 | cut -f1 >> $logfile
+        du -b $output_dir/deltafs_$pp | tail -1 | cut -f1 >> $logfile
 
         ;;
     esac

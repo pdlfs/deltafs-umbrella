@@ -27,7 +27,7 @@
 # Node topology
 cores_per_node=4
 nodes=3
-bbos_buddies=2
+bbos_buddies=1
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
@@ -58,7 +58,6 @@ logfile=""
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
 
-bb_clients=$cores
 bb_client_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_8_client.conf"
 bb_client="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_client"
 
@@ -77,12 +76,15 @@ gen_hosts
 cores=$min_cores
 while [ $cores -le $max_cores ]
 do
-    parts=$((cores * 32))
+    px=$((cores * 30))
+    py=$((10**4))
+    parts=$((px * py * 100))
+    bb_clients=$cores
 
-    build_deck "file-per-process" $parts
+    build_deck "file-per-process" $px $py
     do_run "baseline" $parts
 
-    build_deck "file-per-particle" $parts
+    build_deck "file-per-particle" $x $py
     do_run "deltafs" $parts
 
     cores=$(( cores * 2 ))
