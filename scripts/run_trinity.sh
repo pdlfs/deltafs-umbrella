@@ -65,9 +65,6 @@ bb_servers=$bbos_buddies
 bb_server_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_2_server.conf"
 bb_server="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_server"
 
-message () { echo "$@" | tee -a $logfile; }
-die () { message "Error $@"; exit 1; }
-
 source ./common.sh
 
 mkdir -p $output_dir || die "failed to create $output_dir"

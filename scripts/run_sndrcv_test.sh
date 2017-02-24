@@ -24,9 +24,6 @@ logfile=$output_dir/sndrcv-log.txt
 server="$umbrella_bin_dir/sndrcv-srvr"
 client="$umbrella_bin_dir/sndrcv-client"
 
-message () { echo "$@" | tee -a $logfile; }
-die () { message "Error $@"; exit 1; }
-
 source ./common.sh
 
 mkdir -p $output_dir || die "failed to create $output_dir"

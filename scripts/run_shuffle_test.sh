@@ -41,9 +41,6 @@ build_op_dir="$umbrella_build_dir/vpic-prefix/src/vpic-build"
 deck_dir="$umbrella_build_dir/vpic-prefix/src/vpic/decks/trecon-part"
 logfile=""
 
-message () { echo "$@" | tee -a $logfile; }
-die () { message "Error $@"; exit 1; }
-
 source ./common.sh
 
 mkdir -p $output_dir || die "failed to create $output_dir"

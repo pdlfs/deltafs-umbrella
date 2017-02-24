@@ -5,6 +5,9 @@
 # TODO:
 # - Convert node lists to ranges on CRAY
 
+message () { echo "$@" | tee -a $logfile; }
+die () { message "Error $@"; exit 1; }
+
 # Generate hostfile with all hosts
 gen_hostfile() {
     message "Generating hostfile with all hosts..."
