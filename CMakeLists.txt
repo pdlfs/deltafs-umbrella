@@ -473,7 +473,7 @@ ExternalProject_Add (vpic
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
         <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx &&
-        ${CMAKE_C_COMPILER} -o reader <SOURCE_DIR>/decks/trecon-part/reader.cc
+        ${CMAKE_CXX_COMPILER} -o reader <SOURCE_DIR>/decks/trecon-part/reader.cxx
 
     # No installation. Will have to run VPIC through vpic_run.sh
 
