@@ -172,7 +172,7 @@ do_mpirun() {
         fi
 
         message "mpirun.mpich -np $procs --host $hosts $envstr -prepend-rank $exe"
-        mpirun.mpich -np $procs --host $hosts $envstr -prepend-rank $exe 2>&1 | \
+        mpirun.mpich -np $procs --host $hosts $envstr $exe 2>&1 | \
             tee -a $outfile
 
     elif [ `which mpirun.openmpi` ]; then
@@ -189,7 +189,7 @@ do_mpirun() {
         fi
 
         message "mpirun.openmpi -np $procs $npstr --host $hosts $envstr -tag-output $exe"
-        mpirun.openmpi -np $procs $npstr --host $hosts $envstr -tag-output $exe 2>&1 | \
+        mpirun.openmpi -np $procs $npstr --host $hosts $envstr $exe 2>&1 | \
             tee -a "$outfile"
 
     else

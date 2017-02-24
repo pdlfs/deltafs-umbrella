@@ -14,7 +14,7 @@
 ######################
 
 umbrella_bin_dir="$HOME/src/deltafs-umbrella/install/bin"
-output_dir="/tmp"
+output_dir="$HOME/src/vpic/decks/dump"
 
 ###############
 # Core script #
@@ -30,14 +30,13 @@ die () { message "Error $@"; exit 1; }
 source ./common.sh
 
 mkdir -p $output_dir || die "failed to create $output_dir"
-rm $logfile
 touch $logfile
 message "Output is available in $output_dir"
 
 gen_hostfile
 
-host1=$(echo $all_nodes | sort | head -n 1)
-host2=$(echo $all_nodes | sort | head -n 2 | tail -n 1)
+host1=$(echo "$all_nodes" | sort | head -n 1)
+host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 
 do_mpirun 1 1 "" $host1 "hostname -i" "$output_dir/host1-ip.txt"
 do_mpirun 1 1 "" $host2 "hostname -i" "$output_dir/host2-ip.txt"
