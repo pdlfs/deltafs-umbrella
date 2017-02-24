@@ -340,6 +340,9 @@ do_run() {
             do_mpirun 1 0 "" "$s" "pkill -SIGINT bbos_server" "$logfile"
         done
 
+        # Wait for BBOS binpacking to complete
+        wait
+
         ;;
     "shuffle-test")
         np=$2
