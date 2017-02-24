@@ -2,7 +2,7 @@
 #
 #MSUB -N deltafs-exp
 #MSUB -l walltime=1:00:00
-#MSUB -l nodes=5:haswell
+#MSUB -l nodes=4:haswell
 #MSUB -o /users/$USER/joblogs/deltafs-exp-$MOAB_JOBID.out
 #MSUB -j oe
 ##MSUB -V
@@ -16,17 +16,15 @@
 # Notes:
 # ------
 #
-# nodes: Use an odd number of nodes. The number of particles is a multiple of
-# the number of cores, but 1 node is reserved for DeltaFS server, so you want
-# to be left with power-of-2 cores to get better particle numbers.
+# nodes: Use a power of two to get better particle numbers.
 #
-# bbos_buddies: An additional number of node dedicated for burst buffer
+# bbos_buddies: An additional number of nodes dedicated for burst buffer
 # communication. Should be set to the same number of nodes as the burst buffer
 # nodes.
 
 # Node topology
 cores_per_node=4
-nodes=3
+nodes=4
 bbos_buddies=1
 
 # Paths
@@ -50,7 +48,8 @@ ip_subnet="10.92"
 # for VPIC through the $nodes variable above.
 
 min_cores=1
-max_cores=$(((nodes-1) * cores_per_node))
+max_cores=$((nodes * cores_per_node))
+max_cores=1
 build_op_dir="$umbrella_build_dir/vpic-prefix/src/vpic-build"
 deck_dir="$umbrella_build_dir/vpic-prefix/src/vpic/decks/trecon-part"
 logfile=""

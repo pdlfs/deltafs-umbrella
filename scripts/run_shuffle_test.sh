@@ -2,7 +2,7 @@
 #
 #MSUB -N deltafs-shuffle
 #MSUB -l walltime=1:00:00
-#MSUB -l nodes=5:haswell
+#MSUB -l nodes=4:haswell
 #MSUB -o /users/$USER/joblogs/deltafs-shuffle-$MOAB_JOBID.out
 #MSUB -j oe
 ##MSUB -V
@@ -16,13 +16,11 @@
 # Notes:
 # ------
 #
-# nodes: Use an odd number of nodes. The number of particles is a multiple of
-# the number of cores, but 1 node is reserved for DeltaFS server, so you want
-# to be left with power-of-2 cores to get better particle numbers.
+# nodes: Use a power of two to get better particle numbers.
 
 # Node topology
 cores_per_node=4
-nodes=3
+nodes=4
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
@@ -49,7 +47,7 @@ gen_hosts
 procs_per_node=1
 while [ $procs_per_node -le $cores_per_node ]
 do
-    cores=$((procs_per_node * (nodes-1)))
+    cores=$((procs_per_node * nodes))
     px=$((cores * 30))
     py=$((10**4))
     parts=$((px * py * 100))
