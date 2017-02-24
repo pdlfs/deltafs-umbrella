@@ -13,7 +13,7 @@
 # [optional config vars]
 #
 # -DCMAKE_BUILD_TYPE=RelWithDebInfo       # or Release, Debug, etc.
-#     (this only gets reflected to cmake-based external builds, 
+#     (this only gets reflected to cmake-based external builds,
 #      it isn't applied to autotools-based builds...)
 #
 # -DSKIP_TESTS=OFF                    # skip running unit tests
@@ -40,7 +40,7 @@
 #
 # specifying alternate compilers (overrides CC/CXX environment variables):
 # -DCC=/bin/cc
-# -DCXX=/bin/cxx 
+# -DCXX=/bin/cxx
 #  (you can also use the long form names CMAKE_C_COMPILER/CMAKE_CXX_COMPILER)
 #
 # specifying which mpi to use wrappers by pointing at the wrappers:
@@ -155,7 +155,7 @@ endfunction ()
 # link to (e.g. third party libraries).   this will get added to
 # the configure command line (for autotools-based projects).
 #
-# we also want our install prefix to be in the prefix path too (it 
+# we also want our install prefix to be in the prefix path too (it
 # isn't by default).
 #
 list (APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
@@ -169,7 +169,7 @@ list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
 
 #
 # build command-line variable settings for autotools configure scripts.
-# we reflect the cmake settings (including prefixes) down to the 
+# we reflect the cmake settings (including prefixes) down to the
 # configure script via CPPFLAGS, LDFLAGS, CC, AND CXX.
 #
 if (CMAKE_INCLUDE_PATH)
@@ -472,8 +472,7 @@ ExternalProject_Add (vpic
 
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
-        <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx &&
-        ${CMAKE_CXX_COMPILER} -o reader <SOURCE_DIR>/decks/trecon-part/reader.cxx
+        <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx
 
     # No installation. Will have to run VPIC through vpic_run.sh
 
@@ -513,6 +512,17 @@ ExternalProject_Add (deltafs-bb
     DEPENDS deltafs-vpic-preload vpic     # to make it compile at the end
     ${deltafsbb_download}
     ### CMAKE_ARGS -Dsomething=value
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+)
+
+#
+# trecon-reader -- actually lives in vpic but uses cmake
+#
+ExternalProject_Add (trecon-reader
+    DEPENDS vpic
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/vpic-prefix/src/vpic/decks/trecon-reader
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
     UPDATE_COMMAND ""
