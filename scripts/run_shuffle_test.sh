@@ -46,16 +46,16 @@ source ./common.sh
 mkdir -p $output_dir || die "failed to create $output_dir"
 gen_hosts
 
-np=1
+procs_per_node=1
 while [ $np -le $cores_per_node ]
 do
-    cores=$((np * (nodes-1)))
+    cores=$((procs_per_node * (nodes-1)))
     px=$((cores * 30))
     py=$((10**4))
     parts=$((px * py * 100))
 
     build_deck "file-per-particle" $px $py
-    do_run "shuffle-test" $parts $np
+    do_run "shuffle-test" $parts $procs_per_node
 
-    np=$(( np * 2 ))
+    procs_per_node=$(( procs_per_node * 2 ))
 done

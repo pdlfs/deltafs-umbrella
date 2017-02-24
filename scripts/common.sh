@@ -4,6 +4,7 @@
 
 # TODO:
 # - Convert node lists to ranges on CRAY
+# - Reduce number of needed nodes to 2^n
 
 message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
@@ -137,7 +138,7 @@ build_deck() {
 # @6 outfile (used to log output)
 do_mpirun() {
     procs=$1
-    np=$2
+    ppnode=$2
     if [ ! -z "$3" ]; then
         declare -a envs=("${!3}")
     else
@@ -155,8 +156,8 @@ do_mpirun() {
             envstr=""
         fi
 
-        if [ $np -gt 0 ]; then
-            npstr="-N $np"
+        if [ $ppnode -gt 0 ]; then
+            npstr="-N $ppnode"
         else
             npstr=""
         fi
@@ -172,7 +173,7 @@ do_mpirun() {
             envstr=""
         fi
 
-        if [ $np -gt 0 ]; then
+        if [ $ppnode -gt 0 ]; then
             die "MPICH does not support a fixed number of processes per node"
         fi
 
@@ -187,8 +188,8 @@ do_mpirun() {
             envstr=""
         fi
 
-        if [ $np -gt 0 ]; then
-            npstr="-npernode $np"
+        if [ $ppnode -gt 0 ]; then
+            npstr="-npernode $ppnode"
         else
             npstr=""
         fi
@@ -374,7 +375,6 @@ do_run() {
         vars=("LD_PRELOAD" "$preload_lib_path"
               "PRELOAD_Deltafs_root" "particle"
               "PRELOAD_Local_root" "${output_dir}"
-              "PRELOAD_Bypass_deltafs_namespace" "y"
               "PRELOAD_Bypass_write" "y"
               "PRELOAD_Enable_verbose_error" "y"
               "SHUFFLE_Virtual_factor" "1024"
