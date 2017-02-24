@@ -346,7 +346,7 @@ do_run() {
 
         ;;
     "shuffle-test")
-        np=$2
+        np=$3
 
         # Start DeltaFS processes
         mkdir -p $output_dir/deltafs_$pp/metadata || \
