@@ -395,7 +395,7 @@ do_run() {
 #        kill -KILL $srvr_pid
 
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/deltafs_$pp | tail -1 | cut -f1 >> $logfile
+        du -b $output_dir/shuffle_test_$pp | tail -1 | cut -f1 >> $logfile
 
         ;;
     esac
