@@ -29,7 +29,7 @@ bbos_buddies=1
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
-output_dir="$HOME/src/vpic/decks/dump"
+job_dir="$HOME/src/vpic/decks/dump"
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -66,7 +66,7 @@ bb_server="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_s
 
 source ./common.sh
 
-mkdir -p $output_dir || die "failed to create $output_dir"
+mkdir -p $job_dir || die "failed to create $job_dir"
 gen_hosts
 
 cores=$min_cores

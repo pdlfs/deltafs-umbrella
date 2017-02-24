@@ -24,7 +24,7 @@ nodes=4
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
-output_dir="$HOME/src/vpic/decks/dump"
+job_dir="$HOME/src/vpic/decks/dump"
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -41,7 +41,7 @@ logfile=""
 
 source ./common.sh
 
-mkdir -p $output_dir || die "failed to create $output_dir"
+mkdir -p $job_dir || die "failed to create $job_dir"
 gen_hosts
 
 procs_per_node=1

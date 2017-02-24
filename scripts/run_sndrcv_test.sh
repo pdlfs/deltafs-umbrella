@@ -14,31 +14,31 @@
 ######################
 
 umbrella_bin_dir="$HOME/src/deltafs-umbrella/install/bin"
-output_dir="$HOME/src/vpic/decks/dump"
+job_dir="$HOME/src/vpic/decks/dump"
 
 ###############
 # Core script #
 ###############
 
-logfile=$output_dir/sndrcv-log.txt
+logfile=$job_dir/sndrcv-log.txt
 server="$umbrella_bin_dir/sndrcv-srvr"
 client="$umbrella_bin_dir/sndrcv-client"
 
 source ./common.sh
 
-mkdir -p $output_dir || die "failed to create $output_dir"
+mkdir -p $job_dir || die "failed to create $output_dir"
 touch $logfile
-message "Output is available in $output_dir"
+message "Output is available in $job_dir"
 
 gen_hostfile
 
 host1=$(echo "$all_nodes" | sort | head -n 1)
 host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 
-do_mpirun 1 1 "" $host1 "hostname -i" "$output_dir/host1-ip.txt"
-do_mpirun 1 1 "" $host2 "hostname -i" "$output_dir/host2-ip.txt"
-host1_ip=$(cat $output_dir/host1-ip.txt | head -1)
-host2_ip=$(cat $output_dir/host2-ip.txt | head -1)
+do_mpirun 1 1 "" $host1 "hostname -i" "$job_dir/host1-ip.txt"
+do_mpirun 1 1 "" $host2 "hostname -i" "$job_dir/host2-ip.txt"
+host1_ip=$(cat $job_dir/host1-ip.txt | head -1)
+host2_ip=$(cat $job_dir/host2-ip.txt | head -1)
 message "Host 1: hostname = $host1, ip = $host1_ip"
 message "Host 2: hostname = $host2, ip = $host2_ip"
 
@@ -58,8 +58,8 @@ run_one() {
     message "====================================================="
     message ""
 
-    clogfile=$output_dir/client-$proto-$num-$iter-log.txt
-    slogfile=$output_dir/server-$proto-$num-$iter-log.txt
+    clogfile=$job_dir/client-$proto-$num-$iter-log.txt
+    slogfile=$job_dir/server-$proto-$num-$iter-log.txt
 
     saddress="${proto}://${host1_ip}:%d"
     caddress="${proto}://${host2_ip}:%d"
