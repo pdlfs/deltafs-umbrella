@@ -78,7 +78,7 @@ clear_caches() {
     if [ `which aprun` ]; then
         aprun -L $vpic_nodes -n $cores -N $((nodes - 1)) sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
-    else 
+    else
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
     fi
@@ -248,7 +248,7 @@ do_run() {
         # Start BBOS servers and clients
 
         message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
-        
+
         bb_server_list=$(cat $output_dir/bbos.hosts | tr '\n' ' ')
         n=1
         for s in $bb_server_list; do
@@ -262,7 +262,7 @@ do_run() {
             echo $container_dir >> $new_server_config
 
             do_mpirun 1 0 "" "$s" "$bb_server $new_server_config" "$logfile" &
-            
+
             message "BBOS server started at $s"
 
             sleep 5
@@ -280,7 +280,7 @@ do_run() {
             cfg_file=$output_dir/bbos/client.$s
             do_mpirun 1 0 "" "$bbos_nodes" \
                 "$bb_client $c.obj $cfg_file $bb_log_size $bb_sst_size" "$logfile" &
-
+            client_pids[$c]=$! # so that we can wait for clients to finish
             message "BBOS client #$c started bound to server #$s"
 
             sleep 1
@@ -334,6 +334,11 @@ do_run() {
 
         echo -n "Output size: " >> $logfile
         du -b $output_dir/deltafs_$pp | tail -1 | cut -f1 >> $logfile
+
+        # Waiting for clients to finish data transfer to server
+        for c_pid in "${!client_pids[@]}"; do
+          wait ${client_pids[$c_pid]}
+        done
 
         # Kill BBOS clients and servers
         message ""
