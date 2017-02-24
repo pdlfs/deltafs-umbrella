@@ -55,7 +55,7 @@ do
     parts=$((px * py * 100))
 
     build_deck "file-per-particle" $px $py
-    do_run "shuffle-test" $parts $procs_per_node
+    do_run "shuffle_test" $parts $procs_per_node
 
     procs_per_node=$(( procs_per_node * 2 ))
 done

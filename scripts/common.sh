@@ -289,11 +289,11 @@ do_run() {
         done
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/deltafs_$pp/metadata || \
+        mkdir -p $output_dir/${runtype}_$pp/metadata || \
             die "deltafs metadata mkdir failed"
-        mkdir -p $output_dir/deltafs_$pp/data || \
+        mkdir -p $output_dir/${runtype}_$pp/data || \
             die "deltafs data mkdir failed"
-        mkdir -p $output_dir/deltafs_$pp/plfs || \
+        mkdir -p $output_dir/${runtype}_$pp/plfs || \
             die "deltafs plfs mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
@@ -347,15 +347,15 @@ do_run() {
         wait
 
         ;;
-    "shuffle-test")
+    "shuffle_test")
         np=$3
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/shuffle_test_$pp/metadata || \
+        mkdir -p $output_dir/${runtype}_$pp/metadata || \
             die "shuffle test metadata mkdir failed"
-        mkdir -p $output_dir/shuffle_test_$pp/data || \
+        mkdir -p $output_dir/${runtype}_$pp/data || \
             die "shuffle test data mkdir failed"
-        mkdir -p $output_dir/shuffle_test_$pp/plfs || \
+        mkdir -p $output_dir/${runtype}_$pp/plfs || \
             die "shuffle test plfs mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
