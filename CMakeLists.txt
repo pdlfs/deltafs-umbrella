@@ -522,6 +522,7 @@ ExternalProject_Add (deltafs-bb
 #
 ExternalProject_Add (trecon-reader
     DEPENDS vpic
+    DOWNLOAD_COMMAND true    # no need to download, comes with vpic
     SOURCE_DIR ${CMAKE_BINARY_DIR}/vpic-prefix/src/vpic/decks/trecon-reader
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
