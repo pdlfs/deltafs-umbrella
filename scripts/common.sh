@@ -162,9 +162,14 @@ do_mpirun() {
             npstr=""
         fi
 
-        message "Running: aprun -L $hosts -n $procs $npstr $envstr $exe"
-        aprun -L $hosts -n $procs $npstr $envstr $exe 2>&1 | \
-            tee -a $outfile
+        if [ ! -z "$hosts" ]; then
+            hstr="-L $hosts"
+        else
+            hstr=""
+        fi
+
+        message "Running: aprun $hstr -n $procs $npstr $envstr $exe"
+        aprun $hstr -n $procs $npstr $envstr $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -177,9 +182,14 @@ do_mpirun() {
             die "MPICH does not support a fixed number of processes per node"
         fi
 
-        message "mpirun.mpich -np $procs --host $hosts $envstr -prepend-rank $exe"
-        mpirun.mpich -np $procs --host $hosts $envstr $exe 2>&1 | \
-            tee -a $outfile
+        if [ ! -z "$hosts" ]; then
+            hstr="--host $hosts"
+        else
+            hstr=""
+        fi
+
+        message "mpirun.mpich -np $procs $hstr $envstr -prepend-rank $exe"
+        mpirun.mpich -np $procs $hstr $envstr $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -194,9 +204,14 @@ do_mpirun() {
             npstr=""
         fi
 
-        message "mpirun.openmpi -np $procs $npstr --host $hosts $envstr -tag-output $exe"
-        mpirun.openmpi -np $procs $npstr --host $hosts $envstr $exe 2>&1 | \
-            tee -a "$outfile"
+        if [ ! -z "$hosts" ]; then
+            hstr="--host $hosts"
+        else
+            hstr=""
+        fi
+
+        message "mpirun.openmpi -np $procs $npstr $hstr $envstr -tag-output $exe"
+        mpirun.openmpi -np $procs $npstr $hstr $envstr $exe 2>&1 | tee -a "$outfile"
 
     else
         die "could not find a supported mpirun or aprun command"
