@@ -18,9 +18,9 @@ gen_hostfile() {
         # Generate hostfile on Emulab and store on disk
         fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
-                    sed 's/$/'$fqdn_suffix'$/g'`"
+                    sed 's/$/'$fqdn_suffix'/g'`"
 
-        echo $exp_hosts > $output_dir/hosts.txt || \
+        echo "$exp_hosts" > $output_dir/hosts.txt || \
             die "failed to create hosts.txt file"
     fi
 
@@ -35,29 +35,29 @@ gen_hosts() {
     if [ `which aprun` ]; then
         # Generate host lists on CRAY and store them on disk
         cat $PBS_NODEFILE | uniq | sort | head -n 1 | \
-            tr '\n' ',' > $output_dir/deltafs.hosts || \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/deltafs.hosts || \
             die "failed to create deltafs.hosts file"
         cat $PBS_NODEFILE | uniq | sort | head -n $nodes | tail -n $((nodes-1)) | \
-            tr '\n' ',' > $output_dir/vpic.hosts || \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/vpic.hosts || \
             die "failed to create vpic.hosts file"
         cat $PBS_NODEFILE | uniq | sort | tail -n $bbos_buddies | \
-            tr '\n' ',' > $output_dir/bbos.hosts || \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/bbos.hosts || \
             die "failed to create bbos.hosts file"
 
     else
         # Generate host lists on Emulab and store them on disk
         fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
-                    sed 's/$/'$fqdn_suffix'$/g'`"
+                    sed 's/$/'$fqdn_suffix'/g'`"
 
-        echo $exp_hosts | head -n 1 | \
-            tr '\n' ',' > $output_dir/deltafs.hosts || \
+        echo "$exp_hosts" | head -n 1 | \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/deltafs.hosts || \
             die "failed to create deltafs.hosts file"
-        echo $exp_hosts | head -n $nodes | tail -n $((nodes-1)) | \
-            tr '\n' ',' > $output_dir/vpic.hosts || \
+        echo "$exp_hosts" | head -n $nodes | tail -n $((nodes-1)) | \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/vpic.hosts || \
             die "failed to create vpic.hosts file"
-        echo $exp_hosts | tail -n $bbos_buddies | \
-            tr '\n' ',' > $output_dir/bbos.hosts || \
+        echo "$exp_hosts" | tail -n $bbos_buddies | \
+            tr '\n' ',' | sed '$s/,$//' > $output_dir/bbos.hosts || \
             die "failed to create bbos.hosts file"
     fi
 
@@ -133,7 +133,11 @@ build_deck() {
 do_mpirun() {
     procs=$1
     np=$2
-    declare -a envs=("${!3}")
+    if [ ! -z "$3" ]; then
+        declare -a envs=("${!3}")
+    else
+        envs=()
+    fi
     hosts="$4"
     exe="$5"
     outfile="$6"
@@ -152,6 +156,7 @@ do_mpirun() {
             npstr=""
         fi
 
+        message "Running: aprun -L $hosts -n $procs $npstr $envstr $exe"
         aprun -L $hosts -n $procs $npstr $envstr $exe 2>&1 | \
             tee -a $outfile
 
@@ -166,6 +171,7 @@ do_mpirun() {
             die "MPICH does not support a fixed number of processes per node"
         fi
 
+        message "mpirun.mpich -np $procs --host $hosts $envstr -prepend-rank $exe"
         mpirun.mpich -np $procs --host $hosts $envstr -prepend-rank $exe 2>&1 | \
             tee -a $outfile
 
@@ -182,6 +188,7 @@ do_mpirun() {
             npstr=""
         fi
 
+        message "mpirun.openmpi -np $procs $npstr --host $hosts $envstr -tag-output $exe"
         mpirun.openmpi -np $procs $npstr --host $hosts $envstr -tag-output $exe 2>&1 | \
             tee -a "$outfile"
 
@@ -214,9 +221,7 @@ do_run() {
 
     case $runtype in
     "baseline")
-        vars=()
-
-        do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
+        do_mpirun $cores 0 "" "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
         fi
