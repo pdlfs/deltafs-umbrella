@@ -53,9 +53,11 @@ np=1
 while [ $np -le $cores_per_node ]
 do
     cores=$((np * (nodes-1)))
-    parts=$((cores * 8))
+    px=$((cores * 30))
+    py=$((10**4))
+    parts=$((px * py * 100))
 
-    build_deck "file-per-particle" $parts
+    build_deck "file-per-particle" $px $py
     do_run "shuffle-test" $parts $np
 
     np=$(( np * 2 ))
