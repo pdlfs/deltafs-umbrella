@@ -20,7 +20,7 @@
 
 # Node topology
 cores_per_node=4
-nodes=4
+nodes=16
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
@@ -48,12 +48,16 @@ procs_per_node=1
 while [ $procs_per_node -le $cores_per_node ]
 do
     cores=$((procs_per_node * nodes))
-    px=$((cores * 30))
-    py=$((10**4))
+    px=$((cores * 3)) #10
+    py=$((10**2)) #100
     parts=$((px * py * 100))
 
     build_deck "file-per-particle" $px $py
     do_run "shuffle_test" $parts $procs_per_node
 
-    procs_per_node=$(( procs_per_node * 2 ))
+    if [ $procs_per_node -eq 1 ]; then
+        procs_per_node=4
+    else
+        procs_per_node=$(( procs_per_node + 4 ))
+    fi
 done
