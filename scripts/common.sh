@@ -4,7 +4,6 @@
 
 # TODO:
 # - Convert node lists to ranges on CRAY
-# - Reduce number of needed nodes to 2^n
 
 message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
@@ -15,7 +14,7 @@ gen_hostfile() {
 
     if [ `which aprun` ]; then
         # Generate hostfile on CRAY and store on disk
-        cat $PBS_NODEFILE | uniq | sort > $output_dir/hosts.txt || \
+        cat $PBS_NODEFILE | uniq | sort > $job_dir/hosts.txt || \
             die "failed to create hosts.txt file"
 
     else
@@ -24,12 +23,12 @@ gen_hostfile() {
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
                     sed 's/$/'$fqdn_suffix'/g'`"
 
-        echo "$exp_hosts" > $output_dir/hosts.txt || \
+        echo "$exp_hosts" > $job_dir/hosts.txt || \
             die "failed to create hosts.txt file"
     fi
 
     # Populate a variable with hosts
-    all_nodes=$(cat $output_dir/hosts.txt)
+    all_nodes=$(cat $job_dir/hosts.txt)
 }
 
 # Generate host lists
@@ -38,14 +37,11 @@ gen_hosts() {
 
     if [ `which aprun` ]; then
         # Generate host lists on CRAY and store them on disk
-        cat $PBS_NODEFILE | uniq | sort | head -n 1 | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/deltafs.hosts || \
-            die "failed to create deltafs.hosts file"
-        cat $PBS_NODEFILE | uniq | sort | head -n $nodes | tail -n $((nodes-1)) | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/vpic.hosts || \
+        cat $PBS_NODEFILE | uniq | sort | head -n $nodes \
+            tr '\n' ',' | sed '$s/,$//' > $job_dir/vpic.hosts || \
             die "failed to create vpic.hosts file"
         cat $PBS_NODEFILE | uniq | sort | tail -n $bbos_buddies | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/bbos.hosts || \
+            tr '\n' ',' | sed '$s/,$//' > $job_dir/bbos.hosts || \
             die "failed to create bbos.hosts file"
 
     else
@@ -54,21 +50,17 @@ gen_hosts() {
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
                     sed 's/$/'$fqdn_suffix'/g'`"
 
-        echo "$exp_hosts" | head -n 1 | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/deltafs.hosts || \
-            die "failed to create deltafs.hosts file"
-        echo "$exp_hosts" | head -n $nodes | tail -n $((nodes-1)) | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/vpic.hosts || \
+        echo "$exp_hosts" | head -n $nodes | \
+            tr '\n' ',' | sed '$s/,$//' > $job_dir/vpic.hosts || \
             die "failed to create vpic.hosts file"
         echo "$exp_hosts" | tail -n $bbos_buddies | \
-            tr '\n' ',' | sed '$s/,$//' > $output_dir/bbos.hosts || \
+            tr '\n' ',' | sed '$s/,$//' > $job_dir/bbos.hosts || \
             die "failed to create bbos.hosts file"
     fi
 
     # Populate host list variables
-    deltafs_nodes=$(cat $output_dir/deltafs.hosts)
-    vpic_nodes=$(cat $output_dir/vpic.hosts)
-    bbos_nodes=$(cat $output_dir/bbos.hosts)
+    vpic_nodes=$(cat $job_dir/vpic.hosts)
+    bbos_nodes=$(cat $job_dir/bbos.hosts)
 }
 
 # Clear node caches
@@ -76,7 +68,7 @@ clear_caches() {
     message "Clearing node caches..."
 
     if [ `which aprun` ]; then
-        aprun -L $vpic_nodes -n $cores -N $((nodes - 1)) sudo sh -c \
+        aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
     else
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
@@ -148,24 +140,21 @@ do_mpirun() {
     exe="$5"
     outfile="$6"
 
+    envstr=""; npstr=""; hstr=""
+
     if [ `which aprun` ]; then
         # This is likely a CRAY machine. Deploy an aprun job.
+
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-e %s=\"%s\" " ${envs[@]}`
-        else
-            envstr=""
         fi
 
         if [ $ppnode -gt 0 ]; then
             npstr="-N $ppnode"
-        else
-            npstr=""
         fi
 
         if [ ! -z "$hosts" ]; then
             hstr="-L $hosts"
-        else
-            hstr=""
         fi
 
         message "Running: aprun $hstr -n $procs $npstr $envstr $exe"
@@ -174,8 +163,6 @@ do_mpirun() {
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-env %s \"%s\" " ${envs[@]}`
-        else
-            envstr=""
         fi
 
         if [ $ppnode -gt 0 ]; then
@@ -184,8 +171,6 @@ do_mpirun() {
 
         if [ ! -z "$hosts" ]; then
             hstr="--host $hosts"
-        else
-            hstr=""
         fi
 
         message "mpirun.mpich -np $procs $hstr $envstr -prepend-rank $exe"
@@ -194,20 +179,14 @@ do_mpirun() {
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-x %s=%s " ${envs[@]}`
-        else
-            envstr=""
         fi
 
         if [ $ppnode -gt 0 ]; then
             npstr="-npernode $ppnode"
-        else
-            npstr=""
         fi
 
         if [ ! -z "$hosts" ]; then
             hstr="--host $hosts"
-        else
-            hstr=""
         fi
 
         message "mpirun.openmpi -np $procs $npstr $hstr $envstr -tag-output $exe"
@@ -233,12 +212,12 @@ do_run() {
         pp="$p"
     fi
 
-    cd $output_dir || die "cd failed"
-    mkdir "$output_dir/${runtype}_$pp" || die "mkdir failed"
-    cd $output_dir/${runtype}_$pp || die "cd failed"
+    cd $job_dir || die "cd failed"
+    mkdir "$job_dir/${runtype}_$pp" || die "mkdir failed"
+    cd $job_dir/${runtype}_$pp || die "cd failed"
 
     # Define logfile before calling message()
-    logfile="$output_dir/${runtype}_$pp.log"
+    logfile="$job_dir/${runtype}_$pp.log"
 
     clear_caches
 
@@ -250,28 +229,31 @@ do_run() {
 
     case $runtype in
     "baseline")
+        exp_dir="$job_dir/${runtype}_$pp"
+
         do_mpirun $cores 0 "" "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
         fi
 
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/baseline_$pp | tail -1 | cut -f1 >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
         ;;
 
     "deltafs")
         # Start BBOS servers and clients
+        exp_dir="$job_dir/${runtype}_$pp"
 
         message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
 
-        bb_server_list=$(cat $output_dir/bbos.hosts | tr '\n' ' ')
+        bb_server_list=$(cat $job_dir/bbos.hosts | tr '\n' ' ')
         n=1
         for s in $bb_server_list; do
-            container_dir=$output_dir/bbos/containers.$n
+            container_dir=$exp_dir/bbos/containers.$n
             mkdir -p $container_dir
 
             # Copying config files for every server
-            new_server_config=$output_dir/bbos/server.$n
+            new_server_config=$exp_dir/bbos/server.$n
             cp $bb_server_cfg $new_server_config
             echo $s >> $new_server_config
             echo $container_dir >> $new_server_config
@@ -283,8 +265,8 @@ do_run() {
             sleep 5
 
             # Copying config files for every client of this server
-            cp $bb_client_cfg $output_dir/bbos/client.$n
-            echo $s >> $output_dir/bbos/client.$n
+            cp $bb_client_cfg $exp_dir/bbos/client.$n
+            echo $s >> $exp_dir/bbos/client.$n
 
             n=$((n + 1))
         done
@@ -292,7 +274,7 @@ do_run() {
         c=1
         while [ $c -le $bb_clients ]; do
             s=$(((c % bb_servers) + 1))
-            cfg_file=$output_dir/bbos/client.$s
+            cfg_file=$exp_dir/bbos/client.$s
             do_mpirun 1 0 "" "$bbos_nodes" \
                 "$bb_client $c.obj $cfg_file $bb_log_size $bb_sst_size" "$logfile" &
             client_pids[$c]=$! # so that we can wait for clients to finish
@@ -304,12 +286,9 @@ do_run() {
         done
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/${runtype}_$pp/metadata || \
-            die "deltafs metadata mkdir failed"
-        mkdir -p $output_dir/${runtype}_$pp/data || \
-            die "deltafs data mkdir failed"
-        mkdir -p $output_dir/${runtype}_$pp/plfs || \
-            die "deltafs plfs mkdir failed"
+        mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
+        mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
+        mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
 "deltafs-vpic-preload-build/src/libdeltafs-preload.so"
@@ -317,38 +296,22 @@ do_run() {
 "deltafs-build/src/server/deltafs-srvr"
         deltafs_srvr_ip=`hostname -i`
 
-#        vars=("DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
-#              "DELTAFS_FioName" "posix"
-#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$pp/data"
-#              "DELTAFS_Outputs" "$output_dir/deltafs_$pp/metadata")
-#
-#        do_mpirun 1 0 vars[@] "$deltafs_nodes" "$deltafs_srvr_path" $logfile
-#        if [ $? -ne 0 ]; then
-#            die "deltafs server: mpirun failed"
-#        fi
-#
-#        srvr_pid=$!
-
         vars=("LD_PRELOAD" "$preload_lib_path"
               "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${output_dir}/deltafs_$pp/plfs"
+              "PRELOAD_Local_root" "${exp_dir}/plfs"
               "PRELOAD_Bypass_deltafs_namespace" "1"
               "PRELOAD_Enable_verbose_error" "1"
               "SHUFFLE_Virtual_factor" "1024"
               "SHUFFLE_Mercury_proto" "bmi+tcp"
               "SHUFFLE_Subnet" "$ip_subnet")
-#              "DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
 
         do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
-#            kill -KILL $srvr_pid
             die "deltafs: mpirun failed"
         fi
 
-#        kill -KILL $srvr_pid
-
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/deltafs_$pp | tail -1 | cut -f1 >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -368,15 +331,13 @@ do_run() {
 
         ;;
     "shuffle_test")
+        exp_dir="$job_dir/${runtype}_$pp"
         np=$3
 
         # Start DeltaFS processes
-        mkdir -p $output_dir/${runtype}_$pp/metadata || \
-            die "shuffle test metadata mkdir failed"
-        mkdir -p $output_dir/${runtype}_$pp/data || \
-            die "shuffle test data mkdir failed"
-        mkdir -p $output_dir/${runtype}_$pp/plfs || \
-            die "shuffle test plfs mkdir failed"
+        mkdir -p $exp_dir/metadata || die "shuffle test metadata mkdir failed"
+        mkdir -p $exp_dir/data || die "shuffle test data mkdir failed"
+        mkdir -p $exp_dir/plfs || die "shuffle test plfs mkdir failed"
 
         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
 "deltafs-vpic-preload-build/src/libdeltafs-preload.so"
@@ -384,38 +345,22 @@ do_run() {
 "deltafs-build/src/server/deltafs-srvr"
         deltafs_srvr_ip=`hostname -i`
 
-#        vars=("DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
-#              "DELTAFS_FioName" "posix"
-#              "DELTAFS_FioConf" "root=$output_dir/deltafs_$pp/data"
-#              "DELTAFS_Outputs" "$output_dir/deltafs_$pp/metadata")
-#
-#        do_mpirun 1 0 vars[@] "$deltafs_nodes" "$deltafs_srvr_path" $logfile
-#        if [ $? -ne 0 ]; then
-#            die "deltafs server: mpirun failed"
-#        fi
-#
-#        srvr_pid=$!
-
         vars=("LD_PRELOAD" "$preload_lib_path"
               "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${output_dir}/shuffle_test_$pp/plfs"
+              "PRELOAD_Local_root" "${exp_dir}/plfs"
               "PRELOAD_Bypass_write" "y"
               "PRELOAD_Enable_verbose_error" "y"
               "SHUFFLE_Virtual_factor" "1024"
               "SHUFFLE_Mercury_proto" "bmi+tcp"
               "SHUFFLE_Subnet" "$ip_subnet")
-#              "DELTAFS_MetadataSrvAddrs" "$deltafs_srvr_ip:10101"
 
         do_mpirun $cores $np vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
-#            kill -KILL $srvr_pid
             die "deltafs: mpirun failed"
         fi
 
-#        kill -KILL $srvr_pid
-
         echo -n "Output size: " >> $logfile
-        du -b $output_dir/shuffle_test_$pp | tail -1 | cut -f1 >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
         ;;
     esac

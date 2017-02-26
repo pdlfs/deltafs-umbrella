@@ -2,7 +2,7 @@
 #
 #MSUB -N deltafs-test
 #MSUB -l walltime=1:00:00
-#MSUB -l nodes=5:haswell
+#MSUB -l nodes=4:haswell
 #MSUB -o /users/$USER/joblogs/deltafs-test-$MOAB_JOBID.out
 #MSUB -j oe
 ##MSUB -V
@@ -16,11 +16,9 @@
 # Notes:
 # ------
 #
-# nodes: Use an odd number of nodes. The number of particles is a multiple of
-# the number of cores, but 1 node is reserved for DeltaFS server, so you want
-# to be left with power-of-2 cores to get better particle numbers.
+# nodes: Use a power of two to get better particle numbers.
 #
-# bbos_buddies: An additional number of node dedicated for burst buffer
+# bbos_buddies: An additional number of nodes dedicated for burst buffer
 # communication. Should be set to the same number of nodes as the burst buffer
 # nodes.
 
@@ -31,7 +29,7 @@ bbos_buddies=1
 
 # Paths
 umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
-output_dir="$HOME/src/vpic/decks/dump"
+job_dir="$HOME/src/vpic/decks/dump"
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -41,10 +39,10 @@ ip_subnet="10.92"
 # Core script #
 ###############
 
-cores=$(((nodes-1) * cores_per_node))
+cores=$((nodes * cores_per_node))
 build_op_dir="$umbrella_build_dir/vpic-prefix/src/vpic-build"
 deck_dir="$umbrella_build_dir/vpic-prefix/src/vpic/decks/trecon-part"
-dpoints=1
+dpoints=2
 logfile=""
 
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
@@ -60,7 +58,7 @@ bb_server="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_s
 
 source ./common.sh
 
-mkdir -p $output_dir || die "failed to create $output_dir"
+mkdir -p $job_dir || die "failed to create $job_dir"
 gen_hosts
 
 parts=$cores
