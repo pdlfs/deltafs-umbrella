@@ -433,8 +433,7 @@ GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
 )
 
 MaybeRunTests (deltafs-vpic-preload_test
-    # XXXCDC: test failures disabled...
-    TEST_COMMAND ctest -V || echo "OK"
+    TEST_COMMAND ctest -R preload -V
 )
 
 ExternalProject_Add (deltafs-vpic-preload

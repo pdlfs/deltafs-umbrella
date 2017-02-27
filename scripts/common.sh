@@ -199,8 +199,42 @@ do_mpirun() {
     fi
 }
 
+# Query particle trajectories
+# @1 experiment type in {"baseline", "deltafs"}
+# @2 vpic output directory
+# @2 logfile to print results in
+query_particles() {
+    runtype=$1
+    vpicout=$2
+    logfile=$3
+
+    case $runtype in
+    "baseline")
+        reader_bin="$umbrella_build_dir/trecon-reader-prefix/src/"\
+"trecon-reader-build/vpic-reader"
+        ;;
+    "deltafs")
+        reader_bin="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
+"deltafs-vpic-preload-build/tools/vpic-deltafs-reader"
+        ;;
+    *)
+        die "query_particles: unknown runtype '$runtype'"
+    esac
+
+    # Query more particles per iteration, from 4**1 to 4**14 (268M)
+    # to see when the DeltaFS approach breaks compared to the old,
+    # single-pass approach
+    n=1
+    while [ $n -le 14 ]; do
+        mkdir -p $vpicout/reader/part_$n || die "mkdir for reader output failed"
+        $reader_bin -n $n -i $vpicout -o $vpicout/reader/part_$n | tee -a $logfile
+
+        n=$((n + 1))
+    done
+}
+
 # Run VPIC
-# @1 in {"baseline", "deltafs"}
+# @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 do_run() {
     runtype=$1
@@ -214,9 +248,10 @@ do_run() {
         pp="$p"
     fi
 
-    cd $job_dir || die "cd failed"
-    mkdir "$job_dir/${runtype}_$pp" || die "mkdir failed"
-    cd $job_dir/${runtype}_$pp || die "cd failed"
+    exp_dir="$job_dir/${runtype}_$pp"
+    cd $job_dir || die "cd to $job_dir failed"
+    mkdir "$exp_dir" || die "mkdir failed"
+    cd $exp_dir || die "cd to $exp_dir failed"
 
     # Define logfile before calling message()
     logfile="$job_dir/${runtype}_$pp.log"
@@ -231,8 +266,6 @@ do_run() {
 
     case $runtype in
     "baseline")
-        exp_dir="$job_dir/${runtype}_$pp"
-
         do_mpirun $cores 0 "" "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
@@ -240,6 +273,8 @@ do_run() {
 
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+
+        query_particles $runtype $exp_dir $logfile
         ;;
 
     "deltafs")
@@ -324,9 +359,9 @@ do_run() {
         # Wait for BBOS binpacking to complete
         wait
 
+        query_particles $runtype $exp_dir $logfile
         ;;
     "shuffle_test")
-        exp_dir="$job_dir/${runtype}_$pp"
         np=$3
 
         # Start DeltaFS processes
@@ -356,7 +391,6 @@ do_run() {
 
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
-
         ;;
     esac
 }
