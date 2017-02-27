@@ -212,9 +212,10 @@ do_run() {
         pp="$p"
     fi
 
-    cd $job_dir || die "cd failed"
-    mkdir "$job_dir/${runtype}_$pp" || die "mkdir failed"
-    cd $job_dir/${runtype}_$pp || die "cd failed"
+    exp_dir="$job_dir/${runtype}_$pp"
+    cd $job_dir || die "cd to $job_dir failed"
+    mkdir "$exp_dir" || die "mkdir failed"
+    cd $exp_dir || die "cd to $exp_dir failed"
 
     # Define logfile before calling message()
     logfile="$job_dir/${runtype}_$pp.log"
@@ -229,8 +230,6 @@ do_run() {
 
     case $runtype in
     "baseline")
-        exp_dir="$job_dir/${runtype}_$pp"
-
         do_mpirun $cores 0 "" "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
@@ -242,8 +241,6 @@ do_run() {
 
     "deltafs")
         # Start BBOS servers and clients
-        exp_dir="$job_dir/${runtype}_$pp"
-
         message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
 
         bb_server_list=$(cat $job_dir/bbos.hosts | tr '\n' ' ')
@@ -331,7 +328,6 @@ do_run() {
 
         ;;
     "shuffle_test")
-        exp_dir="$job_dir/${runtype}_$pp"
         np=$3
 
         # Start DeltaFS processes
