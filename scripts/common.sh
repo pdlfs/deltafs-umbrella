@@ -197,8 +197,42 @@ do_mpirun() {
     fi
 }
 
+# Query particle trajectories
+# @1 experiment type in {"baseline", "deltafs"}
+# @2 vpic output directory
+# @2 logfile to print results in
+query_particles() {
+    runtype=$1
+    vpicout=$2
+    logfile=$3
+
+    case $runtype in
+    "baseline")
+        reader_bin="$umbrella_build_dir/deltafs-umbrella/build/"
+"trecon-reader-prefix/src/trecon-reader-build/vpic-reader"
+        ;;
+    "deltafs")
+        reader_bin="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"
+"deltafs-vpic-preload-build/tools/vpic-deltafs-reader"
+        ;;
+    *)
+        die "query_particles: unknown runtype '$runtype'"
+    esac
+
+    # Query more particles per iteration, from 4**1 to 4**14 (268M)
+    # to see when the DeltaFS approach breaks compared to the old,
+    # single-pass approach
+    n=1
+    while [ $n -le 14 ]; do
+        mkdir -p $vpicout/reader/part_$n || die "mkdir for reader output failed"
+        $reader_bin -n $n -i $vpicout -o $vpicout/reader/part_$n | tee -a $logfile
+
+        n=$((n + 1))
+    done
+}
+
 # Run VPIC
-# @1 in {"baseline", "deltafs"}
+# @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 do_run() {
     runtype=$1
@@ -237,6 +271,8 @@ do_run() {
 
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+
+        query_particles $runtype $exp_dir $logfile
         ;;
 
     "deltafs")
@@ -326,6 +362,7 @@ do_run() {
         # Wait for BBOS binpacking to complete
         wait
 
+        query_particles $runtype $exp_dir $logfile
         ;;
     "shuffle_test")
         np=$3
@@ -357,7 +394,6 @@ do_run() {
 
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
-
         ;;
     esac
 }
