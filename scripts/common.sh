@@ -61,6 +61,8 @@ gen_hosts() {
     # Populate host list variables
     vpic_nodes=$(cat $job_dir/vpic.hosts)
     bbos_nodes=$(cat $job_dir/bbos.hosts)
+    # num_bbos_nodes=$(cat $job_dir/bbos.hosts | wc -l)
+    # num_vpic_nodes=$(cat $job_dir/vpic.hosts | wc -l)
 }
 
 # Clear node caches
@@ -243,75 +245,71 @@ do_run() {
     "deltafs")
         # Start BBOS servers and clients
         exp_dir="$job_dir/${runtype}_$pp"
-
+        exp_dir="/panfs/probescratch/TableFS/bbos_test_1"
         message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
 
         bb_server_list=$(cat $job_dir/bbos.hosts | tr '\n' ' ')
         n=1
         for s in $bb_server_list; do
             container_dir=$exp_dir/bbos/containers.$n
-            mkdir -p $container_dir
+            do_mpirun 1 0 "" "" "mkdir -p $container_dir" "$logfile"
 
-            # Copying config files for every server
-            new_server_config=$exp_dir/bbos/server.$n
-            cp $bb_server_cfg $new_server_config
-            echo $s >> $new_server_config
-            echo $container_dir >> $new_server_config
-
-            do_mpirun 1 0 "" "$s" "$bb_server $new_server_config" "$logfile" &
+            env_vars=("BB_Server_IP_address" "$s"
+                      "BB_Output_dir" "$container_dir"
+                      "BB_Server_port" "19900")
+            do_mpirun 1 0 env_vars[@] "$s" "$bb_server" "$logfile" &
 
             message "BBOS server started at $s"
-
-            sleep 5
-
-            # Copying config files for every client of this server
-            cp $bb_client_cfg $exp_dir/bbos/client.$n
-            echo $s >> $exp_dir/bbos/client.$n
 
             n=$((n + 1))
         done
 
+        sleep 5
+
         c=1
-        while [ $c -le $bb_clients ]; do
-            s=$(((c % bb_servers) + 1))
-            cfg_file=$exp_dir/bbos/client.$s
-            do_mpirun 1 0 "" "$bbos_nodes" \
-                "$bb_client $c.obj $cfg_file $bb_log_size $bb_sst_size" "$logfile" &
-            client_pids[$c]=$! # so that we can wait for clients to finish
-            message "BBOS client #$c started bound to server #$s"
+        all_clients=$(echo $vpic_nodes | tr ',' '\n')
+        num_clts_per_svr=$((nodes / bbos_buddies))
+        for s in $bb_server_list; do
+          # Generate string of comma-separated client hostnames for aprun
+          clts=$(echo -e $all_clients | head -n $(($c*$bbos_buddies)) | \
+                tail -n $num_clts_per_svr)
+          clts=$(echo -e "$clts" | tr ' ' ',')
 
-            sleep 1
-
-            c=$((c + 1))
+          # one aprun for set of clients bound to one server
+          env_vars=("BB_Server_port" "19900" "BB_Server_IP_address" "$s"
+                    "BB_Object_size" "$bb_log_size" "BB_Mercury_transfer_size" "$((2**21))")
+          do_mpirun $num_clts_per_svr 0 env_vars[@] "$clts" "$bb_client" "$logfile" &
+          client_pids[$c]=$! # so that we can wait for clients to finish
+          c=$((c+1))
         done
 
         # Start DeltaFS processes
-        mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
-        mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
-        mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
+         mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
+         mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
+         mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
 
-        preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
-"deltafs-vpic-preload-build/src/libdeltafs-preload.so"
-        deltafs_srvr_path="$umbrella_build_dir/deltafs-prefix/src/"\
-"deltafs-build/src/server/deltafs-srvr"
-        deltafs_srvr_ip=`hostname -i`
+         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
+ "deltafs-vpic-preload-build/src/libdeltafs-preload.so"
+         deltafs_srvr_path="$umbrella_build_dir/deltafs-prefix/src/"\
+ "deltafs-build/src/server/deltafs-srvr"
+         deltafs_srvr_ip=`hostname -i`
 
-        vars=("LD_PRELOAD" "$preload_lib_path"
-              "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${exp_dir}/plfs"
-              "PRELOAD_Bypass_deltafs_namespace" "1"
-              "PRELOAD_Enable_verbose_error" "1"
-              "SHUFFLE_Virtual_factor" "1024"
-              "SHUFFLE_Mercury_proto" "bmi+tcp"
-              "SHUFFLE_Subnet" "$ip_subnet")
+         vars=("LD_PRELOAD" "$preload_lib_path"
+               "PRELOAD_Deltafs_root" "particle"
+               "PRELOAD_Local_root" "${exp_dir}/plfs"
+               "PRELOAD_Bypass_deltafs_namespace" "1"
+               "PRELOAD_Enable_verbose_error" "1"
+               "SHUFFLE_Virtual_factor" "1024"
+               "SHUFFLE_Mercury_proto" "bmi+tcp"
+               "SHUFFLE_Subnet" "$ip_subnet")
 
-        do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
-        if [ $? -ne 0 ]; then
-            die "deltafs: mpirun failed"
-        fi
+         do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
+         if [ $? -ne 0 ]; then
+             die "deltafs: mpirun failed"
+         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+         echo -n "Output size: " >> $logfile
+         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -321,10 +319,7 @@ do_run() {
         # Kill BBOS clients and servers
         message ""
         message "Killing BBOS servers"
-        for s in $bb_server_list; do
-            message "- Killing BBOS server: $s"
-            do_mpirun 1 0 "" "$s" "pkill -SIGINT bbos_server" "$logfile"
-        done
+        do_mpirun $bbos_buddies 0 "" "$bb_server_list" "pkill -SIGINT bbos_server" "$logfile"
 
         # Wait for BBOS binpacking to complete
         wait
