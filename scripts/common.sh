@@ -208,11 +208,11 @@ query_particles() {
 
     case $runtype in
     "baseline")
-        reader_bin="$umbrella_build_dir/deltafs-umbrella/build/"
+        reader_bin="$umbrella_build_dir/deltafs-umbrella/build/"\
 "trecon-reader-prefix/src/trecon-reader-build/vpic-reader"
         ;;
     "deltafs")
-        reader_bin="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"
+        reader_bin="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
 "deltafs-vpic-preload-build/tools/vpic-deltafs-reader"
         ;;
     *)
