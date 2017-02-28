@@ -282,7 +282,6 @@ do_run() {
     "deltafs")
         # Start BBOS servers and clients
         exp_dir="$job_dir/${runtype}_$pp"
-        exp_dir="/panfs/probescratch/TableFS/bbos_test_1"
         message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
 
         bb_server_list=$(cat $job_dir/bbos.hosts | tr '\n' ' ')
