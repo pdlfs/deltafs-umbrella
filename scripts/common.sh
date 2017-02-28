@@ -202,11 +202,13 @@ do_mpirun() {
 # Query particle trajectories
 # @1 experiment type in {"baseline", "deltafs"}
 # @2 vpic output directory
-# @2 logfile to print results in
+# @3 total number of particles
+# @4 logfile to print results in
 query_particles() {
     runtype=$1
     vpicout=$2
-    logfile=$3
+    parts=$3
+    logfile=$4
 
     case $runtype in
     "baseline")
@@ -221,13 +223,13 @@ query_particles() {
         die "query_particles: unknown runtype '$runtype'"
     esac
 
-    # Query more particles per iteration, from 4**1 to 4**14 (268M)
+    # Query more particles per iteration, from 10**0 to 10**6 (1M)
     # to see when the DeltaFS approach breaks compared to the old,
     # single-pass approach
-    n=1
-    while [ $n -le 14 ]; do
-        mkdir -p $vpicout/reader/part_$n || die "mkdir for reader output failed"
-        $reader_bin -n $n -i $vpicout -o $vpicout/reader/part_$n | tee -a $logfile
+    n=0
+    while [ $n -le 6 ] && [ $n -lt $p ]; do
+        mkdir -p $vpicout/reader/part_10_$n || die "mkdir for reader output failed"
+        $reader_bin -n $((10**n)) -i $vpicout -o $vpicout/reader/part_10_$n | tee -a $logfile
 
         n=$((n + 1))
     done
@@ -274,7 +276,7 @@ do_run() {
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
-        query_particles $runtype $exp_dir $logfile
+        query_particles $runtype $exp_dir $p $logfile
         ;;
 
     "deltafs")
@@ -359,7 +361,7 @@ do_run() {
         # Wait for BBOS binpacking to complete
         wait
 
-        query_particles $runtype $exp_dir $logfile
+        query_particles $runtype $exp_dir $p $logfile
         ;;
     "shuffle_test")
         np=$3
