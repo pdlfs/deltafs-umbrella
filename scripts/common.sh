@@ -320,32 +320,32 @@ do_run() {
         done
 
         # Start DeltaFS processes
-         mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
-         mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
-         mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
+        mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
+        mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
+        mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
 
-         preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
- "deltafs-vpic-preload-build/src/libdeltafs-preload.so"
-         deltafs_srvr_path="$umbrella_build_dir/deltafs-prefix/src/"\
- "deltafs-build/src/server/deltafs-srvr"
-         deltafs_srvr_ip=`hostname -i`
+        preload_lib_path="$umbrella_build_dir/deltafs-vpic-preload-prefix/src/"\
+"deltafs-vpic-preload-build/src/libdeltafs-preload.so"
+        deltafs_srvr_path="$umbrella_build_dir/deltafs-prefix/src/"\
+"deltafs-build/src/server/deltafs-srvr"
+        deltafs_srvr_ip=`hostname -i`
 
-         vars=("LD_PRELOAD" "$preload_lib_path"
-               "PRELOAD_Deltafs_root" "particle"
-               "PRELOAD_Local_root" "${exp_dir}/plfs"
-               "PRELOAD_Bypass_deltafs_namespace" "1"
-               "PRELOAD_Enable_verbose_error" "1"
-               "SHUFFLE_Virtual_factor" "1024"
-               "SHUFFLE_Mercury_proto" "bmi+tcp"
-               "SHUFFLE_Subnet" "$ip_subnet")
+        vars=("LD_PRELOAD" "$preload_lib_path"
+        "PRELOAD_Deltafs_root" "particle"
+        "PRELOAD_Local_root" "${exp_dir}/plfs"
+        "PRELOAD_Bypass_deltafs_namespace" "1"
+        "PRELOAD_Enable_verbose_error" "1"
+        "SHUFFLE_Virtual_factor" "1024"
+        "SHUFFLE_Mercury_proto" "bmi+tcp"
+        "SHUFFLE_Subnet" "$ip_subnet")
 
-         do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
-         if [ $? -ne 0 ]; then
-             die "deltafs: mpirun failed"
-         fi
+        do_mpirun $cores 0 vars[@] "$vpic_nodes" "$deck_dir/turbulence.op" $logfile
+        if [ $? -ne 0 ]; then
+          die "deltafs: mpirun failed"
+        fi
 
-         echo -n "Output size: " >> $logfile
-         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        echo -n "Output size: " >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
