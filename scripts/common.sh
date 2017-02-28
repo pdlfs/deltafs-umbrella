@@ -227,7 +227,7 @@ query_particles() {
     # to see when the DeltaFS approach breaks compared to the old,
     # single-pass approach
     n=0
-    while [ $n -le 6 ] && [ $n -lt $p ]; do
+    while [ $n -le 6 ] && [ $((10**n)) -lt $p ]; do
         mkdir -p $vpicout/reader/part_10_$n || die "mkdir for reader output failed"
         $reader_bin -n $((10**n)) -i $vpicout -o $vpicout/reader/part_10_$n | tee -a $logfile
 
