@@ -250,13 +250,13 @@ do_run() {
         pp="$p"
     fi
 
-    exp_dir="$job_dir/${runtype}_$pp"
+    exp_dir="$job_dir/${runtype}_P${pp}_C${cores}_N${nodes}"
     cd $job_dir || die "cd to $job_dir failed"
     mkdir "$exp_dir" || die "mkdir failed"
     cd $exp_dir || die "cd to $exp_dir failed"
 
     # Define logfile before calling message()
-    logfile="$job_dir/${runtype}_$pp.log"
+    logfile="$job_dir/${runtype}_P${pp}_C${cores}_N${nodes}.log"
 
     clear_caches
 
