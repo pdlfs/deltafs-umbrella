@@ -464,6 +464,7 @@ ExternalProject_Add (vpic
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./config/bootstrap
         COMMAND <SOURCE_DIR>/prep_conf.sh <SOURCE_DIR>
         COMMAND <SOURCE_DIR>/configure ${ac_mpicomp}
+                --prefix=${CMAKE_INSTALL_PREFIX}
                 --with-machine=<SOURCE_DIR>/machine.conf
 
     # We only compile a sample deck here to ensure build.op was properly
@@ -473,9 +474,13 @@ ExternalProject_Add (vpic
         COMMAND cd <SOURCE_DIR> &&
         <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx
 
-    # No installation. Will have to run VPIC through vpic_run.sh
-
-    INSTALL_COMMAND ""
+    INSTALL_COMMAND make install
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/decks
+        COMMAND cp -r <SOURCE_DIR>/decks ${CMAKE_INSTALL_PREFIX}
+        COMMAND cp -r <SOURCE_DIR>/src/deck_wrapper.cxx
+                                  ${CMAKE_INSTALL_PREFIX}/decks
+        COMMAND cp -r <SOURCE_DIR>/src/main.cxx ${CMAKE_INSTALL_PREFIX}/decks
+        COMMAND cp -r <BINARY_DIR>/vpic-build.op ${CMAKE_INSTALL_PREFIX}/bin
     UPDATE_COMMAND ""
 )
 
