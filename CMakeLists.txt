@@ -485,7 +485,7 @@ ExternalProject_Add (vpic
 )
 
 #
-# sndrcv-test
+# sndrcv-test (XXX: to be replaced with mercury-runner)
 #
 GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-0bdb4dcc.tar.gz
     GIT_REPOSITORY "https://github.com/chuckcranor/sndrcv-test.git"
@@ -496,6 +496,24 @@ GenDownloadConfig (sndrcv_download sndrcv-test sndrcv-test-0bdb4dcc.tar.gz
 ExternalProject_Add (sndrcv-test
     DEPENDS deltafs-vpic-preload vpic     # to make it compile at the end
     ${sndrcv_download}
+    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+    # this is a test, no test command.
+)
+
+#
+# mercury-runner
+#
+GenDownloadConfig (mrun_download mercury-runner mercury-runner.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/mercury-runner.git"
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (mercury-runner
+    DEPENDS mercury
+    ${mrun_download}
     ### CMAKE_ARGS -Dsomething=value
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
