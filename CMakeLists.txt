@@ -528,3 +528,14 @@ ExternalProject_Add (trecon-reader
     UPDATE_COMMAND ""
 )
 
+#
+# scripts -- live in deltafs-umbrella
+#
+ExternalProject_Add (scripts
+    DOWNLOAD_COMMAND true    # no need to download, comes with umbrella
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/scripts
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+)
+
