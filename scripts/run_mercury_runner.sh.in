@@ -17,6 +17,7 @@
 # Core script #
 ###############
 
+logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 get_jobdir

@@ -34,6 +34,7 @@ ip_subnet="10.92"
 # Core script #
 ###############
 
+logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 get_jobdir
@@ -51,7 +52,6 @@ gen_hosts
 min_cores=1
 max_cores=$((nodes * cores_per_node))
 max_cores=1
-logfile=""
 
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
