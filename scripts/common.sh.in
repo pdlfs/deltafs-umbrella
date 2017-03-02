@@ -67,13 +67,13 @@ die () { message "Error $@"; exit 1; }
 # sets: $jobdir
 #
 get_jobdir() {
-    if [ x${JOBDIRHOME} != x ]; then
+    if [ x${JOBDIRHOME-} != x ]; then
         jobdirhome=${JOBDIRHOME}
     else
         jobdirhome=${HOME}/jobs
     fi
-    if [ x${MOAB_JOBNAME} != x ]; then
-        jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID}
+    if [ x${MOAB_JOBNAME-} != x ]; then
+        jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID-}
     else
         jobdir=${jobdirhome}/$0.$$     # use top-level script name $0
     fi
@@ -302,7 +302,8 @@ build_deck() {
 
     # Compile input deck
     (cd ${ddir}/trecon-part && \
-     ${dfsu_prefix}/vpic-build.op ./turbulence.cxx) || die "compilation failed"
+     ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx) || \
+                                              die "compilation failed"
 
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
