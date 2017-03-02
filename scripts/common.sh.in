@@ -75,7 +75,7 @@ get_jobdir() {
     if [ x${MOAB_JOBNAME-} != x ]; then
         jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID-}
     else
-        jobdir=${jobdirhome}/$0.$$     # use top-level script name $0
+        jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
     message "note: jobdir = ${jobdir}"
