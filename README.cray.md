@@ -1,4 +1,4 @@
-**// This file is written for deltafs adoptors that want to experiment with deltafs on a Cray system**
+**// This file is written for collaborators that are willing to run experiments using deltafs on a Cray system**
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
@@ -6,58 +6,88 @@
 
 Download, build, and install deltafs, deltafs friends, and their dependencies in a single highly-automated step.
 
-This guide assumes a cray-based computing system.
+This guide assumes a Linux Cray.
+
+### Step-0: prepare git-lfs
+
+First, get a latest `git-lfs` release from github.com.
+
+The latest release version may be higher than 2.0.0.
+```
+wget https://github.com/git-lfs/git-lfs/releases/download/v2.0.0/git-lfs-linux-amd64-2.0.0.tar.gz -C .
+tar xzf git-lfs-linux-amd64-2.0.0.tar.gz -C .
+```
+The entire `git-lfs` release consists of a single executable file so we can easily install it by moving it to a directory that belongs to the `PATH`, such as
+```
+mv git-lfs-2.0.0/git-lfs $HOME/bin/
+```
+After that, initalize `git-lfs` once by
+```
+git lfs install
+```
 
 ### Step-1: prepare programming env
 
+First, set cray link type to dynamic (required to compile deltafs)
 ```
-// First, set cray link type to dynamic (required to compile deltafs)
 export CRAYPE_LINK_TYPE="dynamic"
-
-// If CRAYOS_VERSION is not in the env, we have to explicitly set it.
-// On Nersc Edison, CRAYOS_VERSION is set by the Cray system
-// On Nersc Cori, which has a newer Cray, it is not set.
+```
+If `CRAYOS_VERSION` is not in the env, we have to explicitly set it.
+On Nersc Edison, `CRAYOS_VERSION` is pre-set by the Cray system. On Nersc Cori, which has a newer version of Cray, it is not set.
+```
 export CRAYOS_VERSION=6
-
-// Make sure the desired processor-targeting module (craype-sandybridge,
-// or craype-haswell, or craype-mic-knl, etc.) has been loaded.
-
-// These targeting modules will configure the compiler driver scripts
-// (cc, CC, ftn) to compile code optimized for the processor
-// on the compute node.
-
-// Also make sure the desired compiler (PrgEnv-*
-// such as Intel, GNU, or Cray) has been set.
-
-// Using PrgEnv-intel is recommended.
-
-// Second, load a few addition modules needed by deltafs umbrella.
+```
+Make sure the desired processor-targeting module (such as `craype-sandybridge`, or `craype-haswell`, or `craype-mic-knl`, etc.) has been loaded. These targeting modules will configure the compiler driver scripts (`cc`, `CC`, `ftn`) to compile code optimized for the processors on the compute nodes.
+```
+module load craype-haswell  # depending on your system
+```
+Also make sure the desired compiler bundle (`PrgEnv-*` such as Intel, GNU, or Cray) has been configured, such as
+```
+module load PrgEnv-intel  # depending on your system
+```
+Now, load a few addition modules needed by deltafs umbrella.
+```
 module load boost  # needed by mercury rpc
 module load cmake  # at least v3.x
 ```
 
 ### Step-2: build deltafs suite
 
+Assuming `$HOME` is a global file system accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`. After that, deltafs should be installed under `$HOME/deltafs`:
 ```
-// We will be building deltafs under $HOME/deltafs/src.
-// After that, deltafs will be install under $HOME/deltafs
+#
+# $HOME/deltafs
+#  -- bin
+#  -- include
+#  -- lib
+#  -- src
+#      -- deltafs-umbrella
+#          -- cache.0
+#          -- cache
+#      -- build
+#  -- share
+#
 mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
-
-// First, wget a recent deltafs-umbrella release from github
-wget https://github.com/pdlfs/deltafs-umbrella/releases/download/1.0-beta/deltafs-umbrella-1.0-beta.tag.gz
-tar xzf deltafs-umbrella-1.0-beta.tar.gz -C .
-cd deltafs-umbrella-1.0-beta
-
-// Second, prepolute the cache directory
+```
+First, wget a recent deltafs-umbrella release from github:
+```
+git lfs clone git@github.com:pdlfs/deltafs-umbrella.git
+cd deltafs-umbrella
+```
+Second, prepolute the cache directory:
+```
 cd cache
 ln -fs ../cache.0/* .
 cd ..
-
-// Finally, kick-off the building process
+```
+Finally, kick-off the auto-building process:
+```
+cd $HOME/deltafs/src
 mkdir build
 cd build
 
+# Skip unit tests, and tell cmake that we are doing cross-compiling
 CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
