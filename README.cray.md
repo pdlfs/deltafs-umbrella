@@ -14,7 +14,7 @@ First, get a latest `git-lfs` release from github.com.
 
 The latest release version may be higher than 2.0.0.
 ```
-wget https://github.com/git-lfs/git-lfs/releases/download/v2.0.0/git-lfs-linux-amd64-2.0.0.tar.gz -C .
+wget https://github.com/git-lfs/git-lfs/releases/download/v2.0.0/git-lfs-linux-amd64-2.0.0.tar.gz
 tar xzf git-lfs-linux-amd64-2.0.0.tar.gz -C .
 ```
 The entire `git-lfs` release consists of a single executable file so we can easily install it by moving it to a directory that belongs to the `PATH`, such as
