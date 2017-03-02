@@ -27,17 +27,18 @@ cores_per_node=4
 nodes=4
 bbos_buddies=1
 
-# Paths
-umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
-job_dir="$HOME/src/vpic/decks/dump"
-
 # DeltaFS config
 ip_subnet="10.92"
-
 
 ###############
 # Core script #
 ###############
+
+source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
+
+get_jobdir
+gen_hosts
+
 
 # Notes:
 # ------
@@ -50,24 +51,19 @@ ip_subnet="10.92"
 min_cores=1
 max_cores=$((nodes * cores_per_node))
 max_cores=1
-build_op_dir="$umbrella_build_dir/vpic-prefix/src/vpic-build"
-deck_dir="$umbrella_build_dir/vpic-prefix/src/vpic/decks/trecon-part"
 logfile=""
 
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
 
+# XXX: don't use the build directory
 bb_client_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_8_client.conf"
-bb_client="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_client"
+bb_client="${dfsu_prefix}/bin/bbos_client"
 
 bb_servers=$bbos_buddies
+# XXX: don't use the build directory
 bb_server_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_2_server.conf"
-bb_server="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb-build/src/bbos_server"
-
-source ./common.sh
-
-mkdir -p $job_dir || die "failed to create $job_dir"
-gen_hosts
+bb_server="${dfsu_prefix}/bin/bbos_server"
 
 cores=$min_cores
 while [ $cores -le $max_cores ]

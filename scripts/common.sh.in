@@ -1,0 +1,529 @@
+#!/bin/bash -eu
+
+#
+# common.sh.in  common code shared across experiment scripts
+# 02-Mar-2017  gamvrosi@cs.cmu.edu
+#
+
+#
+# global variables we set/use:
+#  $all_nodes - list of all nodes (sep: whitespace)
+#  $bb_log_size - BBOS max per-core log size in bytes
+#  $bbos_buddies - number of nodes for bbos
+#  $bbos_nodes - list of nodes for bbos
+#  $cores - cores per node (?)
+#  $dfsu_prefix - deltafs umbrella prefix directory
+#  $ip_subnet - the ip subnet we want to use
+#  $jobdir - per-job shared output directory 
+#  $logfile - job's logfile we append to
+#  $nodes - number of nodes for vpic
+#  $vpic_nodes - list of nodes for vpic
+#
+
+# environment variables we set/use:
+#  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
+#                example: /lustre/ttscratch1/users/$USER
+#
+
+#
+# environment variables we use as input:
+#  $HOME - your home directory
+#  $MOAB_JOBNAME - jobname (cray)
+#  $PBS_JOBID - job id (cray)
+#  $PBS_NODEFILE - file with list of all nodes (cray)
+#
+
+#
+# files we create:
+#  $jobdir/hosts.txt - list of hosts
+#  $jobdir/bbos.hosts - host file only of bbos hosts
+#  $jobdir/vpic.hosts - host file only of vpic hosts
+#
+
+# TODO:
+# - Convert node lists to ranges on CRAY
+
+#
+# prefix directory comes from cmake's ${CMAKE_INSTALL_PREFIX} variable
+#
+dfsu_prefix=@CMAKE_INSTALL_PREFIX@
+
+#
+# message: echo message to stdout and append it to the logfile.  note
+# that if $logfile is undefined, tee will just print the output without
+# using a log file.
+# uses: $logfile
+#
+message () { echo "$@" | tee -a $logfile; }
+
+#
+# die: emit a mesage and exit 1
+#
+die () { message "Error $@"; exit 1; }
+
+#
+# get_jobdir: setup $jobdir var and makes sure jobdir is present
+# uses: $MOAB_JOBNAME, $PBS_JOBID, $JOBDIRHOME
+# sets: $jobdir
+#
+get_jobdir() {
+    if [ x${JOBDIRHOME} != x ]; then
+        jobdirhome=${JOBDIRHOME}
+    else
+        jobdirhome=${HOME}/jobs
+    fi
+    if [ x${MOAB_JOBNAME} != x ]; then
+        jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID}
+    else
+        jobdir=${jobdirhome}/$0.$$     # use top-level script name $0
+    fi
+    mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
+    message "note: jobdir = ${jobdir}"
+}
+
+#
+# gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
+# one host per line.
+# uses: $PBS_NODEFILE, $jobdir
+# sets: $all_nodes
+# creates: $jobdir/hosts.txt
+#
+gen_hostfile() {
+    message "Generating hostfile with all hosts..."
+
+    if [ `which aprun` ]; then
+        # Generate hostfile on CRAY and store on disk
+        cat $PBS_NODEFILE | uniq | sort > $jobdir/hosts.txt || \
+            die "failed to create hosts.txt file"
+
+    else
+        # Generate hostfile on Emulab and store on disk
+        fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
+        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
+                    sed 's/$/'$fqdn_suffix'/g'`"
+
+        echo "$exp_hosts" > $jobdir/hosts.txt || \
+            die "failed to create hosts.txt file"
+    fi
+
+    # Populate a variable with hosts
+    all_nodes=$(cat $jobdir/hosts.txt)
+}
+
+#
+# generate host list files: $jobdir/vpic.hosts, $jobdir/bbos.hosts
+# uses: $PBS_NODEFILE, $jobdir, $nodes, $bbos_buddies
+# sets: $vpic_nodes, $bbos_nodes
+# creates: $jobdir/vpic.hosts, $jobdir/bbos.hosts
+#
+gen_hosts() {
+    message "Generating host lists..."
+
+    # XXX: sanity check: # of nodes in list from PBS_NODEFILE or
+    # XXX:               emulab-listall >= $nodes+$bbos_buddies
+
+    if [ `which aprun` ]; then
+        # Generate host lists on CRAY and store them on disk
+        cat $PBS_NODEFILE | uniq | sort | head -n $nodes \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
+            die "failed to create vpic.hosts file"
+        cat $PBS_NODEFILE | uniq | sort | tail -n $bbos_buddies | \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
+            die "failed to create bbos.hosts file"
+
+    else
+        # Generate host lists on Emulab and store them on disk
+        fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
+        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
+                    sed 's/$/'$fqdn_suffix'/g'`"
+
+        echo "$exp_hosts" | head -n $nodes | \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
+            die "failed to create vpic.hosts file"
+        echo "$exp_hosts" | tail -n $bbos_buddies | \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
+            die "failed to create bbos.hosts file"
+    fi
+
+    # Populate host list variables
+    vpic_nodes=$(cat $jobdir/vpic.hosts)
+    bbos_nodes=$(cat $jobdir/bbos.hosts)
+}
+
+#
+# clear_caches: clear node caches on vpic nodes
+# uses: $vpic_nodes, $cores, $nodes
+#
+clear_caches() {
+    message "Clearing node caches..."
+
+    if [ `which aprun` ]; then
+        aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
+            'echo 3 > /proc/sys/vm/drop_caches'
+    else
+        # this does more than just $vpic_nodes (does them all)
+        /share/testbed/bin/emulab-mpirunall sudo sh -c \
+            'echo 3 > /proc/sys/vm/drop_caches'
+    fi
+}
+
+#
+# do_mpirun: Run CRAY MPICH, ANL MPICH, or OpenMPI run command
+#
+# Arguments:
+# @1 number of processes
+# @2 number of processes per node
+# @3 array of env vars: ("name1", "val1", "name2", ... )
+# @4 host list (comma-separated)
+# @5 executable (and any options that don't fit elsewhere)
+# @6 outfile (used to log output)
+do_mpirun() {
+    procs=$1
+    ppnode=$2
+    if [ ! -z "$3" ]; then
+        declare -a envs=("${!3}")
+    else
+        envs=()
+    fi
+    hosts="$4"
+    exe="$5"
+    outfile="$6"
+
+    envstr=""; npstr=""; hstr=""
+
+    if [ `which aprun` ]; then
+        # This is likely a CRAY machine. Deploy an aprun job.
+
+        if [ ${#envs[@]} -gt 0 ]; then
+            envstr=`printf -- "-e %s=\"%s\" " ${envs[@]}`
+        fi
+
+        if [ $ppnode -gt 0 ]; then
+            npstr="-N $ppnode"
+        fi
+
+        if [ ! -z "$hosts" ]; then
+            hstr="-L $hosts"
+        fi
+
+        message "Running: aprun $hstr -n $procs $npstr $envstr $exe"
+        aprun $hstr -n $procs $npstr $envstr $exe 2>&1 | tee -a $outfile
+
+    elif [ `which mpirun.mpich` ]; then
+        if [ ${#envs[@]} -gt 0 ]; then
+            envstr=`printf -- "-env %s \"%s\" " ${envs[@]}`
+        fi
+
+        if [ $ppnode -gt 0 ]; then
+            die "MPICH does not support a fixed number of processes per node"
+        fi
+
+        if [ ! -z "$hosts" ]; then
+            hstr="--host $hosts"
+        fi
+
+        message "mpirun.mpich -np $procs $hstr $envstr $exe"
+        mpirun.mpich -np $procs $hstr $envstr $exe 2>&1 | tee -a $outfile
+
+    elif [ `which mpirun.openmpi` ]; then
+        if [ ${#envs[@]} -gt 0 ]; then
+            envstr=`printf -- "-x %s=%s " ${envs[@]}`
+        fi
+
+        if [ $ppnode -gt 0 ]; then
+            npstr="-npernode $ppnode"
+        fi
+
+        if [ ! -z "$hosts" ]; then
+            hstr="--host $hosts"
+        fi
+
+        message "mpirun.openmpi -np $procs $npstr $hstr $envstr $exe"
+        mpirun.openmpi -np $procs $npstr $hstr $envstr $exe 2>&1 | tee -a "$outfile"
+
+    else
+        die "could not find a supported mpirun or aprun command"
+    fi
+}
+
+#
+# build_deck: build a vpic deck by copying the deck template to the jobdir, 
+# adjusting config.h, and then compiling it using the vpic-build.op script.
+# the result is placed in $jobdir/current-deck.op (XXX: assume you are only
+# going to have one compiled deck at a time).
+#
+# uses: $dfsu_prefix, $jobdir, $cores
+# creates: $jobdir/current-deck.op
+#
+# Arguments:
+# @1 in {"file-per-process", "file-per-particle"}
+# @2 particles on x dimension
+# @3 particles on y dimension
+#
+build_deck() {
+    px=$2
+    py=$3
+
+    ddir=${jobdir}/tmpdeck.$$     # tmp staging area for stacking the deck
+    rm -rf ${ddir}
+    cp -r ${dfsu_prefix}/decks ${ddir}
+    mv ${ddir}/trecon-part/config.h ${ddir}/trecon-part/config.bkp || \
+		die "mv failed"
+    
+    case $1 in
+    "file-per-process")
+        cat ${ddir}/trecon-part/config.bkp | \
+            sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
+            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
+            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
+            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' >  \
+                   ${ddir}/trecon-part/config.h || \
+            die "config.h editing failed"
+        ;;
+    "file-per-particle")
+        cat ${ddir}/trecon-part/config.bkp | \
+            sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
+            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
+            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
+            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' >  \
+                   ${ddir}/trecon-part/config.h || \
+            die "config.h editing failed"
+        ;;
+    *)
+        die "build_deck: VPIC mode not supported"
+        ;;
+    esac
+
+    # Compile input deck
+    (cd ${ddir}/trecon-part && \
+     ${dfsu_prefix}/vpic-build.op ./turbulence.cxx) || die "compilation failed"
+
+    mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
+        die "install new current deck failed"
+
+    rm -rf ${ddir}      # don't need staging area anymore
+}
+
+#
+# do_run: run a vpic experiment
+#
+# uses: $dfsu_prefix, $jobdir, $cores, $nodes, $logfile, $vpic_nodes,
+#        $bb_log_size, $bbos_buddies
+#        $jobdir/current-deck.op (precompiled deck)
+#        $jobdir/bbos.hosts, $jobdir/vpic.hosts
+# creates: an experiment tag: {runtype}_P{particles}_C${cores}_N${nodes}
+#          $jobdir/$exp_tag - output directory for the experiment
+#          $jobdir/$exp_tag.log - logfile for the output dir
+# side effects: changes current directory to $exp_dir
+#
+# Arguments:
+# @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
+# @2 number of particles
+#
+do_run() {
+    runtype=$1
+    p=$2
+
+    # pp: make a more human readable version of "p"
+    if [ $((p / (10**6))) -gt 0 ]; then
+        pp="$((p / (10**6)))M"
+    elif [ $((p / (10**3))) -gt 0 ]; then
+        pp="$((p / (10**3)))K"
+    else
+        pp="$p"
+    fi
+
+    exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
+    exp_dir="$jobdir/$exp_tag"
+    cd $jobdir || die "cd to $jobdir failed"
+    mkdir "$exp_dir" || die "mkdir failed"
+    cd $exp_dir || die "cd to $exp_dir failed"
+
+    # Define logfile before calling message(), changes behavior of message()
+    logfile="${exp_tag}.log"
+
+    clear_caches
+
+    message ""
+    message "=================================================================="
+    message "Running VPIC ($runtype) with $pp particles on $cores cores."
+    message "Experiment dir is ${exp_dir}"
+    message "=================================================================="
+    message ""
+
+    case $runtype in
+    "baseline")
+        do_mpirun $cores 0 "" "$vpic_nodes" "$jobdir/current-deck.op" $logfile
+        if [ $? -ne 0 ]; then
+            die "baseline: mpirun failed"
+        fi
+
+        echo -n "Output size: " >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+
+        query_particles $runtype $exp_dir $p $logfile
+        ;;
+
+    "deltafs")
+        # Start BBOS servers and clients
+        message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
+
+        bb_server_list=$(cat $jobdir/bbos.hosts | tr '\n' ' ')
+        n=1
+        for s in $bb_server_list; do
+            container_dir=$exp_dir/bbos/containers.$n
+            do_mpirun 1 0 "" "" "mkdir -p $container_dir" "$logfile"
+
+            env_vars=("BB_Server_IP_address" "$s"
+                      "BB_Output_dir" "$container_dir"
+                      "BB_Server_port" "19900")
+            do_mpirun 1 0 env_vars[@] "$s" \
+                      "${dfsu_prefix}/bin/bbos_server" "$logfile" &
+
+            message "BBOS server started at $s"
+
+            n=$((n + 1))
+        done
+
+        sleep 5
+
+        c=1
+        all_clients=$(echo $vpic_nodes | tr ',' '\n')
+        num_clts_per_svr=$((nodes / bbos_buddies))
+        for s in $bb_server_list; do
+          # Generate string of comma-separated client hostnames for aprun
+          clts=$(echo -e $all_clients | head -n $(($c*$bbos_buddies)) | \
+                tail -n $num_clts_per_svr)
+          clts=$(echo -e "$clts" | tr ' ' ',')
+
+          # one aprun for set of clients bound to one server
+          env_vars=("BB_Server_port" "19900" 
+                    "BB_Server_IP_address" "$s"
+                    "BB_Object_size" "$bb_log_size" 
+                    "BB_Mercury_transfer_size" "$((2**21))")
+          do_mpirun $num_clts_per_svr 0 env_vars[@] "$clts" \
+                    "${dfsu_prefix}/bin/bbos_client" "$logfile" &
+          client_pids[$c]=$! # so that we can wait for clients to finish
+          c=$((c+1))
+        done
+
+        # Start DeltaFS processes
+        mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
+        mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
+        mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
+
+        preload_lib_path="${dfsu_prefix}/lib/libdeltafs-preload.so"
+        deltafs_srvr_path="${dfsu_prefix}/bin/deltafs-srvr"
+
+        vars=("LD_PRELOAD" "$preload_lib_path"
+        "PRELOAD_Deltafs_root" "particle"
+        "PRELOAD_Local_root" "${exp_dir}/plfs"
+        "PRELOAD_Bypass_deltafs_namespace" "1"
+        "PRELOAD_Enable_verbose_error" "1"
+        "SHUFFLE_Virtual_factor" "1024"
+        "SHUFFLE_Mercury_proto" "bmi+tcp"
+        "SHUFFLE_Subnet" "$ip_subnet")
+
+        do_mpirun $cores 0 vars[@] "$vpic_nodes" \
+                  "$jobdir/current-deck.op" $logfile
+        if [ $? -ne 0 ]; then
+          die "deltafs: mpirun failed"
+        fi
+
+        echo -n "Output size: " >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+
+        # Waiting for clients to finish data transfer to server
+        for c_pid in "${!client_pids[@]}"; do
+          wait ${client_pids[$c_pid]}
+        done
+
+        # Kill BBOS clients and servers
+        message ""
+        message "Killing BBOS servers"
+        do_mpirun $bbos_buddies 0 "" "$bb_server_list" "pkill -SIGINT bbos_server" "$logfile"
+
+        # Wait for BBOS binpacking to complete
+        wait
+
+        query_particles $runtype $exp_dir $p $logfile
+        ;;
+    "shuffle_test")
+        np=$3
+
+        # Start DeltaFS processes
+        mkdir -p $exp_dir/metadata || die "shuffle test metadata mkdir failed"
+        mkdir -p $exp_dir/data || die "shuffle test data mkdir failed"
+        mkdir -p $exp_dir/plfs || die "shuffle test plfs mkdir failed"
+
+        preload_lib_path="${dfsu_prefix}/lib/libdeltafs-preload.so"
+        deltafs_srvr_path="${dfsu_prefix}/bin/deltafs-srvr"
+
+        vars=("LD_PRELOAD" "$preload_lib_path"
+              "PRELOAD_Deltafs_root" "particle"
+              "PRELOAD_Local_root" "${exp_dir}/plfs"
+              "PRELOAD_Bypass_write" "y"
+              "PRELOAD_Enable_verbose_error" "y"
+              "SHUFFLE_Virtual_factor" "1024"
+              "SHUFFLE_Mercury_proto" "bmi+tcp"
+              "SHUFFLE_Subnet" "$ip_subnet")
+
+        do_mpirun $cores $np vars[@] "$vpic_nodes" \
+                  "$jobdir/current-deck.op" $logfile
+        if [ $? -ne 0 ]; then
+            die "deltafs: mpirun failed"
+        fi
+
+        echo -n "Output size: " >> $logfile
+        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        ;;
+    esac
+}
+
+#
+# query_particles: query particle trajectories
+#
+# uses: $dfsu_prefix
+#
+# Arguments:
+# @1 experiment type in {"baseline", "deltafs"}
+# @2 vpic output directory
+# @3 total number of particles
+# @4 logfile to print results in
+query_particles() {
+    runtype=$1
+    vpicout=$2
+    qparts=$3
+    logfile=$4
+
+    case $runtype in
+    "baseline")
+        reader_bin="${dfsu_prefix}/bin/vpic-reader"
+        ;;
+    "deltafs")
+        reader_bin="${dfsu_prefix}/bin/vpic-deltafs-reader"
+        ;;
+    *)
+        die "query_particles: unknown runtype '$runtype'"
+    esac
+
+    # Query more particles per iteration, from 10**0 to 10**6 (1M)
+    # to see when the DeltaFS approach breaks compared to the old,
+    # single-pass approach
+    n=0
+    while [ $n -le 6 ] && [ $((10**n)) -lt $qparts ]; do
+        mkdir -p $vpicout/reader/part_10_$n || \
+                                   die "mkdir for reader output failed"
+        $reader_bin -n $((10**n)) -i $vpicout \
+                -o $vpicout/reader/part_10_$n | tee -a $logfile
+
+        n=$((n + 1))
+    done
+}
+

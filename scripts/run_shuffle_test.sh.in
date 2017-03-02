@@ -22,10 +22,6 @@
 cores_per_node=4
 nodes=16
 
-# Paths
-umbrella_build_dir="$HOME/src/deltafs-umbrella/build"
-job_dir="$HOME/src/vpic/decks/dump"
-
 # DeltaFS config
 ip_subnet="10.92"
 
@@ -34,14 +30,12 @@ ip_subnet="10.92"
 # Core script #
 ###############
 
+source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
+
 bbos_buddies=0
-build_op_dir="$umbrella_build_dir/vpic-prefix/src/vpic-build"
-deck_dir="$umbrella_build_dir/vpic-prefix/src/vpic/decks/trecon-part"
 logfile=""
 
-source ./common.sh
-
-mkdir -p $job_dir || die "failed to create $job_dir"
+get_jobdir
 gen_hosts
 
 procs_per_node=1
