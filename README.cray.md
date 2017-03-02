@@ -148,6 +148,8 @@ Next let's check if the following system envrionments used by our scripts are in
 
 If you set `JOBDIRHOME` to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}` ^_^
 
+One last thing, go to `common.sh` Line 210ish, add `-cc numa_node` as an additional option to `aprun`. We think this will ask aprun to bind each process to a speicifc CPU socket.
+
 OK.
 
 Time to submit the job to the batch system.
