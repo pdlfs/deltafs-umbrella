@@ -13,35 +13,39 @@
 # Tunable parameters #
 ######################
 
-job_dir="$HOME/src/vpic/decks/dump"
-
 ###############
 # Core script #
 ###############
 
-logfile=$job_dir/mercury-runner.txt
-runner="@CMAKE_INSTALL_PREFIX@/bin/mercury-runner"
-
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
-mkdir -p $job_dir || die "failed to create $output_dir"
-touch $logfile
-message "Output is available in $job_dir"
-
+get_jobdir
 gen_hostfile
+
+logfile=$jobdir/mercury-runner.log
+runner="${dfsu_prefix}/bin/mercury-runner"
+
+touch $logfile
+message "Output is available in $jobdir"
 
 host1=$(echo "$all_nodes" | sort | head -n 1)
 host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 
-do_mpirun 1 1 "" $host1 "hostname -i" "$job_dir/host1-ip.txt"
-do_mpirun 1 1 "" $host2 "hostname -i" "$job_dir/host2-ip.txt"
-host1_ip=$(cat $job_dir/host1-ip.txt | head -1)
-host2_ip=$(cat $job_dir/host2-ip.txt | head -1)
+#
+# convert hostnames to IPs using hostname -i on remote nodes
+# and put results in host*-ip.txt in $jobdir
+#
+do_mpirun 1 1 "" $host1 "hostname -i" "$jobdir/host1-ip.txt"
+do_mpirun 1 1 "" $host2 "hostname -i" "$jobdir/host2-ip.txt"
+host1_ip=$(cat $jobdir/host1-ip.txt | head -1)
+host2_ip=$(cat $jobdir/host2-ip.txt | head -1)
 message "Host 1: hostname = $host1, ip = $host1_ip"
 message "Host 2: hostname = $host2, ip = $host2_ip"
 
 protos=("bmi+tcp" "cci+tcp" "cci+gni")
-instances=(1 2 4 8)
+### instances=(1 2 4 8)
+### XXX: vary -l?
+instances=(1 2)
 repeats=3
 
 run_one() {
@@ -56,22 +60,24 @@ run_one() {
     message "====================================================="
     message ""
 
-    clogfile=$job_dir/client-$proto-$num-$iter-log.txt
-    slogfile=$job_dir/server-$proto-$num-$iter-log.txt
+    clogfile=$jobdir/client-$proto-$num-$iter-log.txt
+    slogfile=$jobdir/server-$proto-$num-$iter-log.txt
 
     saddress="${proto}://${host1_ip}:%d"
     caddress="${proto}://${host2_ip}:%d"
 
     # Start the server
     message "Starting server (Instances: $num, Address spec: $saddress)."
-    do_mpirun 1 1 "" $host1 "$server $num $saddress" "$slogfile" &
+    do_mpirun 1 1 "" $host1 \
+        "$runner -c 100000 -l 1 -m s -q $num $saddress" "$slogfile" &
 
     server_pid=$!
 
     # Start the client
     message "Starting client (Instances: $num, Address spec: $caddress)."
     message "Please be patient while the test is in progress..."
-    do_mpirun 1 1 "" $host2 "$client $num $caddress $saddress" "$clogfile"
+    do_mpirun 1 1 "" $host2 \
+        "$runner -c 100000 -l 1 -m c -q $num $caddress $saddress" "$clogfile"
 
     # Collect return codes
     client_ret=$?
