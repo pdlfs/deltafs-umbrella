@@ -1,4 +1,4 @@
-**// This file is written for collaborators that are willing to run experiments using deltafs on a Cray system**
+**// This file is written for collaborators that are willing to run experiments using deltafs on Cray systems.**
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
@@ -8,7 +8,7 @@ Download, build, and install deltafs, deltafs friends, and their dependencies in
 
 This guide assumes a Linux Cray.
 
-### Step-0: prepare git-lfs
+### Step-0: Prepare git-lfs
 
 First, get a latest `git-lfs` release from github.com.
 
@@ -23,10 +23,11 @@ mv git-lfs-2.0.0/git-lfs $HOME/bin/
 ```
 After that, initalize `git-lfs` once by
 ```
+module load git
 git lfs install
 ```
 
-### Step-1: prepare programming env
+### Step-1: Prepare cray programming env
 
 First, set cray link type to dynamic (required to compile deltafs)
 ```
@@ -51,20 +52,22 @@ module load boost  # needed by mercury rpc
 module load cmake  # at least v3.x
 ```
 
-### Step-2: build deltafs suite
+### Step-2: Build deltafs suite
 
 Assuming `$HOME` is a global file system accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`. After that, deltafs should be installed under `$HOME/deltafs`:
 ```
 #
 # $HOME/deltafs
 #  -- bin
+#  -- decks (vpic input decks)
 #  -- include
 #  -- lib
 #  -- src
 #      -- deltafs-umbrella
 #          -- cache.0
 #          -- cache
-#      -- build
+#          -- build
+#  -- scripts
 #  -- share
 #
 mkdir -p $HOME/deltafs/src
@@ -81,9 +84,8 @@ cd cache
 ln -fs ../cache.0/* .
 cd ..
 ```
-Finally, kick-off the auto-building process:
+Finally, kick-off the cmake auto-building process:
 ```
-cd $HOME/deltafs/src
 mkdir build
 cd build
 
