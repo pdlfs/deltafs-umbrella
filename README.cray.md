@@ -40,11 +40,11 @@ export CRAYOS_VERSION=6
 ```
 Make sure the desired processor-targeting module (such as `craype-sandybridge`, or `craype-haswell`, or `craype-mic-knl`, etc.) has been loaded. These targeting modules will configure the compiler driver scripts (`cc`, `CC`, `ftn`) to compile code optimized for the processors on the compute nodes.
 ```
-module load craype-haswell  # depending on your system
+module load craype-haswell  # Or module load craype-sandybridge if you want to run code on monitor nodes
 ```
 Also make sure the desired compiler bundle (`PrgEnv-*` such as Intel, GNU, or Cray) has been configured, such as
 ```
-module load PrgEnv-intel  # depending on your system
+module load PrgEnv-intel  # Or module load PrgEnv-gnu
 ```
 Now, load a few addition modules needed by deltafs umbrella.
 ```
@@ -54,21 +54,27 @@ module load cmake  # at least v3.x
 
 ### Step-2: Build deltafs suite
 
-Assuming `$HOME` is a global file system accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`. After that, deltafs should be installed under `$HOME/deltafs`:
+Assuming `$INSTALL` is a global file system location that is accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`, and to install everything under `$INSTALL/deltafs`.
+
+**After installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.**
+
+**Do not move install directory after installation is done. If you do not like your current install location, remove the install directiry and reinstall deltafs to a new place.**
 ```
 #
-# $HOME/deltafs
+# $INSTALL/deltafs
 #  -- bin
 #  -- decks (vpic input decks)
 #  -- include
 #  -- lib
+#  -- scripts
+#  -- share
+#
+# $HOME/deltafs
 #  -- src
 #      -- deltafs-umbrella
 #          -- cache.0
 #          -- cache
 #          -- build
-#  -- scripts
-#  -- share
 #
 mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
@@ -84,17 +90,21 @@ cd cache
 ln -fs ../cache.0/* .
 cd ..
 ```
-Finally, kick-off the cmake auto-building process:
+Now, kick-off the cmake auto-building process:
 ```
 mkdir build
 cd build
 
 # Skip unit tests, and tell cmake that we are doing cross-compiling
-CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
+CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=$INSTALL/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
 make
 ```
 
-**Thanks for trying deltafs :-)**
+**After installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.**
+
+**Do not move install directory after installation is done. If you do not like your current install location, remove the install directiry and reinstall deltafs to a new place.**
+
+Thanks for trying deltafs :-)
