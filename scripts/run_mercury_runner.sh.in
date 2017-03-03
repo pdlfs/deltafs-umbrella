@@ -70,7 +70,7 @@ run_one() {
     # Start the server
     message "Starting server (Instances: $num, Address spec: $saddress)."
     do_mpirun 1 1 "" $host1 \
-        "$runner -c 100000 -l 1 -m s -q $num $saddress" "$slogfile" &
+        "$runner -c 100000 -l 1 -m s -q -r $iter $num $saddress" "$slogfile" &
 
     server_pid=$!
 
@@ -78,7 +78,8 @@ run_one() {
     message "Starting client (Instances: $num, Address spec: $caddress)."
     message "Please be patient while the test is in progress..."
     do_mpirun 1 1 "" $host2 \
-        "$runner -c 100000 -l 1 -m c -q $num $caddress $saddress" "$clogfile"
+        "$runner -c 100000 -l 1 -m c -q -r $iter $num $caddress $saddress" \
+        "$clogfile"
 
     # Collect return codes
     client_ret=$?
