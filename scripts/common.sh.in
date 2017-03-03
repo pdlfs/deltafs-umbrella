@@ -158,8 +158,9 @@ clear_caches() {
     message "Clearing node caches..."
 
     if [ `which aprun` ]; then
-        aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
-            'echo 3 > /proc/sys/vm/drop_caches'
+        message "Skipping cache clear ... no sudo access on cray"
+        #aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
+        #    'echo 3 > /proc/sys/vm/drop_caches'
     else
         # this does more than just $vpic_nodes (does them all)
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
