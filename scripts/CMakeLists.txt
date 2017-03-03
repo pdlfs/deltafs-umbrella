@@ -16,7 +16,7 @@ project (deltafs-umbrella-scripts NONE)
 set (install-files README.md vpic_plots.R)
 
 # executable scripts to install
-set (install-programs process_logs.sh process_runner.pl srun_bbos_test.sh
+set (install-programs process_logs.sh process_runner.pl run_bbos_test.sh
      run_sndrcv_test.sh)
 
 # executable scripts to @-expand and then install
