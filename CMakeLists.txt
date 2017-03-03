@@ -252,12 +252,13 @@ if (EXISTS ${ccipatch})
     set (ccipatchcmd patch -p1 -i ${ccipatch} -d <SOURCE_DIR>)
 endif ()
 
-GenDownloadConfig (cci_download cci cci-3ab663e0.tar.gz
+GenDownloadConfig (cci_download cci cci-4e655d1.tar.gz
     ### URL http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz
     ### URL_MD5 070b2ba4eca92a846c093f2cd000d3b2
     TIMEOUT 100
     GIT_REPOSITORY "https://github.com/CCI/cci"
-    GIT_TAG 3ab663e0
+    ###GIT_TAG 3ab663e0   # old
+    GIT_TAG 4e655d1       # for verbs to kind of work
     ### GIT_TAG master
 )
 
