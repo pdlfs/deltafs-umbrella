@@ -124,7 +124,7 @@ gen_hosts() {
 
     if [ `which aprun` ]; then
         # Generate host lists on CRAY and store them on disk
-        cat $PBS_NODEFILE | uniq | sort | head -n $nodes \
+        cat $PBS_NODEFILE | uniq | sort | head -n $nodes | \
             tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
             die "failed to create vpic.hosts file"
         cat $PBS_NODEFILE | uniq | sort | tail -n $bbos_buddies | \
