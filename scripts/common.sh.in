@@ -195,7 +195,7 @@ do_mpirun() {
         # This is likely a CRAY machine. Deploy an aprun job.
 
         if [ ${#envs[@]} -gt 0 ]; then
-            envstr=`printf -- "-e %s=\"%s\" " ${envs[@]}`
+            envstr=`printf -- "-e %s=%s " ${envs[@]}`
         fi
 
         if [ $ppnode -gt 0 ]; then
@@ -211,7 +211,7 @@ do_mpirun() {
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
-            envstr=`printf -- "-env %s \"%s\" " ${envs[@]}`
+            envstr=`printf -- "-env %s %s " ${envs[@]}`
         fi
 
         if [ $ppnode -gt 0 ]; then
