@@ -47,13 +47,9 @@ bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
 
 bb_clients=$cores
-# XXX: don't use the build directory
-bb_client_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_8_client.conf"
 bb_client="${dfsu_prefix}/bin/bbos_client"
 
 bb_servers=$bbos_buddies
-# XXX: don't use the build directory
-bb_server_cfg="$umbrella_build_dir/deltafs-bb-prefix/src/deltafs-bb/config/narwhal_2_server.conf"
 bb_server="${dfsu_prefix}/bin/bbos_server"
 
 parts=$cores
