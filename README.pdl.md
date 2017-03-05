@@ -56,6 +56,9 @@ git lfs install --local
 git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
 git config --add lfs.pushurl git@github.com:pdlfs/deltafs-umbrella.git
 
+// Update lfs lock setting
+git config lfs.https://github.com/pdlfs/deltafs-umbrella.git/info/lfs.locksverify true
+
 // Next and optionally, fetch all git-lfs files
 git lfs pull
 
