@@ -23,6 +23,8 @@
 # environment variables we set/use:
 #  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
 #                example: /lustre/ttscratch1/users/$USER
+#  $EXTRA_MPIOPTS - additional options that need to be
+#                       passed to mpirun
 #
 
 #
@@ -207,8 +209,8 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "Running: aprun $hstr -n $procs $npstr $envstr $exe"
-        aprun $hstr -n $procs $npstr $envstr $exe 2>&1 | tee -a $outfile
+        message "Running: aprun $hstr -n $procs $npstr $envstr $EXTRA_MPIOPTS $exe"
+        aprun $hstr -n $procs $npstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -223,8 +225,8 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.mpich -np $procs $hstr $envstr $exe"
-        mpirun.mpich -np $procs $hstr $envstr $exe 2>&1 | tee -a $outfile
+        message "mpirun.mpich -np $procs $hstr $envstr $EXTRA_MPIOPTS $exe"
+        mpirun.mpich -np $procs $hstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -239,8 +241,8 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.openmpi -np $procs $npstr $hstr $envstr $exe"
-        mpirun.openmpi -np $procs $npstr $hstr $envstr $exe 2>&1 | tee -a "$outfile"
+        message "mpirun.openmpi -np $procs $npstr $hstr $envstr $EXTRA_MPIOPTS $exe"
+        mpirun.openmpi -np $procs $npstr $hstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a "$outfile"
 
     else
         die "could not find a supported mpirun or aprun command"
