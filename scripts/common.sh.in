@@ -209,7 +209,7 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "Running: aprun $hstr -n $procs $npstr $envstr $EXTRA_MPIOPTS $exe"
+        message "aprun $hstr -n $procs $npstr $envstr $EXTRA_MPIOPTS $exe"
         aprun $hstr -n $procs $npstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.mpich` ]; then
