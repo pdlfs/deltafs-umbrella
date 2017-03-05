@@ -13,6 +13,26 @@
 # Tunable parameters #
 ######################
 
+
+# "n" - normal send run: RPC, vary request size and limit
+n_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
+n_sizes=(64 512 1024 4096)                      # RPC snd size ("-i" flag)
+n_limits=(1 2 4 8)                              # outstanding RPCs ("-l" flag)
+n_repeats=3                                     # repeat runs
+n_nrpcs=100000                                  # nrpcs in 1 run ("-c" flag)
+n_timeout=120                                   # timeout  ("-t" flag)
+
+# "b" - bulk read run: RPC, vary bulk read size and limit
+b_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
+b_Sizes=(2m)                                    # bulk sizes ("-S" flag)
+b_limits=(1 2 4 8)                              # outstanding RPCs ("-l" flag)
+b_repeats=3                                     # repeat runs
+b_nrpcs=10000                                   # nrpcs in 1 run ("-c" flag)
+b_timeout=300                                   # timeout  ("-t" flag)
+
+dryrun=0                                        # set to 1 for script debug
+
+instances=(1)                                   # currently not changing this
 ###############
 # Core script #
 ###############
@@ -29,12 +49,14 @@ runner="${dfsu_prefix}/bin/mercury-runner"
 touch $logfile
 message "Output is available in $jobdir"
 
+# get our two hostnames
 host1=$(echo "$all_nodes" | sort | head -n 1)
 host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 
 #
 # convert hostnames to IPs using hostname -i on remote nodes
-# and put results in host*-ip.txt in $jobdir
+# and put results in host*-ip.txt in $jobdir, load into 
+# host1_ip and host2_ip  (XXX: issue if multiple interfaces)
 #
 do_mpirun 1 1 "" $host1 "hostname -i" "$jobdir/host1-ip.txt"
 do_mpirun 1 1 "" $host2 "hostname -i" "$jobdir/host2-ip.txt"
@@ -43,48 +65,97 @@ host2_ip=$(cat $jobdir/host2-ip.txt | head -1)
 message "Host 1: hostname = $host1, ip = $host1_ip"
 message "Host 2: hostname = $host2, ip = $host2_ip"
 
-protos=("bmi+tcp" "cci+tcp" "cci+gni")
-### instances=(1 2 4 8)
-### XXX: vary -l?
-instances=(1 2)
-repeats=3
-
+#
+# run_one: run one instance
+#
+# uses: jobdir, host1, host2, host1_ip, host2_ip, dryrun
+# Arguments:
+# @1 protocol to use
+# @2 number of mercury instances
+# @3 req size ("-s")
+# @4 bulk send size ("-S")
+# @5 outstanding RPC limit ("-l")
+# @6 current current iteration number
+# @7 number of rpcs ("-c")
+# @8 number repeats we target
+# @9 timeout
 run_one() {
     proto="$1"
     num="$2"
-    iter=$3
+    reqsz=$3
+    bulksz=$4
+    limit=$5
+    iter=$6
+    nrpcs=$7
+    repeats=$8
+    timeo=$9
+
+    now=`date`
 
     message ""
     message "====================================================="
+    message "Starting new test at: ${now}"
     message "Testing protocol '$proto' with $num Mercury instances"
+    message "reqsz=$reqsz, bulksz=$bulksz, limit=$limit, nrpcs=$nrpcs"
     message "Iteration $iter out of $repeats"
     message "====================================================="
     message ""
 
-    clogfile=$jobdir/client-$proto-$num-$iter-log.txt
-    slogfile=$jobdir/server-$proto-$num-$iter-log.txt
-
     saddress="${proto}://${host1_ip}:%d"
     caddress="${proto}://${host2_ip}:%d"
 
-    # Start the server
-    message "Starting server (Instances: $num, Address spec: $saddress)."
-    do_mpirun 1 1 "" $host1 \
-        "$runner -c 100000 -l 1 -m s -q -r $iter $num $saddress" "$slogfile" &
+    # generate log file names (maybe they should be passed in?)
+    if [ ! -d $jobdir/$proto ]; then
+        mkdir -p $jobdir/$proto
+    fi
+    if [ x$bulksz != x ]; then
+        clogfile=$jobdir/$proto/bcli-$proto-$num-$bulksz-$limit-$iter-log.txt
+        slogfile=$jobdir/$proto/bsrv-$proto-$num-$bulksz-$limit-$iter-log.txt
+    else
+        clogfile=$jobdir/$proto/ncli-$proto-$num-$reqsz-$limit-$iter-log.txt
+        slogfile=$jobdir/$proto/nsrv-$proto-$num-$reqsz-$limit-$iter-log.txt
+    fi
 
-    server_pid=$!
+    # build command line
+    cmd="$runner -c ${nrpcs} -l $limit -q -r $iter -t ${timeo}"
+    if [ x$bulksz != x ]; then
+        cmd="$cmd -S $bulksz -L $bulksz"
+    fi
+    if [ x$reqsz != x ]; then
+        cmd="$cmd -i $reqsz"
+    fi
+
+    srvr_cmd="$cmd -m s $num $saddress"
+    clnt_cmd="$cmd -m c $num $caddress $saddress"
+
+    # start the server
+    message "Starting server (Instances: $num, Address spec: $saddress)."
+    if [ $dryrun = 1 ]; then
+        message "DRY RUN SERVER @ $host1 -> $srvr_cmd"
+    else
+        do_mpirun 1 1 "" $host1 "$srvr_cmd" "$slogfile" &
+        server_pid=$!
+    fi
+
 
     # Start the client
     message "Starting client (Instances: $num, Address spec: $caddress)."
     message "Please be patient while the test is in progress..."
-    do_mpirun 1 1 "" $host2 \
-        "$runner -c 100000 -l 1 -m c -q -r $iter $num $caddress $saddress" \
-        "$clogfile"
+    if [ $dryrun = 1 ]; then
+        message "DRY RUN CLIENT @ $host2 -> $clnt_cmd"
+    else
+        do_mpirun 1 1 "" $host2 "$clnt_cmd" "$clogfile"
+    fi
 
     # Collect return codes
-    client_ret=$?
-    wait $server_pid
-    server_ret=$?
+    if [ x$dryrun != x ]; then
+        client_ret=0      # fake return values
+        server_ret=0
+    else
+        client_ret=$?
+        wait $server_pid
+        server_ret=$?
+    fi
 
     if [[ $client_ret != 0 || $server_ret != 0 ]]; then
         if [ $client_ret != 0 ]; then
@@ -96,19 +167,115 @@ run_one() {
     else
         message "Test completed successfully."
     fi
+
+    now=`date`
+    message "Finished at ${now}"
 }
 
-for proto in ${protos[@]}; do
-    for num in ${instances[@]}; do
-        # BMI doesn't do well with >1 instances, so avoid those tests
-        if [[ $proto == "bmi+tcp" && $num -gt 1 ]]; then
-            continue;
-        fi
+# keep track of start time so we can see how long this takes
+timein=`date`
 
-        i=1
-        while [ $i -le $repeats ]; do
-            run_one $proto $num $i
-            i=$((i + 1))
+# do normal test first
+now=`date`
+message "Starting normal tests: ${now}"
+for proto in ${n_protos[@]}; do
+    for num in ${instances[@]}; do
+        for sz in ${n_sizes[@]}; do
+            for lm in ${n_limits[@]}; do
+
+                if [[ $proto == "bmi+tcp" && $num -gt 1 ]]; then
+                    continue;  # BMI doesn't do well with >1 instances
+                fi
+
+                i=1
+                while [ $i -le $n_repeats ]; do
+                    run_one $proto $num $sz "" $lm $i $n_nrpcs \
+                            $n_repeats $n_timeout
+                    i=$((i + 1))
+                done
+
+            done
         done
     done
 done
+now=`date`
+message "DONE normal tests: ${now}"
+
+message "Generate result files"
+for proto in ${n_protos[@]}; do
+    for num in ${instances[@]}; do
+        for sz in ${n_sizes[@]}; do
+            cat ${jobdir}/${proto}/ncli-${proto}-${num}-${sz}-* \
+                ${jobdir}/${proto}/nsrv-${proto}-${num}-${sz}-* | \
+                ${dfsu_prefix}/scripts/process_runner.pl > \
+                ${jobdir}/norm-${proto}-${num}-${sz}.result
+            if [ ! -s ${jobdir}/norm-${proto}-${num}-${sz}.result ]; then
+                message "NO RESULTS: ${jobdir}/norm-${proto}-${num}-${sz}"
+                rm -f ${jobdir}/norm-${proto}-${num}-${sz}.result
+            fi
+        done
+    done
+done
+message "DONE generate result files"
+
+
+# do bulk test next
+now=`date`
+message "Starting bulk tests: ${now}"
+for proto in ${b_protos[@]}; do
+    for num in ${instances[@]}; do
+        for sz in ${b_Sizes[@]}; do
+            for lm in ${b_limits[@]}; do
+
+                if [[ $proto == "bmi+tcp" && $num -gt 1 ]]; then
+                    continue;  # BMI doesn't do well with >1 instances
+                fi
+
+                i=1
+                while [ $i -le $b_repeats ]; do
+                    run_one $proto $num "" $sz $lm $i $b_nrpcs \
+                            $b_repeats $b_timeout
+                    i=$((i + 1))
+                done
+
+            done
+        done
+    done
+done
+now=`date`
+message "DONE bulk tests: ${now}"
+
+message "Generate result files"
+for proto in ${b_protos[@]}; do
+    for num in ${instances[@]}; do
+        for sz in ${b_Sizes[@]}; do
+            cat ${jobdir}/${proto}/bcli-${proto}-${num}-${sz}-* \
+                ${jobdir}/${proto}/bsrv-${proto}-${num}-${sz}-* | \
+                ${dfsu_prefix}/scripts/process_runner.pl > \
+                ${jobdir}/bulk-${proto}-${num}-${sz}.result
+            if [ ! -s ${jobdir}/bulk-${proto}-${num}-${sz}.result ]; then
+                message "NO RESULTS: ${jobdir}/bulk-${proto}-${num}-${sz}"
+                rm -f ${jobdir}/bulk-${proto}-${num}-${sz}.result
+            fi
+        done
+    done
+done
+message "DONE generate result files"
+
+message "Listing results ..."
+for result in $jobdir/*.result; do
+    message ""
+    message "$result"
+    cat $result | tee -a $logfile
+    message ""
+    message "----------"
+done
+message "DONE listing results"
+
+# overall time
+timeout=`date`
+message "Script complete."
+message "start: ${timein}"
+message "  end: ${timeout}"
+
+exit 0
