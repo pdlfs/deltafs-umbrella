@@ -218,15 +218,15 @@ do_mpirun() {
         fi
 
         if [ $ppnode -gt 0 ]; then
-            die "MPICH does not support a fixed number of processes per node"
+            npstr="-ppn $ppnode"
         fi
 
         if [ ! -z "$hosts" ]; then
             hstr="--host $hosts"
         fi
 
-        message "mpirun.mpich -np $procs $hstr $envstr $EXTRA_MPIOPTS $exe"
-        mpirun.mpich -np $procs $hstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a $outfile
+        message "mpirun.mpich -np $procs $npstr $hstr $envstr $EXTRA_MPIOPTS $exe"
+        mpirun.mpich -np $procs $npstr $hstr $envstr $EXTRA_MPIOPTS $exe 2>&1 | tee -a $outfile
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
