@@ -66,7 +66,9 @@ host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 do_mpirun 1 1 "" $host1 "hostname -I" "$jobdir/host1-ips.txt"
 do_mpirun 1 1 "" $host2 "hostname -I" "$jobdir/host2-ips.txt"
 host1_ip=$(cat $jobdir/host1-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
+if [ -z $host1_ip ]; then die "wrong subnet"; fi
 host2_ip=$(cat $jobdir/host2-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
+if [ -z $host2_ip ]; then die "wrong subnet"; fi
 message "Host 1: hostname = $host1, ip = $host1_ip"
 message "Host 2: hostname = $host2, ip = $host2_ip"
 
