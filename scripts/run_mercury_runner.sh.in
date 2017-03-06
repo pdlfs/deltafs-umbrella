@@ -52,7 +52,7 @@ logfile=$jobdir/mercury-runner.log
 runner="${dfsu_prefix}/bin/mercury-runner"
 
 touch $logfile
-message "Output is available in $jobdir"
+message "== Output is available in $jobdir"
 
 # get our two hostnames
 host1=$(echo "$all_nodes" | sort | head -n 1)
@@ -103,7 +103,7 @@ run_one() {
     message "====================================================="
     message "Starting new test at: ${now}"
     message "Testing protocol '$proto' with $num Mercury instances"
-    message "reqsz=$reqsz, bulksz=$bulksz, limit=$limit, nrpcs=$nrpcs"
+    message "reqsz=${reqsz:-'n/a'}, bulksz=${bulksz:-'n/a'}, limit=$limit, nrpcs=$nrpcs"
     message "Iteration $iter out of $repeats"
     message "====================================================="
     message ""
@@ -184,7 +184,7 @@ timein=`date`
 
 # do normal test first
 now=`date`
-message "Starting normal tests: ${now}"
+message "== Starting normal tests: ${now}"
 for proto in ${n_protos[@]}; do
     for num in ${instances[@]}; do
         for sz in ${n_sizes[@]}; do
@@ -217,7 +217,7 @@ for proto in ${n_protos[@]}; do
                 ${dfsu_prefix}/scripts/process_runner.pl > \
                 ${jobdir}/norm-${proto}-${num}-${sz}.result
             if [ ! -s ${jobdir}/norm-${proto}-${num}-${sz}.result ]; then
-                message "NO RESULTS: ${jobdir}/norm-${proto}-${num}-${sz}"
+                message "!!! WARN !!! NO RESULTS: ${jobdir}/norm-${proto}-${num}-${sz}"
                 rm -f ${jobdir}/norm-${proto}-${num}-${sz}.result
             fi
         done
@@ -228,7 +228,7 @@ message "DONE generate result files"
 
 # do bulk test next
 now=`date`
-message "Starting bulk tests: ${now}"
+message "== Starting bulk tests: ${now}"
 for proto in ${b_protos[@]}; do
     for num in ${instances[@]}; do
         for sz in ${b_Sizes[@]}; do
@@ -261,7 +261,7 @@ for proto in ${b_protos[@]}; do
                 ${dfsu_prefix}/scripts/process_runner.pl > \
                 ${jobdir}/bulk-${proto}-${num}-${sz}.result
             if [ ! -s ${jobdir}/bulk-${proto}-${num}-${sz}.result ]; then
-                message "NO RESULTS: ${jobdir}/bulk-${proto}-${num}-${sz}"
+                message "!!! WARN !!! NO RESULTS: ${jobdir}/bulk-${proto}-${num}-${sz}"
                 rm -f ${jobdir}/bulk-${proto}-${num}-${sz}.result
             fi
         done
@@ -269,7 +269,7 @@ for proto in ${b_protos[@]}; do
 done
 message "DONE generate result files"
 
-message "Listing results ..."
+message "== Listing results ..."
 for result in $jobdir/*.result; do
     message ""
     message "$result"
