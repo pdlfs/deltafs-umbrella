@@ -14,10 +14,10 @@
 ######################
 subnet="11.128"      # trinity / trinitite
 
-subset="10.53"       # susitna - fge0
+subnet="10.53"       # susitna - fge0
 subnet="10.51"       # susitna - eth0
-subset="10.93"       # narwhal - eth1
-subset="10.92"       # narwhal - eth0
+subnet="10.93"       # narwhal - eth1
+subnet="10.92"       # narwhal - eth0
 
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
@@ -60,7 +60,7 @@ host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 
 #
 # convert hostnames to IPs using hostname -I on remote nodes
-# and put results in host*-ip.txt in $jobdir, load into 
+# and put results in host*-ips.txt in $jobdir, load into
 # host1_ip and host2_ip, also taking $subnet into consideration
 #
 do_mpirun 1 1 "" $host1 "hostname -I" "$jobdir/host1-ips.txt"
