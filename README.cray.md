@@ -36,7 +36,7 @@ First, let's set cray link type to dynamic (required to compile deltafs)
 export CRAYPE_LINK_TYPE="dynamic"
 ```
 If `CRAYOS_VERSION` is not in the env, we have to explicitly set it.
-On Nersc `Edison`, `CRAYOS_VERSION` is pre-set by the Cray system. On Nersc `Cori`, which has a newer version of Cray, it is not set.
+On **Nersc Edison**, `CRAYOS_VERSION` is pre-set by the Cray system. On **Nersc Cori**, which has a newer version of Cray, it is not set.
 ```
 export CRAYOS_VERSION=6
 ```
@@ -58,9 +58,9 @@ module load cmake  # at least v3.x
 
 Assuming `$INSTALL` is a global file system location that is accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`, and to install everything under `$INSTALL/deltafs`.
 
-**After installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.**
+*Note that after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.*
 
-**Do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.**
+*Note that do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.*
 ```
 #
 # $INSTALL/deltafs
@@ -105,9 +105,24 @@ CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DVERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/d
 
 make
 ```
-**After installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.**
+*Note that after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.*
 
-**Do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.**
+*Note that do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.*
+
+## Mercury test
+
+The following scripts are involved in our mercury test. Note that you can find all our scripts in the install directory. Do not use the scripts in the build directory.
+```
+# $INSTALL/deltafs
+#  -- bin
+#  -- decks (vpic input decks)
+#  -- include
+#  -- lib
+#  -- scripts
+#      -- common.sh
+#      -- run_mercury_runner.sh
+#
+```
 
 ## Shuffle test
 
@@ -151,8 +166,6 @@ If you set `JOBDIRHOME` to `/lustre/ttscratch1/users/$USER`, our script will aut
 
 One last thing, go to `common.sh` Line 210ish, add `-cc numa_node` as an additional option to `aprun`. We think this will ask aprun to bind each process to a speicifc CPU socket.
 
-OK.
-
 Time to submit the job to the batch system.
 
 After the job is done, in `${JOBDIRHOME}/${MOAB_JOBNAME}.${PBS_JOBID}`, there will be a set of result directories like:
@@ -180,20 +193,5 @@ Two files are important: *shuffle_test_P960K_C32_N8.log* and *vpic-deltafs-mon-r
 We hope you can send these two files back to us ^_^
 
 This concludes the shuffle test.
-
-## Mercury test
-
-The following scripts are involved in our mercury test. Note that you can find all our scripts in the install directory. Do not use the scripts in the build directory.
-```
-# $INSTALL/deltafs
-#  -- bin
-#  -- decks (vpic input decks)
-#  -- include
-#  -- lib
-#  -- scripts
-#      -- common.sh
-#      -- run_mercury_runner.sh
-#
-```
 
 Thanks for trying deltafs :-)
