@@ -51,7 +51,6 @@ gen_hosts
 
 min_cores=1
 max_cores=$((nodes * cores_per_node))
-max_cores=1
 
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
@@ -64,7 +63,7 @@ bb_server="${dfsu_prefix}/bin/bbos_server"
 cores=$min_cores
 while [ $cores -le $max_cores ]
 do
-    px=$((cores * 30))
+    px=$((cores * 8)) # x 30
     py=$((10**4))
     parts=$((px * py * 100))
     bb_clients=$cores
