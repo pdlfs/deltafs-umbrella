@@ -1,30 +1,14 @@
 #!/bin/bash -eu
-#
-#MSUB -N deltafs-shuffle
-#MSUB -l walltime=1:00:00
-#MSUB -l nodes=4:haswell
-#MSUB -o /users/$USER/joblogs/deltafs-shuffle-$MOAB_JOBID.out
-#MSUB -j oe
-##MSUB -V
-##MSUB -m b
-##MSUB -m $USER@lanl.gov
 
 ######################
 # Tunable parameters #
 ######################
 
-# Notes:
-# ------
-#
-# nodes: Use a power of two to get better particle numbers.
-
-# Node topology
-cores_per_node=4
-nodes=16
-
-# DeltaFS config
-ip_subnet="10.92"
-
+ip_subnet=${1:-"10.92"}
+nodes=${2:-"16"}
+cores_per_node=${3:-"4"}
+init_procs_per_node=${4:-"1"}
+procs_per_node_increase_step=${5:-"4"}
 
 ###############
 # Core script #
@@ -38,7 +22,7 @@ bbos_buddies=0
 get_jobdir
 gen_hosts
 
-procs_per_node=1
+procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
 do
     cores=$((procs_per_node * nodes))
@@ -50,8 +34,10 @@ do
     do_run "shuffle_test" $parts $procs_per_node
 
     if [ $procs_per_node -eq 1 ]; then
-        procs_per_node=4
+        procs_per_node=$procs_per_node_increase_step
     else
-        procs_per_node=$(( procs_per_node + 4 ))
+        procs_per_node=$(( procs_per_node + procs_per_node_increase_step ))
     fi
 done
+
+exit 0
