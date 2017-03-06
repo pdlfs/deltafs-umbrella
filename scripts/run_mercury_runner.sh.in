@@ -12,13 +12,12 @@
 ######################
 # Tunable parameters #
 ######################
-subnet="11.128" # tt
+subnet="11.128"      # trinity / trinitite
 
-subset="10.53" # ss fge0
-subnet="10.51" # ss eth0
-
-subset="10.93" # nw eth1
-subset="10.92" # nw eth0
+subset="10.53"       # susitna - fge0
+subnet="10.51"       # susitna - eth0
+subset="10.93"       # narwhal - eth1
+subset="10.92"       # narwhal - eth0
 
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
@@ -64,10 +63,10 @@ host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 # and put results in host*-ip.txt in $jobdir, load into 
 # host1_ip and host2_ip, also taking $subnet into consideration
 #
-do_mpirun 1 1 "" $host1 "hostname -I | tr ' ' '\n'" "$jobdir/host1-ip.txt"
-do_mpirun 1 1 "" $host2 "hostname -I | tr ' ' '\n'" "$jobdir/host2-ip.txt"
-host1_ip=$(cat $jobdir/host1-ip.txt | grep $subnet | head -1)
-host2_ip=$(cat $jobdir/host2-ip.txt | grep $subnet | head -1)
+do_mpirun 1 1 "" $host1 "hostname -I" "$jobdir/host1-ips.txt"
+do_mpirun 1 1 "" $host2 "hostname -I" "$jobdir/host2-ips.txt"
+host1_ip=$(cat $jobdir/host1-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
+host2_ip=$(cat $jobdir/host2-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
 message "Host 1: hostname = $host1, ip = $host1_ip"
 message "Host 2: hostname = $host2, ip = $host2_ip"
 
