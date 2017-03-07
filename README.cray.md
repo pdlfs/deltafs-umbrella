@@ -130,9 +130,9 @@ The following scripts are involved in our mercury runner test.
 ```
 **NOTE**: do not call `run_mercury_runner.sh` directly. Instead, call the `lanl_do_mercury_runner.sh` wrapper script.
 
-To do that, open `lanl_do_mercury_runner`, check the subnet option and modify it to match your network settings.
+To do that, open `lanl_do_mercury_runner.sh`, check the **subnet** option and modify it to match your network settings.
 
-Next, set env `JOBDIRHOME` to a place that will hold all job output, and `EXTRA_MPIOPTS` as extra `aprun` options.
+Next, set env `JOBDIRHOME` to a place that will hold all job output, and env `EXTRA_MPIOPTS` as extra `aprun` options.
 ```
 export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
 export EXTRA_MPIOPTS="-cc cpu"
