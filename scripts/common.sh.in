@@ -14,7 +14,7 @@
 #  $cores - cores per node (?)
 #  $dfsu_prefix - deltafs umbrella prefix directory
 #  $ip_subnet - the ip subnet we want to use
-#  $jobdir - per-job shared output directory 
+#  $jobdir - per-job shared output directory
 #  $logfile - job's logfile we append to
 #  $nodes - number of nodes for vpic
 #  $vpic_nodes - list of nodes for vpic
@@ -250,7 +250,7 @@ do_mpirun() {
 }
 
 #
-# build_deck: build a vpic deck by copying the deck template to the jobdir, 
+# build_deck: build a vpic deck by copying the deck template to the jobdir,
 # adjusting config.h, and then compiling it using the vpic-build.op script.
 # the result is placed in $jobdir/current-deck.op (XXX: assume you are only
 # going to have one compiled deck at a time).
@@ -272,7 +272,7 @@ build_deck() {
     cp -r ${dfsu_prefix}/decks ${ddir}
     mv ${ddir}/trecon-part/config.h ${ddir}/trecon-part/config.bkp || \
 		die "mv failed"
-    
+
     case $1 in
     "file-per-process")
         cat ${ddir}/trecon-part/config.bkp | \
@@ -386,9 +386,11 @@ do_run() {
             container_dir=$exp_dir/bbos/containers.$n
             do_mpirun 1 0 "" "" "mkdir -p $container_dir" "$logfile"
 
-            env_vars=("BB_Server_IP_address" "$s"
-                      "BB_Output_dir" "$container_dir"
-                      "BB_Server_port" "19900")
+            env_vars=("BB_Lustre_chunk_size" "$pchunk"
+                      "BB_Mercury_transfer_size" "$hgchunk" "BB_Num_workers" "4"
+                      "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
+                      "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"
+                      "$((2**28))")
             do_mpirun 1 0 env_vars[@] "$s" \
                       "${dfsu_prefix}/bin/bbos_server" "$logfile" &
 
@@ -400,22 +402,41 @@ do_run() {
         sleep 5
 
         c=1
+        j=1
+        p=1
+        num_clts=$((num_bbos_client_nodes / num_bbos_server_nodes))
         all_clients=$(echo $vpic_nodes | tr ',' '\n')
         num_clts_per_svr=$((nodes / bbos_buddies))
         for s in $bb_server_list; do
           # Generate string of comma-separated client hostnames for aprun
-          clts=$(echo -e $all_clients | head -n $(($c*$bbos_buddies)) | \
-                tail -n $num_clts_per_svr)
-          clts=$(echo -e "$clts" | tr ' ' ',')
+          filter=$(seq -s, $j $((c * num_clts)))
+          j=$(((c * num_clts) + 1))
+          clts=$(echo $bbos_client_nodes | cut -d ' ' --fields $filter | tr ' ' ',' )
+          echo "======== $clts bound to server $c ========="
 
           # one aprun for set of clients bound to one server
-          env_vars=("BB_Server_port" "19900" 
-                    "BB_Server_IP_address" "$s"
-                    "BB_Object_size" "$bb_log_size" 
-                    "BB_Mercury_transfer_size" "$((2**21))")
-          do_mpirun $num_clts_per_svr 0 env_vars[@] "$clts" \
-                    "${dfsu_prefix}/bin/bbos_client" "$logfile" &
-          client_pids[$c]=$! # so that we can wait for clients to finish
+          for (( core = 0; core < num_cores; core++ )); do
+            env_vars=("BB_Mercury_transfer_size" "$hgchunk"
+            "BB_Object_size" "$((2**32))" "BB_Server_IP_address" "$svr"
+            "BB_Core_num" "$core")
+            start_clients "$clts" "$env_vars" $num_clts
+            client_pids[$p]=$! # so that we can wait for clients to finish
+            p=$((p+1))
+          done
+
+          # Generate string of comma-separated client hostnames for aprun
+          # clts=$(echo -e $all_clients | head -n $(($c*$bbos_buddies)) | \
+          #       tail -n $num_clts_per_svr)
+          # clts=$(echo -e "$clts" | tr ' ' ',')
+          #
+          # # one aprun for set of clients bound to one server
+          # env_vars=("BB_Server_port" "19900"
+          #           "BB_Server_IP_address" "$s"
+          #           "BB_Object_size" "$bb_log_size"
+          #           "BB_Mercury_transfer_size" "$((2**21))")
+          # do_mpirun $num_clts_per_svr 0 env_vars[@] "$clts" \
+          #           "${dfsu_prefix}/bin/bbos_client" "$logfile" &
+          # client_pids[$c]=$! # so that we can wait for clients to finish
           c=$((c+1))
         done
 
@@ -532,4 +553,3 @@ query_particles() {
         n=$((n + 1))
     done
 }
-
