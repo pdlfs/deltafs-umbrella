@@ -15,11 +15,12 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 * deltafs dependencies
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
   * ssg (https://xgitlab.cels.anl.gov/sds/ssg.git)
-  * mercury rpc (https://github.com/mercury-hpc/mercury.git)
-  * cci (http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz)
+  * mercury-rpc (https://github.com/mercury-hpc/mercury.git)
+  * cci (https://github.com/CCI/cci.git)
   * bmi (http://git.mcs.anl.gov/bmi.git)
 * deltafs
   * deltafs (https://github.com/pdlfs/deltafs.git)
+  * deltafs-bb (https://github.com/pdlfs/deltafs-bb.git)
 * vpic
   * deltafs-vpic-preload (https://github.com/pdlfs/deltafs-vpic-preload.git)
   * vpic (https://github.com/pdlfs/vpic.git)
@@ -28,11 +29,10 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 
 A recent CXX compiler with standard building tools including make, cmake (used by deltafs), and automake (used by some of our dependencies), as well as a few other common library packages including libboost (used by mercury rpc) and libltdl (used by cci).
 
-On Ubuntu 16.04.1, these requirements could be obtained by:
+On Ubuntu 16.04.2, these requirements could be obtained by:
 
 ```
-sudo apt-get update  # Optional, but recommended
-
+sudo apt-get update  # Optional, though highly recommended
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
 sudo apt-get install libboost-dev libltdl-dev libopenmpi-dev
