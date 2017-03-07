@@ -131,7 +131,7 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
                 "BB_Mercury_transfer_size" "$hgchunk" "BB_Num_workers" "4"
                 "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
                 "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"
-                "$((2**28))")
+                "$((2**28))" "BB_Binpacking_threshold" "$((2**33))")
       start_server "$svr" "$env_vars"
     done
     sleep 3
