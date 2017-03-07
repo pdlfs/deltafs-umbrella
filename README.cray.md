@@ -1,4 +1,4 @@
-*// This file is written for collaborators that are willing to run experiments using deltafs on Cray systems.*
+**This file is written for our fine collaborators that are kind enough to experiment with deltafs on their Cray systems.**
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
@@ -6,15 +6,15 @@
 
 Download, build, and install deltafs, deltafs friends, and their dependencies in a single highly-automated step.
 
-## Installation
+## INSTALLATION
 
-This guide assumes a Linux Cray.
+This guide is assuming a Linux Cray.
 
 ### Step-0: Prepare git-lfs
 
 First, we need to get a latest `git-lfs` release from github.com.
 
-*Note that The latest release version may be higher than 2.0.0.*
+**NOTE**: the latest release version may be higher than 2.0.0.
 ```
 wget https://github.com/git-lfs/git-lfs/releases/download/v2.0.0/git-lfs-linux-amd64-2.0.0.tar.gz
 tar xzf git-lfs-linux-amd64-2.0.0.tar.gz -C .
@@ -36,7 +36,7 @@ First, let's set cray link type to dynamic (required to compile deltafs)
 export CRAYPE_LINK_TYPE="dynamic"
 ```
 If `CRAYOS_VERSION` is not in the env, we have to explicitly set it.
-On **Nersc Edison**, `CRAYOS_VERSION` is pre-set by the Cray system. On **Nersc Cori**, which has a newer version of Cray, it is not set.
+On Nersc Edison, `CRAYOS_VERSION` is pre-set by the Cray system. On Nersc Cori, which has a newer version of Cray, it is not set.
 ```
 export CRAYOS_VERSION=6
 ```
@@ -58,9 +58,9 @@ module load cmake  # at least v3.x
 
 Assuming `$INSTALL` is a global file system location that is accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`, and to install everything under `$INSTALL/deltafs`.
 
-*Note that after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.*
+**NOTE**: after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.
 
-*Note that do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.*
+**NOTE**: do not rename the install dir after installation is done. If the current install location is bad, simply remove the install dir and reinstall deltafs to a new place.
 ```
 #
 # $INSTALL/deltafs
@@ -93,6 +93,8 @@ ln -fs ../cache.0/* .
 cd ..
 ```
 Now, kick-off the cmake auto-building process:
+
+**NOTE**: set `-DVERBS=ON` to enable `cci-ibverbs`.
 ```
 mkdir build
 cd build
@@ -105,13 +107,15 @@ CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DVERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/d
 
 make
 ```
-*Note that after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.*
+**NOTE**: after installation, the build dir `$HOME/deltafs/src` is no longer needed and can be safely discarded. `$INSTALL/deltafs` is going to be the only thing we need for running deltafs experiments.
 
-*Note that do not move install directory after installation is done. If the current install location is bad, remove the install directiry and reinstall deltafs to a new place.*
+**NOTE**: do not rename the install dir after installation is done. If the current install location is bad, simply remove the install dir and reinstall deltafs to a new place.
 
-## Mercury test
+## MERCURY RUNNER
 
-The following scripts are involved in our mercury test. Note that you can find all our scripts in the install directory. Do not use the scripts in the build directory.
+The following scripts are involved in our mercury runner test.
+
+**NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
 # $INSTALL/deltafs
 #  -- bin
@@ -120,11 +124,47 @@ The following scripts are involved in our mercury test. Note that you can find a
 #  -- lib
 #  -- scripts
 #      -- common.sh
+#      -- lanl_do_mercury_runner.sh
 #      -- run_mercury_runner.sh
-#
+#  -- share
+```
+**NOTE**: do not call `run_mercury_runner.sh` directly. Instead, call the `lanl_do_mercury_runner.sh` wrapper script.
+
+To do that, open `lanl_do_mercury_runner.sh`, check the **subnet** option and modify it to match your network settings.
+
+Next, set env `JOBDIRHOME` to a place that will hold all job output, and env `EXTRA_MPIOPTS` as extra `aprun` options.
+```
+export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
+export EXTRA_MPIOPTS="-cc cpu"
 ```
 
-## Shuffle test
+**NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
+
+Time to submit the job to the batch system !!
+
+Our job requires **2 compute nodes** to run, consists of a series of small mercury-testing tasks, and the entire job is expected to run for **2 hours**.
+
+After the job completes, the main script will parse the outputs generated by individual tests and list results on stdout, which looks like:
+```
+----------
+
+/users/qingzhen/jobs/run_mercury_runner.sh.7890/norm-bmi+tcp-1-64.result
+bmi   1 0.000107 sec per op, cli/srv sys time 4.276000 / 2.210000 sec, r=2
+bmi   8 0.000042 sec per op, cli/srv sys time 4.676000 / 1.626000 sec, r=2
+bmi  16 0.000043 sec per op, cli/srv sys time 4.666000 / 1.604000 sec, r=2
+
+----------
+
+/users/qingzhen/jobs/run_mercury_runner.sh.7890/norm-cci+tcp-1-64.result
+cci   1 0.000117 sec per op, cli/srv sys time 17.988000 / 16.812000 sec, r=2
+cci   8 0.000062 sec per op, cli/srv sys time 14.998000 / 13.218000 sec, r=2
+cci  16 0.000063 sec per op, cli/srv sys time 15.134000 / 13.526000 sec, r=2
+
+```
+
+Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/mercury-runner.log`.
+
+## SHUFFLE TEST [under construction]
 
 The following scripts are involved in our shuffle test. Note that you can find all our scripts in the install directory. Do not use the scripts in the build directory.
 ```
@@ -193,5 +233,7 @@ Two files are important: *shuffle_test_P960K_C32_N8.log* and *vpic-deltafs-mon-r
 We hope you can send these two files back to us ^_^
 
 This concludes the shuffle test.
+
+## END
 
 Thanks for trying deltafs :-)
