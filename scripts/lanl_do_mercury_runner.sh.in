@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 #
 #MSUB -N mercury-runner
-#MSUB -l walltime=1:30:00
+#MSUB -l walltime=2:00:00
 #MSUB -l nodes=2:haswell
 #MSUB -o /users/$USER/joblogs/mercury-runner-$MOAB_JOBID.out
 #MSUB -j oe

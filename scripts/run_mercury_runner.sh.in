@@ -15,7 +15,7 @@ subnet=${1:-"10.92"}
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
 n_sizes=(64 1024 4096)                          # RPC snd size ("-i" flag)
-n_limits=(1 8 16)                               # outstanding RPCs ("-l" flag)
+n_limits=(1 2 4 8 16)                           # outstanding RPCs ("-l" flag)
 n_repeats=2                                     # repeat runs
 n_nrpcs=100000                                  # nrpcs in 1 run ("-c" flag)
 n_timeout=120                                   # timeout  ("-t" flag)
@@ -23,7 +23,7 @@ n_timeout=120                                   # timeout  ("-t" flag)
 # "b" - bulk read run: RPC, vary bulk read size and limit
 b_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
 b_Sizes=(2m)                                    # bulk sizes ("-S" flag)
-b_limits=(1 8 16)                               # outstanding RPCs ("-l" flag)
+b_limits=(1 2)                                  # outstanding RPCs ("-l" flag)
 b_repeats=2                                     # repeat runs
 b_nrpcs=10000                                   # nrpcs in 1 run ("-c" flag)
 b_timeout=300                                   # timeout  ("-t" flag)
