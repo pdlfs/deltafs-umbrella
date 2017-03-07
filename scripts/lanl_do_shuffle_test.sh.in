@@ -1,0 +1,25 @@
+#!/bin/bash -eu
+#
+#MSUB -N deltafs-shuffle
+#MSUB -l walltime=1:00:00
+#MSUB -l nodes=4:haswell
+#MSUB -o /users/$USER/joblogs/deltafs-shuffle-$MOAB_JOBID.out
+#MSUB -j oe
+##MSUB -V
+##MSUB -m b
+##MSUB -m $USER@lanl.gov
+
+ip_subnet="11.128"
+nodes=16
+cores_per_node=32
+init_procs_per_node=8
+procs_per_node_increase_step=8
+
+@CMAKE_INSTALL_PREFIX@/scripts/run_shuffle_test.sh \
+    $ip_subnet \
+    $nodes \
+    $cores_per_node \
+    $init_procs_per_node \
+    $procs_per_node_increase_step
+
+exit 0

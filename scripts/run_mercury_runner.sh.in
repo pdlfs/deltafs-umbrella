@@ -1,37 +1,30 @@
 #!/bin/bash -eu
-#
-#MSUB -N mercury-runner
-#MSUB -l walltime=0:15:00
-#MSUB -l nodes=2:haswell
-#MSUB -o /users/$USER/joblogs/mercury-runner-$MOAB_JOBID.out
-#MSUB -j oe
-##MSUB -V
-##MSUB -m b
-##MSUB -m $USER@lanl.gov
 
 ######################
 # Tunable parameters #
 ######################
-subnet="11.128"      # trinity / trinitite
+subnet=${1:-"10.92"}
 
-subnet="10.53"       # susitna - fge0
-subnet="10.51"       # susitna - eth0
-subnet="10.93"       # narwhal - eth1
-subnet="10.92"       # narwhal - eth0
+## subnet="11.128"      # trinity / trinitite
+
+## subnet="10.53"       # susitna - fge0
+## subnet="10.51"       # susitna - eth0
+## subnet="10.93"       # narwhal - eth1
+## subnet="10.92"       # narwhal - eth0
 
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
-n_sizes=(64 512 1024 4096)                      # RPC snd size ("-i" flag)
-n_limits=(1 2 4 8)                              # outstanding RPCs ("-l" flag)
-n_repeats=3                                     # repeat runs
+n_sizes=(64 1024 4096)                          # RPC snd size ("-i" flag)
+n_limits=(1 2 4 8 16)                           # outstanding RPCs ("-l" flag)
+n_repeats=2                                     # repeat runs
 n_nrpcs=100000                                  # nrpcs in 1 run ("-c" flag)
 n_timeout=120                                   # timeout  ("-t" flag)
 
 # "b" - bulk read run: RPC, vary bulk read size and limit
 b_protos=("bmi+tcp" "cci+tcp" "cci+verbs")      # protocols to test
 b_Sizes=(2m)                                    # bulk sizes ("-S" flag)
-b_limits=(1 2 4 8)                              # outstanding RPCs ("-l" flag)
-b_repeats=3                                     # repeat runs
+b_limits=(1 2)                                  # outstanding RPCs ("-l" flag)
+b_repeats=2                                     # repeat runs
 b_nrpcs=10000                                   # nrpcs in 1 run ("-c" flag)
 b_timeout=300                                   # timeout  ("-t" flag)
 
