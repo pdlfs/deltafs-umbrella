@@ -22,6 +22,9 @@ bbos_buddies=0
 get_jobdir
 gen_hosts
 
+# keep track of start time so we can see how long this takes
+timein=`date`
+
 procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
 do
@@ -39,5 +42,11 @@ do
         procs_per_node=$(( procs_per_node + procs_per_node_increase_step ))
     fi
 done
+
+# overall time
+timeout=`date`
+message "Script complete."
+message "start: ${timein}"
+message "  end: ${timeout}"
 
 exit 0
