@@ -1,4 +1,4 @@
-**This file is written for collaborators that are willing to run experiments using deltafs on Cray systems.**
+**This file is written for our fine collaborators that are kind enough to experiment with deltafs on their Cray systems.**
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
@@ -231,5 +231,7 @@ Two files are important: *shuffle_test_P960K_C32_N8.log* and *vpic-deltafs-mon-r
 We hope you can send these two files back to us ^_^
 
 This concludes the shuffle test.
+
+## END
 
 Thanks for trying deltafs :-)
