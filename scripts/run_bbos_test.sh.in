@@ -92,7 +92,7 @@ message "Clients: $bbos_client_nodes"
 message "Servers: $bbos_server_nodes"
 
 # Test the burst buffer
-do_mpirun 1 1 "" "" "mkdir -p $bb_dir" "$logfile"
+do_mpirun 1 1 "" "" "mkdir -p ${jobdir}/bbos" "$logfile"
 echo "Basic ls of Burst Buffer ..."
 do_mpirun 1 1 "" "" "ls -l" "$logfile"
 
@@ -123,7 +123,7 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     # SK: Because they have different initialization parameters.
     # This should be fixed when we go to env variables for initialization
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
-      container_dir=$jobdir/containers-$pchunk-$hgchunk-$svr
+      container_dir=$jobdir/bbos/containers-$pchunk-$hgchunk-$svr
       do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
 
       # SK: moved background inside start_server
