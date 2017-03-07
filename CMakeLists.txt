@@ -43,11 +43,11 @@
 # -DCXX=/bin/cxx
 #  (you can also use the long form names CMAKE_C_COMPILER/CMAKE_CXX_COMPILER)
 #
-# specifying which mpi to use wrappers by pointing at the wrappers:
-# -DMPI_C_COMPILER=mpicc
-# -DMPI_CXX_COMPILER=mpicxx
+# specifying which mpi to use by pointing at the wrappers:
+# -DMPI_C_COMPILER=/usr/bin/mpicc
+# -DMPI_CXX_COMPILER=/usr/bin/mpicxx
+# -DMPIEXEC=/usr/bin/mpiexec
 #
-
 cmake_minimum_required (VERSION 3.0)
 if(POLICY CMP0054)
     # avoid warn from CMakeDetermineCompilerABI about an "if" with ${CXX}
