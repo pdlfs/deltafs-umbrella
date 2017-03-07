@@ -25,7 +25,7 @@
 # Node topology
 cores_per_node=4
 nodes=4
-bbos_buddies=1
+bbos_buddies=2
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -44,7 +44,7 @@ cores=$((nodes * cores_per_node))
 dpoints=2
 
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
-bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
+bb_log_size=$((2 * (2**32))) # BBOS max per-core log size in bytes
 
 bb_clients=$cores
 bb_client="${dfsu_prefix}/bin/bbos_client"
