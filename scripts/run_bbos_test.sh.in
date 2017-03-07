@@ -12,8 +12,8 @@
 #
 # Tunables
 #
-num_bbos_client_nodes=1
-num_bbos_server_nodes=1
+num_bbos_client_nodes=4
+num_bbos_server_nodes=2
 num_cores=4
 
 logfile=""
@@ -107,7 +107,7 @@ for c in ${PFS_CHUNK_SIZE[@]}; do
   env_vars=("BB_Lustre_chunk_size" "$c"
             "BB_Max_container_size" "$((2**33))" "BB_Dummy_file"
             "$jobdir/\$(hostname)")
-  # test_raw_bw $bbos_server_nodes "$env_vars" $c $count $num_bbos_server_nodes
+  test_raw_bw $bbos_server_nodes "$env_vars" $c $count $num_bbos_server_nodes
   wait # have to wait
 done
 
