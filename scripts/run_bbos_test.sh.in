@@ -12,21 +12,23 @@
 #
 # Tunables
 #
-num_bbos_client_nodes=2
-num_bbos_server_nodes=1
-deltafs_dir="$SWHOME/deltafs"
-deltafs_bb_dir="/proj/TableFS/bbos/src/build/deltafs-bb-prefix/src/deltafs-bb-build/src"
-job_dir="/lustre/ttscratch1/users/$USER/$MOAB_JOBNAME.$PBS_JOBID"
-job_dir="/proj/TableFS/bbos/src/build/deltafs-bb-prefix/src/deltafs-bb"
-bb_dir="$DW_JOB_STRIPED"
-bb_dir="/panfs/probescratch/TableFS/bbos_test_1"
-output_dir=$bb_dir
-# SK: need scratch config dir for each run
-scratch_config_dir=$job_dir/scratch_config
-logfile="$job_dir/bb-test-log.txt"
-logfile="$bb_dir/bb-test-log.txt"
-ip_file="$job_dir/bb-ips.txt"
-ip_file="$bb_dir/bb-ips.txt"
+num_bbos_client_nodes=6
+num_bbos_server_nodes=3
+num_cores=2
+
+logfile=""
+source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
+
+get_jobdir
+gen_hostfile
+
+logfile=$jobdir/deltafs-bb.log
+
+touch $logfile
+
+# get client and server nodes
+bbos_client_nodes=$(echo "$all_nodes" | sort | head -n $num_bbos_client_nodes)
+bbos_server_nodes=$(echo "$all_nodes" | sort | tail -n $num_bbos_server_nodes)
 
 # Client transfer sizes we experiment with
 OBJECT_CHUNK_SIZE=($((1*(2**20))))
@@ -40,9 +42,7 @@ PFS_CHUNK_SIZE=($(( 8*(2**20))))
 #                $((32*(2**20)))
 #                $((64*(2**20)))) # 8-64 MB
 
-message () { echo "$@" | tee -a $logfile; }
-
-source ./common.sh
+# message () { echo "$@" | tee -a $logfile; }
 
 test_raw_bw() {
   svrs=$1
@@ -50,7 +50,7 @@ test_raw_bw() {
   blocksize=$3
   count=$4
   num_servers=$5
-  exe=$deltafs_bb_dir/eval_bb
+  exe=@CMAKE_INSTALL_PREFIX@/bin/eval_bb
 
   message "RAW dd throughput: servers=$svrs bs=$blocksize count=$count"
   do_mpirun $num_servers 1 env_vars[@] "$svrs" "$exe" "$logfile"
@@ -62,7 +62,7 @@ test_raw_bw() {
 start_server() {
   svr_name=$1
   env_vars=$2
-  exe=$deltafs_bb_dir/bbos_server
+  exe=@CMAKE_INSTALL_PREFIX@/bin/bbos_server
 
   message "Starting Server: server=$svr_name"
   do_mpirun 1 1 env_vars[@] "$svr_name" "$exe" "$logfile" &
@@ -72,7 +72,7 @@ start_clients() {
   clients=$1
   env_vars=$2
   num_clients=$3
-  exe=$deltafs_bb_dir/bbos_client
+  exe=@CMAKE_INSTALL_PREFIX@/bin/bbos_client
 
   message "Starting clients: clients=$clients"
   # SK: line below is a temporary fix to get each client to create an object
@@ -88,26 +88,6 @@ kill_server() {
   do_mpirun 1 1 "" "$svr" "pkill -SIGINT bbos_server" "$logfile"
 }
 
-mkdir -p $job_dir
-
-# Create the logfile
-touch $logfile
-echo "" > $logfile # remove any stale log entries
-
-# Create a file that will contain all hosts' IP addresses
-touch $ip_file
-echo "" > $ip_file # remove any stale IP entries
-
-gen_hostfile
-PBS_NODEFILE="$bb_dir/hosts.txt"
-# Find the IP addresses of all allocated nodes
-#all_nodes=$(echo -e "$all_nodes" | uniq | sort | tr '\n' ',')
-#do_mpirun 1 1 "" "$all_nodes" "hostname -i" "$ip_file"
-#cp $output_dir/fake_ips.txt $ip_file
-# Split nodes into clients and servers
-bbos_client_nodes=$(cat $PBS_NODEFILE | uniq | sort | head -n $num_bbos_client_nodes | tr '\n' ',')
-bbos_server_nodes=$(cat $PBS_NODEFILE | uniq | sort | tail -n $num_bbos_server_nodes | tr '\n' ',')
-
 message "Clients: $bbos_client_nodes"
 message "Servers: $bbos_server_nodes"
 
@@ -120,14 +100,14 @@ do_mpirun 1 1 "" "" "ls -l" "$logfile"
 # BWS: This seems pointless, but whatever
 # SK - Goal: estimate bandwidth to burst buffer
 for c in ${PFS_CHUNK_SIZE[@]}; do
-  count=$((512 * (2**20) / c))
+  count=$(((2**33) / c)) # 8 GB container file divided into count chunks of c MB each
 
   message "TRIAL BW Testing BB Chunk: $c"
 
   env_vars=("BB_Lustre_chunk_size" "$c"
-            "BB_Max_container_size" "1073741824" "BB_Dummy_file"
-            "$bb_dir/\$(hostname)")
-  test_raw_bw $bbos_server_nodes "$env_vars" $c $count $num_bbos_server_nodes
+            "BB_Max_container_size" "$((2**33))" "BB_Dummy_file"
+            "$jobdir/\$(hostname)")
+  # test_raw_bw $bbos_server_nodes "$env_vars" $c $count $num_bbos_server_nodes
   wait # have to wait
 done
 
@@ -143,13 +123,15 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     # SK: Because they have different initialization parameters.
     # This should be fixed when we go to env variables for initialization
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
-      container_dir=$bb_dir/containers-$pchunk-$hgchunk-$svr
+      container_dir=$jobdir/containers-$pchunk-$hgchunk-$svr
       do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
 
       # SK: moved background inside start_server
-      env_vars=("BB_Server_port" "19900" "BB_Lustre_chunk_size" "$pchunk"
+      env_vars=("BB_Lustre_chunk_size" "$pchunk"
                 "BB_Mercury_transfer_size" "$hgchunk" "BB_Num_workers" "4"
-                "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir")
+                "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
+                "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"
+                "$((2**28))")
       start_server "$svr" "$env_vars"
     done
     sleep 3
@@ -157,19 +139,27 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     # Start client for each BB buddy on each node
     # Perform aprun once for all clients of the same server
     i=1
-    all_clients=$(echo $bbos_client_nodes | tr ',' '\n')
+    j=1
+    p=1
+    num_clts=$((num_bbos_client_nodes / num_bbos_server_nodes))
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
-      # Generate string of comma-separated client hostnames for aprun
-      clts=$(echo -e $all_clients | head -n $(($i*$num_bbos_server_nodes)) | \
-            tail -n $((num_bbos_client_nodes / num_bbos_server_nodes)))
-      num_clts=$((num_bbos_client_nodes / num_bbos_server_nodes))
-      clts=$(echo -e "$clts" | tr ' ' ',')
-
+      # filter=$(seq -s, $counter $j $((i * num_clts)))
+      filter=$(seq -s, $j $((i * num_clts)))
+      j=$(((i * num_clts) + 1))
+      clts=$(echo $bbos_client_nodes | cut -d ' ' --fields $filter | tr ' ' ',' )
+      echo "======== $clts bound to server $i ========="
       # one aprun for set of clients bound to one server
-      env_vars=("BB_Server_port" "19900" "BB_Mercury_transfer_size" "$hgchunk"
-      "BB_Object_size" "$((2**30))" "BB_Server_IP_address" "$svr")
-      start_clients "$clts" "$env_vars" $num_clts
-      client_pids[$i]=$! # so that we can wait for clients to finish
+
+      for (( core = 0; core < num_cores; core++ )); do
+        env_vars=("BB_Mercury_transfer_size" "$hgchunk"
+        "BB_Object_size" "$((2**32))" "BB_Server_IP_address" "$svr"
+        "BB_Core_num" "$core")
+        start_clients "$clts" "$env_vars" $num_clts
+        client_pids[$p]=$! # so that we can wait for clients to finish
+        p=$((p+1))
+      done
+      # start_clients "$clts" "$env_vars" $num_clts
+      # client_pids[$i]=$! # so that we can wait for clients to finish
       i=$((i+1))
     done
 
