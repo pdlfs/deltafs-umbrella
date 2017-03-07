@@ -388,7 +388,7 @@ do_run() {
 
             env_vars=("BB_Lustre_chunk_size" "$((2**23))"
                       "BB_Mercury_transfer_size" "$((2**21))" "BB_Num_workers" "4"
-                      "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
+                      "BB_Server_IP_address" "$s" "BB_Output_dir" "$container_dir"
                       "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"
                       "$((2**28))" "BB_Binpacking_threshold" "$((2**33))")
             do_mpirun 1 1 env_vars[@] "$s" \
@@ -414,9 +414,9 @@ do_run() {
           echo "======== $clts bound to server $c ========="
 
           # one aprun for set of clients bound to one server
-          for (( core = 0; core < num_cores; core++ )); do
+          for (( core = 0; core < cores_per_node; core++ )); do
             env_vars=("BB_Mercury_transfer_size" "$((2**21))"
-            "BB_Object_size" "$((2**32))" "BB_Server_IP_address" "$svr"
+            "BB_Object_size" "$((2**32))" "BB_Server_IP_address" "$s"
             "BB_Core_num" "$core")
             do_mpirun $num_clts_per_svr 1 env_vars[@] "$clts" \
 		      "${dfsu_prefix}/bin/bbos_client" "$logfile" &
