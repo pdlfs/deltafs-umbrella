@@ -24,7 +24,7 @@
 
 # Node topology
 cores_per_node=4
-nodes=4
+nodes=16
 bbos_buddies=1
 
 # DeltaFS config
@@ -71,7 +71,7 @@ do
     build_deck "file-per-process" $px $py
     do_run "baseline" $parts
 
-    build_deck "file-per-particle" $x $py
+    build_deck "file-per-particle" $px $py
     do_run "deltafs" $parts
 
     cores=$(( cores * 2 ))
