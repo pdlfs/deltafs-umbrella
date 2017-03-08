@@ -63,7 +63,7 @@ bb_server="${dfsu_prefix}/bin/bbos_server"
 cores=$min_cores
 while [ $cores -le $max_cores ]
 do
-    px=$((cores * 8)) # x 30
+    px=$((cores * 16))
     py=$((10**4))
     parts=$((px * py * 100))
     bb_clients=$cores

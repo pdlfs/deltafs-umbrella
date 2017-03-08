@@ -373,7 +373,7 @@ do_run() {
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
-        query_particles $runtype $exp_dir $p $logfile
+        #query_particles $runtype $exp_dir $p $logfile
         ;;
 
     "deltafs")
@@ -468,7 +468,7 @@ do_run() {
         # Wait for BBOS binpacking to complete
         wait
 
-        query_particles $runtype $exp_dir $p $logfile
+        #query_particles $runtype $exp_dir $p $logfile
         ;;
     "shuffle_test")
         np=$3
