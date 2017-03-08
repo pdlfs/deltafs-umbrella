@@ -166,7 +166,11 @@ Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBI
 
 ## SHUFFLE TEST [under construction]
 
-The following scripts are involved in our shuffle test. Note that you can find all our scripts in the install directory. Do not use the scripts in the build directory.
+**shuffle test** is designed to touch only the rpc and inter-process communication functionality within the deltafs micro-service stack so all file-system related activities have been removed and converted to no-op. The main goal of running a shuffle test is to evaluate and quantify the overhead incurred by deltafs to move particles around.
+
+The following scripts are involved in our shuffle test.
+
+**NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
 # $INSTALL/deltafs
 #  -- bin
@@ -175,9 +179,12 @@ The following scripts are involved in our shuffle test. Note that you can find a
 #  -- lib
 #  -- scripts
 #      -- common.sh
+#      -- lanl_do_shuffle_test.sh
 #      -- run_shuffle_test.sh
-
+#  -- share
 ```
+**NOTE**: do not call `run_shuffle_test.sh` directly. Instead, call the `lanl_do_shuffle_test.sh` wrapper script.
+
 First, open `run_shuffle_test.sh`, at Line 20-30ish, set `cores_per_node` to 32 perhaps, `nodes` to 4 for the 1st test run, and as many as 128 for later runs. Update `ip_subnet` to the subnet used by your compute nodes, such as something like "10.4", "172.16.3".
 ```
 # Node topology
