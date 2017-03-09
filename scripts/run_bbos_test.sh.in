@@ -46,16 +46,15 @@ PFS_CHUNK_SIZE=($(( 8*(2**20))))
 
 test_raw_bw() {
   svrs=$1
-  env_vars=$2
-  blocksize=$3
-  count=$4
-  num_servers=$5
-  exe=@CMAKE_INSTALL_PREFIX@/bin/eval_bb
+  blocksize=$2
+  count=$3
+  num_servers=$4
+  exe="/proj/TableFS/bbos/IOR/src/C/IOR -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $jobdir/bbos/ior.file -w"
 
-  message "RAW dd throughput: servers=$svrs bs=$blocksize count=$count"
-  do_mpirun $num_servers 1 env_vars[@] "$svrs" "$exe" "$logfile"
+  message "RAW IOR throughput: servers=$svrs bs=$blocksize count=$count"
+  do_mpirun $num_servers 0 "" "$svrs" "$exe" "$logfile"
 
-  # Let the DDs finish on all the servers
+  # Let the IORs finish on all the servers
   wait
 }
 
@@ -104,10 +103,7 @@ for c in ${PFS_CHUNK_SIZE[@]}; do
 
   message "TRIAL BW Testing BB Chunk: $c"
 
-  env_vars=("BB_Lustre_chunk_size" "$c"
-            "BB_Max_container_size" "$((2**33))" "BB_Dummy_file"
-            "$jobdir/\$(hostname)")
-  test_raw_bw $bbos_server_nodes "$env_vars" $c $count $num_bbos_server_nodes
+  test_raw_bw $bbos_server_nodes $c $count $num_bbos_server_nodes
   wait # have to wait
 done
 
@@ -143,7 +139,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     p=1
     num_clts=$((num_bbos_client_nodes / num_bbos_server_nodes))
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
-      # filter=$(seq -s, $counter $j $((i * num_clts)))
       filter=$(seq -s, $j $((i * num_clts)))
       j=$(((i * num_clts) + 1))
       clts=$(echo $bbos_client_nodes | cut -d ' ' --fields $filter | tr ' ' ',' )
@@ -158,8 +153,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
         client_pids[$p]=$! # so that we can wait for clients to finish
         p=$((p+1))
       done
-      # start_clients "$clts" "$env_vars" $num_clts
-      # client_pids[$i]=$! # so that we can wait for clients to finish
       i=$((i+1))
     done
 
