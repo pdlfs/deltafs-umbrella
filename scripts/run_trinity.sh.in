@@ -61,18 +61,23 @@ bb_servers=$bbos_buddies
 bb_server="${dfsu_prefix}/bin/bbos_server"
 
 cores=$min_cores
+last=0
 while [ $cores -le $max_cores ]
 do
+    if [ $cores -eq $max_cores ]; then
+        last=1
+    fi
+
     px=$((cores * 16))
     py=$((10**4))
     parts=$((px * py * 100))
     bb_clients=$cores
 
     build_deck "file-per-process" $px $py
-    do_run "baseline" $parts
+    do_run "baseline" $parts $last
 
     build_deck "file-per-particle" $px $py
-    do_run "deltafs" $parts
+    do_run "deltafs" $parts $last
 
     cores=$(( cores * 2 ))
 done

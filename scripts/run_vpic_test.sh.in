@@ -53,13 +53,18 @@ bb_servers=$bbos_buddies
 bb_server="${dfsu_prefix}/bin/bbos_server"
 
 parts=$cores
+last=0
 while [ $dpoints -gt 0 ]
 do
+    if [ $dpoints -eq 1 ]; then
+        last=1
+    fi
+
     build_deck "file-per-process" $parts $parts
-    do_run "baseline" $(((parts**2)*100))
+    do_run "baseline" $(((parts**2)*100)) $last
 
     build_deck "file-per-particle" $parts $parts
-    do_run "deltafs" $(((parts**2)*100))
+    do_run "deltafs" $(((parts**2)*100)) $last
 
     dpoints=$(( dpoints - 1 ))
     parts=$(( parts * 2 ))

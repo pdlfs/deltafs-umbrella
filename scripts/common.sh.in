@@ -51,6 +51,11 @@
 dfsu_prefix=@CMAKE_INSTALL_PREFIX@
 
 #
+# number of epochs for VPIC runs
+#
+vpic_epochs=8
+
+#
 # message: echo message to stdout and append it to the logfile.  note
 # that if $logfile is undefined, tee will just print the output without
 # using a log file.
@@ -276,7 +281,7 @@ build_deck() {
     case $1 in
     "file-per-process")
         cat ${ddir}/trecon-part/config.bkp | \
-            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS 8/' | \
+            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
@@ -289,7 +294,7 @@ build_deck() {
         ;;
     "file-per-particle")
         cat ${ddir}/trecon-part/config.bkp | \
-            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS 8/' | \
+            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
@@ -331,10 +336,12 @@ build_deck() {
 # Arguments:
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
+# @3 is last experiment (0 if false, 1 if true)
 #
 do_run() {
     runtype=$1
     p=$2
+    last=$3
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -373,7 +380,9 @@ do_run() {
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
-        #query_particles $runtype $exp_dir $p $logfile
+        if [ $last -eq 1 ]; then
+            query_particles $runtype $exp_dir $p $logfile
+        fi
         ;;
 
     "deltafs")
@@ -468,7 +477,9 @@ do_run() {
         # Wait for BBOS binpacking to complete
         wait
 
-        #query_particles $runtype $exp_dir $p $logfile
+        if [ $last -eq 1 ]; then
+            query_particles $runtype $exp_dir $p $logfile
+        fi
         ;;
     "shuffle_test")
         np=$3
@@ -529,16 +540,13 @@ query_particles() {
         die "query_particles: unknown runtype '$runtype'"
     esac
 
-    # Query more particles per iteration, from 10**0 to 10**6 (1M)
-    # to see when the DeltaFS approach breaks compared to the old,
-    # single-pass approach
-    n=0
-    while [ $n -le 6 ] && [ $((10**n)) -lt $qparts ]; do
-        mkdir -p $vpicout/reader/part_10_$n || \
-                                   die "mkdir for reader output failed"
-        $reader_bin -n $((10**n)) -i $vpicout \
-                -o $vpicout/reader/part_10_$n | tee -a $logfile
+    if [ $nodes -ge $vpic_epochs ]; then
+        ppn=1
+    else
+        ppn=0
+    fi
 
-        n=$((n + 1))
-    done
+    # Query particles to see when the DeltaFS approach breaks compared to old,
+    # single-pass approach
+    do_mpirun $vpic_epochs $ppn "" $vpic_nodes $reader_bin -i $vpicout $logfile
 }
