@@ -548,5 +548,5 @@ query_particles() {
 
     # Query particles to see when the DeltaFS approach breaks compared to old,
     # single-pass approach
-    do_mpirun $vpic_epochs $ppn "" $vpic_nodes $reader_bin -i $vpicout $logfile
+    do_mpirun $vpic_epochs $ppn "" $vpic_nodes "$reader_bin -i $vpicout" $logfile
 }
