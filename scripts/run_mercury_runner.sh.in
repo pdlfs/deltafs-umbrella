@@ -56,8 +56,8 @@ host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 # and put results in host*-ips.txt in $jobdir, load into
 # host1_ip and host2_ip, also taking $subnet into consideration
 #
-do_mpirun 1 1 "" $host1 "hostname -I" "$jobdir/host1-ips.txt"
-do_mpirun 1 1 "" $host2 "hostname -I" "$jobdir/host2-ips.txt"
+do_mpirun 1 1 "" $host1 "hostname -i" "$jobdir/host1-ips.txt"
+do_mpirun 1 1 "" $host2 "hostname -i" "$jobdir/host2-ips.txt"
 host1_ip=$(cat $jobdir/host1-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
 if [ -z $host1_ip ]; then die "wrong subnet"; fi
 host2_ip=$(cat $jobdir/host2-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
