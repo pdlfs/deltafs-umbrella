@@ -13,6 +13,7 @@
 #  $bbos_nodes - list of nodes for bbos
 #  $cores - cores per node (?)
 #  $dfsu_prefix - deltafs umbrella prefix directory
+#  $do_querying - whether we will perform particle queries
 #  $ip_subnet - the ip subnet we want to use
 #  $jobdir - per-job shared output directory
 #  $logfile - job's logfile we append to
@@ -336,12 +337,10 @@ build_deck() {
 # Arguments:
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
-# @3 is last experiment (0 if false, 1 if true)
 #
 do_run() {
     runtype=$1
     p=$2
-    last=$3
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -380,7 +379,7 @@ do_run() {
         echo -n "Output size: " >> $logfile
         du -b $exp_dir | tail -1 | cut -f1 >> $logfile
 
-        if [ $last -eq 1 ]; then
+        if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
         fi
         ;;
@@ -485,7 +484,7 @@ do_run() {
             wait
         fi # $bbos_buddies > 0
 
-        if [ $last -eq 1 ]; then
+        if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
         fi
         ;;
@@ -556,5 +555,11 @@ query_particles() {
 
     # Query particles to see when the DeltaFS approach breaks compared to old,
     # single-pass approach
-    do_mpirun $vpic_epochs $ppn "" $vpic_nodes "$reader_bin -i $vpicout" $logfile
+    if [ $last -eq 1 ]; then
+        do_mpirun $vpic_epochs $ppn "" $vpic_nodes \
+                  "$reader_bin -i $vpicout" $logfile
+    else
+        do_mpirun $vpic_epochs $ppn "" $vpic_nodes \
+                  "$reader_bin -i $vpicout -n 1" $logfile
+    fi
 }

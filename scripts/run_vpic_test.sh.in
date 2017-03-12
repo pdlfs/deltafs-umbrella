@@ -47,12 +47,13 @@ bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((2 * (2**27))) # BBOS max per-core log size in bytes
 
 parts=$cores
+do_querying=0
 last=0
 while [ $dpoints -gt 0 ]
 do
-    #if [ $dpoints -eq 1 ]; then
-    #    last=1
-    #fi
+    if [ $dpoints -eq 1 ]; then
+        last=1
+    fi
 
     build_deck "file-per-process" $parts $parts
     do_run "baseline" $(((parts**2)*100)) $last
