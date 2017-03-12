@@ -25,7 +25,7 @@
 # Node topology
 cores_per_node=4
 nodes=4
-bbos_buddies=2
+bbos_buddies=0
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -50,9 +50,9 @@ parts=$cores
 last=0
 while [ $dpoints -gt 0 ]
 do
-    if [ $dpoints -eq 1 ]; then
-        last=1
-    fi
+    #if [ $dpoints -eq 1 ]; then
+    #    last=1
+    #fi
 
     build_deck "file-per-process" $parts $parts
     do_run "baseline" $(((parts**2)*100)) $last

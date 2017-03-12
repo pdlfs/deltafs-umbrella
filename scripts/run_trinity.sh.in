@@ -25,7 +25,7 @@
 # Node topology
 cores_per_node=4
 nodes=16
-bbos_buddies=1
+bbos_buddies=0
 
 # DeltaFS config
 ip_subnet="10.92"
@@ -39,7 +39,6 @@ source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 get_jobdir
 gen_hosts
-
 
 # Notes:
 # ------
@@ -59,9 +58,9 @@ cores=$min_cores
 last=0
 while [ $cores -le $max_cores ]
 do
-    if [ $cores -eq $max_cores ]; then
-        last=1
-    fi
+    #if [ $cores -eq $max_cores ]; then
+    #    last=1
+    #fi
 
     px=$((cores * 16))
     py=$((10**4))
