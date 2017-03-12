@@ -386,55 +386,61 @@ do_run() {
         ;;
 
     "deltafs")
-        # Start BBOS servers and clients
-        message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
+        if [ $bbos_buddies -gt 0 ]; then
+            # Start BBOS servers and clients
+            message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
 
-        bb_server_list=$(cat $jobdir/bbos.hosts | tr ',' ' ')
-        n=1
-        for s in $bb_server_list; do
-            container_dir=$exp_dir/bbos/containers.$n
-            do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
+            bb_server_list=$(cat $jobdir/bbos.hosts | tr ',' ' ')
+            n=1
+            for s in $bb_server_list; do
+                container_dir=$exp_dir/bbos/containers.$n
+                do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
 
-            env_vars=("BB_Lustre_chunk_size" "$((2**23))"
-                      "BB_Mercury_transfer_size" "$bb_sst_size" "BB_Num_workers" "4"
-                      "BB_Server_IP_address" "$s" "BB_Output_dir" "$container_dir"
-                      "BB_Max_container_size" "$bb_log_size" "BB_Object_dirty_threshold"
-                      "$((2**26))" "BB_Binpacking_threshold" "$bb_log_size")
-            do_mpirun 1 1 env_vars[@] "$s" \
+                env_vars=("BB_Lustre_chunk_size" "$((2**23))"
+                          "BB_Mercury_transfer_size" "$bb_sst_size"
+                          "BB_Num_workers" "4"
+                          "BB_Server_IP_address" "$s"
+                          "BB_Output_dir" "$container_dir"
+                          "BB_Max_container_size" "$bb_log_size"
+                          "BB_Object_dirty_threshold" "$((2**26))"
+                          "BB_Binpacking_threshold" "$bb_log_size")
+                do_mpirun 1 1 env_vars[@] "$s" \
                       "${dfsu_prefix}/bin/bbos_server" "$logfile" &
 
-            message "BBOS server started at $s"
+                message "BBOS server started at $s"
 
-            n=$((n + 1))
-        done
+                n=$((n + 1))
+            done
 
-        sleep 5
+            sleep 5
 
-        c=1
-        j=1
-        p=1
-        all_clients=$(echo $vpic_nodes | tr ',' '\n')
-        num_clts_per_svr=$((nodes / bbos_buddies))
-        for s in $bb_server_list; do
-          # Generate string of comma-separated client hostnames for aprun
-          filter=$(seq -s, $j $((c * num_clts_per_svr)))
-          j=$(((c * num_clts_per_svr) + 1))
-          clts=$(echo $all_clients | cut -d ' ' --fields $filter | tr ' ' ',' )
-          echo "======== $clts bound to server $c ========="
+            c=1; j=1; p=1
+            all_clients=$(echo $vpic_nodes | tr ',' '\n')
+            num_clts_per_svr=$((nodes / bbos_buddies))
+            for s in $bb_server_list; do
+                # Generate string of comma-separated client hostnames for aprun
+                filter=$(seq -s, $j $((c * num_clts_per_svr)))
+                j=$(((c * num_clts_per_svr) + 1))
+                clts=$(echo $all_clients | cut -d ' ' --fields $filter | tr ' ' ',' )
+                echo "======== $clts bound to server $c ========="
 
-          # one aprun for set of clients bound to one server
-          for (( core = 0; core < cores_per_node; core++ )); do
-            env_vars=("BB_Mercury_transfer_size" "$bb_sst_size"
-            "BB_Object_size" "$bb_log_size" "BB_Server_IP_address" "$s"
-            "BB_Core_num" "$core")
-            do_mpirun $num_clts_per_svr 1 env_vars[@] "$clts" \
-		      "${dfsu_prefix}/bin/bbos_client" "$logfile" &
-	    client_pids[$p]=$! # so that we can wait for clients to finish
-            p=$((p+1))
-          done
+                # one aprun for set of clients bound to one server
+                for (( core = 0; core < cores_per_node; core++ )); do
+                    env_vars=("BB_Mercury_transfer_size" "$bb_sst_size"
+                            "BB_Object_size" "$bb_log_size"
+                            "BB_Server_IP_address" "$s"
+                            "BB_Core_num" "$core")
 
-          c=$((c+1))
-        done
+                    do_mpirun $num_clts_per_svr 1 env_vars[@] "$clts" \
+		                    "${dfsu_prefix}/bin/bbos_client" "$logfile" &
+
+            	    client_pids[$p]=$! # so we can wait for clients to finish
+                    p=$((p+1))
+                done
+
+                c=$((c+1))
+            done
+        fi # $bbos_buddies > 0
 
         # Start DeltaFS processes
         mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
@@ -445,18 +451,18 @@ do_run() {
         deltafs_srvr_path="${dfsu_prefix}/bin/deltafs-srvr"
 
         vars=("LD_PRELOAD" "$preload_lib_path"
-        "PRELOAD_Deltafs_root" "particle"
-        "PRELOAD_Local_root" "${exp_dir}/plfs"
-        "PRELOAD_Bypass_deltafs_namespace" "1"
-        "PRELOAD_Enable_verbose_error" "1"
-        "SHUFFLE_Virtual_factor" "1024"
-        "SHUFFLE_Mercury_proto" "bmi+tcp"
-        "SHUFFLE_Subnet" "$ip_subnet")
+              "PRELOAD_Deltafs_root" "particle"
+              "PRELOAD_Local_root" "${exp_dir}/plfs"
+              "PRELOAD_Bypass_deltafs_namespace" "1"
+              "PRELOAD_Enable_verbose_error" "1"
+              "SHUFFLE_Virtual_factor" "1024"
+              "SHUFFLE_Mercury_proto" "bmi+tcp"
+              "SHUFFLE_Subnet" "$ip_subnet")
 
         do_mpirun $cores 0 vars[@] "$vpic_nodes" \
                   "$jobdir/current-deck.op" $logfile
         if [ $? -ne 0 ]; then
-          die "deltafs: mpirun failed"
+            die "deltafs: mpirun failed"
         fi
 
         echo -n "Output size: " >> $logfile
@@ -464,18 +470,20 @@ do_run() {
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
-          wait ${client_pids[$c_pid]}
+            wait ${client_pids[$c_pid]}
         done
 
-	bb_server_list=$(cat $jobdir/bbos.hosts | tr ' ' ',')
+        if [ $bbos_buddies -gt 0 ]; then
+            bb_server_list=$(cat $jobdir/bbos.hosts | tr ' ' ',')
 
-        # Kill BBOS clients and servers
-        message ""
-        message "Killing BBOS servers"
-        do_mpirun $bbos_buddies 0 "" "$bb_server_list" "pkill -SIGINT bbos_server" "$logfile"
+            # Kill BBOS clients and servers
+            message ""
+            message "Killing BBOS servers"
+            do_mpirun $bbos_buddies 0 "" "$bb_server_list" "pkill -SIGINT bbos_server" "$logfile"
 
-        # Wait for BBOS binpacking to complete
-        wait
+            # Wait for BBOS binpacking to complete
+            wait
+        fi # $bbos_buddies > 0
 
         if [ $last -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile

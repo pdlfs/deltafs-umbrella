@@ -55,11 +55,6 @@ max_cores=$((nodes * cores_per_node))
 bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((1024 * (2**20))) # BBOS max per-core log size in bytes
 
-bb_client="${dfsu_prefix}/bin/bbos_client"
-
-bb_servers=$bbos_buddies
-bb_server="${dfsu_prefix}/bin/bbos_server"
-
 cores=$min_cores
 last=0
 while [ $cores -le $max_cores ]
