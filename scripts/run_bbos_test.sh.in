@@ -12,9 +12,9 @@
 ##################
 # Tunables
 ##################
-num_bbos_client_nodes=4
-num_bbos_server_nodes=2
-num_cores=4
+num_bbos_client_nodes=1
+num_bbos_server_nodes=1
+num_cores=1
 
 # location of IOR bin, leave as "IOR" to use $PATH
 iorbin=IOR
@@ -31,9 +31,14 @@ gen_hostfile
 
 logfile=$jobdir/deltafs-bb.log
 
-DW_JOB_STRIPED=/panfs/probescratch/TableFS/bbos_test_1
-jobdir_last_component=$(basename $jobdir)
-bb_dir="$DW_JOB_STRIPED/$jobdir_last_component"
+if [ x${DW_JOB_STRIPED} = x ]; then
+  bb_dir=${jobdir}
+  message "Missing DW_JOB_STRIPED - putting data in jobdir for this test"
+else
+  jobdir_last_component=$(basename $jobdir)
+  bb_dir="$DW_JOB_STRIPED/$jobdir_last_component"
+  message "Using DW: bb_dir = ${bb_dir}"
+fi
 
 touch $logfile
 
