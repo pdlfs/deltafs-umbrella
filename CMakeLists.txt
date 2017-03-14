@@ -408,7 +408,7 @@ GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
 
 ExternalProject_Add (deltafs-bb
     ${deltafsbb_download}
-    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
     UPDATE_COMMAND ""
