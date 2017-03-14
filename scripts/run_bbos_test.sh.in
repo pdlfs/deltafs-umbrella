@@ -9,12 +9,19 @@
 ##DW stage_in type=directory source=/lustre/ttscratch1/users/$USER... destination=$DW_JOB_STRIPED
 ##DW stage_out type=directory source=$DW_JOB_STRIPED destination=/lustre/ttscratch1/users/$USER
 
-#
+##################
 # Tunables
-#
+##################
 num_bbos_client_nodes=1
 num_bbos_server_nodes=1
 num_cores=1
+
+# location of IOR bin, leave as "IOR" to use $PATH
+iorbin=IOR
+
+##################
+# end of Tunables
+##################
 
 logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
@@ -44,12 +51,17 @@ PFS_CHUNK_SIZE=($(( 8*(2**20))))
 
 # message () { echo "$@" | tee -a $logfile; }
 
+if [ ! `which ${iorbin}` ]; then
+    message "Cannot find iorbin (${iorbin})"
+    exit 1
+fi
+
 test_raw_bw() {
   svrs=$1
   blocksize=$2
   count=$3
   num_servers=$4
-  exe="/proj/TableFS/bbos/IOR/src/C/IOR -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $jobdir/bbos/ior.file -w"
+  exe="${iorbin} -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $jobdir/bbos/ior.file -w"
 
   message "RAW IOR throughput: servers=$svrs bs=$blocksize count=$count"
   do_mpirun $num_servers 0 "" "$svrs" "$exe" "$logfile"
