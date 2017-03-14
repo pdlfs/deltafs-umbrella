@@ -185,13 +185,9 @@ The following scripts are involved to run vpic baseline tests. Each vpic baselin
 ```
 **NOTE**: do not invoke `run_vpic_baseline.sh` directly. Use the `lanl_do_vpic_baseline.sh` wrapper script instead.
 
-To do that, open `lanl_do_vpic_baseline.sh`, check the **subnet** option and modify it to match your network settings.
+To do that, open `lanl_do_vpic_baseline.sh`, **a**) check the **subnet** option and modify it to match your network settings; **b**) set the **nodes** option to control the number of compute nodes to request -- all the cores installed on the compute nodes will be used to run vpic (if a node has 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally, **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job output as well as the runtime of the job.
 
-Use the **nodes** option to control the size of the job.
-
-In addition, use **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of output and runtime of the job.
-
-**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2.
+**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2. This will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump.
 
 Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```
@@ -202,6 +198,46 @@ export EXTRA_MPIOPTS="-cc cpu"
 **NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
 
 Time to submit the job to the batch system !!
+
+After the job completes, the main script will show the testing results, which may look like:
+```
+==================================================================
+Running VPIC (baseline) with 320K particles on 4 cores.
+Experiment dir is /users/qingzhen/jobs/run_vpic_baseline.sh.15665/baseline_P320K_C4_N1
+==================================================================
+
+mpirun.mpich -np 4  --host h0.fs.tablefs.narwhal.pdl.cmu.edu   /users/qingzhen/jobs/run_vpic_baseline.sh.15665/current-deck.op
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(325)[0]: Topology: X=4 Y=1 Z=1
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(333)[0]: num_step = 1000 nppc = 50
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(342)[0]: Particles: nx = 32 ny = 100 nz = 1
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(351)[0]: total # of particles = 320000
+/users/qingzhen/vpic-install/decks/main.cxx(86): **** Beginning simulation advance with 1 tpp ****
+Free Mem: 99.31%
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.500
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.161916
+Free Mem: 99.22%
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.1000
+/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.149855
+/users/qingzhen/vpic-install/decks/main.cxx(94): simulation time: 28.719526
+
+/users/qingzhen/vpic-install/decks/main.cxx(103): Maximum number of time steps reached.  Job has completed.
+mpirun.mpich -np 2  --host h0.fs.tablefs.narwhal.pdl.cmu.edu   /users/qingzhen/vpic-install/bin/vpic-reader -i /users/qingzhen/jobs/run_vpic_baseline.sh.15665/baseline_P320K_C4_N1 -n 1
+
+Number of particles: 320000
+
+Querying 1 particles (3 retries)
+Overall: 35ms / query, 35 ms / particle
+Overall: 37ms / query, 34 ms / particle
+Overall: 36ms / query, 33 ms / particle
+Querying results: 34 ms / query, 34 ms / particle
+
+Script complete.
+start: Tue Mar 14 14:15:25 MDT 2017
+  end: Tue Mar 14 14:16:02 MDT 2017
+
+```
+
+Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/baseline_Pxx_Cyy_Nzz.log`. Here `xx` is the number of particles simulated, `yy` is the number of cores, and `zz` is the number of compute nodes used.
 
 ## SHUFFLE TEST [under construction]
 
