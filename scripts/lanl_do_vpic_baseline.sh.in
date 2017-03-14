@@ -1,24 +1,24 @@
 #!/bin/bash -eu
 #
-#MSUB -N deltafs-shuffle
-#MSUB -l walltime=1:00:00
-#MSUB -l nodes=4:haswell
-#MSUB -o /users/$USER/joblogs/deltafs-shuffle-$MOAB_JOBID.out
+#MSUB -N vpic-baseline
+#MSUB -l walltime=0:40:00
+#MSUB -l nodes=1:haswell
+#MSUB -o /users/$USER/joblogs/vpic-baseline-$MOAB_JOBID.out
 #MSUB -j oe
 ##MSUB -V
 ##MSUB -m b
 ##MSUB -m $USER@lanl.gov
 
 ip_subnet="11.128"
-nodes=16
+nodes=1
 cores_per_node=32
-init_procs_per_node=8
-procs_per_node_increase_step=8
+init_procs_per_node=32
+procs_per_node_increase_step=32
 num_vpic_dumps=2
 px_factor=4
 py_factor=2
 
-@CMAKE_INSTALL_PREFIX@/scripts/run_shuffle_test.sh \
+@CMAKE_INSTALL_PREFIX@/scripts/run_vpic_baseline.sh \
     $ip_subnet \
     $nodes \
     $cores_per_node \
