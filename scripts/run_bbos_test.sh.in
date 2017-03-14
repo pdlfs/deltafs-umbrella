@@ -208,6 +208,9 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
   done
 done
 
-rm -rf ${bb_dir}/bbos
+# this is for non-cray test env, we don't need the data in jobdir
+if [ x${DW_JOB_STRIPED} = x ]; then
+  rm -rf ${bb_dir}/bbos
+fi
 
 exit 0
