@@ -11,7 +11,7 @@
 #  $bb_log_size - BBOS max per-core log size in bytes
 #  $bbos_buddies - number of nodes for bbos
 #  $bbos_nodes - list of nodes for bbos
-#  $cores - cores per node (?)
+#  $cores - total cores across all nodes
 #  $dfsu_prefix - deltafs umbrella prefix directory
 #  $do_querying - whether we will perform particle queries
 #  $ip_subnet - the ip subnet we want to use
@@ -539,9 +539,11 @@ query_particles() {
     case $runtype in
     "baseline")
         reader_bin="${dfsu_prefix}/bin/vpic-reader"
+        nnum=$vpic_epochs
         ;;
     "deltafs")
         reader_bin="${dfsu_prefix}/bin/vpic-deltafs-reader"
+        nnum=$cores
         ;;
     *)
         die "query_particles: unknown runtype '$runtype'"
@@ -556,10 +558,8 @@ query_particles() {
     # Query particles to see when the DeltaFS approach breaks compared to old,
     # single-pass approach
     if [ $last -eq 1 ]; then
-        do_mpirun $vpic_epochs $ppn "" $vpic_nodes \
-                  "$reader_bin -i $vpicout" $logfile
+        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout" $logfile
     else
-        do_mpirun $vpic_epochs $ppn "" $vpic_nodes \
-                  "$reader_bin -i $vpicout -n 1" $logfile
+        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1" $logfile
     fi
 }
