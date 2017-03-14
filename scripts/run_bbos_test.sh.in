@@ -12,9 +12,9 @@
 #
 # Tunables
 #
-num_bbos_client_nodes=4
-num_bbos_server_nodes=2
-num_cores=4
+num_bbos_client_nodes=1
+num_bbos_server_nodes=1
+num_cores=1
 
 logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
@@ -32,7 +32,7 @@ bbos_server_nodes=$(echo "$all_nodes" | sort | tail -n $num_bbos_server_nodes)
 
 # Client transfer sizes we experiment with
 OBJECT_CHUNK_SIZE=($((1*(2**20))))
-#                   $((2*(2**20))))
+#                   $((2*(2**20)))
 #                   $((4*(2**20)))
 #                   $((8*(2**20)))) # 1-8 MB
 
@@ -77,7 +77,7 @@ start_clients() {
   # SK: line below is a temporary fix to get each client to create an object
   # whose name is the same as the client. Eventually env variables will obviate
   # the need to do this.
-  do_mpirun $num_clients 1 env_vars[@] "$clients" "$exe" "$logfile" &
+  do_mpirun $num_clients 1 env_vars[@] "$clients" "time $exe" "$logfile" &
 }
 
 kill_server() {
@@ -93,18 +93,18 @@ message "Servers: $bbos_server_nodes"
 # Test the burst buffer
 do_mpirun 1 1 "" "" "mkdir -p ${jobdir}/bbos" "$logfile"
 echo "Basic ls of Burst Buffer ..."
-do_mpirun 1 1 "" "" "ls -l" "$logfile"
+do_mpirun 1 1 "" "" "ls -l ${jobdir}/bbos" "$logfile"
 
 # First perform basic BB benchmarking loop across all servers
 # BWS: This seems pointless, but whatever
 # SK - Goal: estimate bandwidth to burst buffer
+bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
 for c in ${PFS_CHUNK_SIZE[@]}; do
   count=$(((2**33) / c)) # 8 GB container file divided into count chunks of c MB each
 
   message "TRIAL BW Testing BB Chunk: $c"
 
-  test_raw_bw $bbos_server_nodes $c $count $num_bbos_server_nodes
-  wait # have to wait
+  test_raw_bw $bbos_server_nodes_comma $c $count $num_bbos_server_nodes
 done
 
 # Now perform client-server test
@@ -169,6 +169,13 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
 
     # Waiting for servers to finish binpacking
     wait
+
+    message "Forcibly killing all clients"
+    bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
+    do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "pkill -9 bbos_client" "$logfile"
+
+    message "Forcibly killing all servers"
+    do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "pkill -9 bbos_server" "$logfile"
   done
 done
 
