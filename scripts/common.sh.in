@@ -377,7 +377,7 @@ do_run() {
         fi
 
         echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-	du -sh $exp_dir
+        du -sh $exp_dir
 
         if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
@@ -465,7 +465,7 @@ do_run() {
         fi
 
         echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-	du -sh $exp_dir
+        du -sh $exp_dir
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -515,7 +515,7 @@ do_run() {
         fi
 
         echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-	du -sh $exp_dir
+        du -sh $exp_dir
         ;;
     esac
 }
