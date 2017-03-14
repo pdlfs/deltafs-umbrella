@@ -166,6 +166,43 @@ cci  16 0.000063 sec per op, cli/srv sys time 15.134000 / 13.526000 sec, r=2
 
 Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/mercury-runner.log`.
 
+## VPIC BASELINE
+
+The following scripts are involved to run vpic baseline tests. Each vpic baseline run consists of a `write` phase and a `read` phase.
+
+**NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
+```
+# $INSTALL/deltafs
+#  -- bin
+#  -- decks (vpic input decks)
+#  -- include
+#  -- lib
+#  -- scripts
+#      -- common.sh
+#      -- lanl_do_vpic_baseline.sh
+#      -- run_vpic_baseline.sh
+#  -- share
+```
+**NOTE**: do not invoke `run_vpic_baseline.sh` directly. Use the `lanl_do_vpic_baseline.sh` wrapper script instead.
+
+To do that, open `lanl_do_vpic_baseline.sh`, check the **subnet** option and modify it to match your network settings.
+
+Use the **nodes** option to control the size of the job.
+
+In addition, use **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of output and runtime of the job.
+
+**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2.
+
+Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
+```
+export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
+export EXTRA_MPIOPTS="-cc cpu"
+```
+
+**NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
+
+Time to submit the job to the batch system !!
+
 ## SHUFFLE TEST [under construction]
 
 **shuffle test** is designed to touch only the rpc and inter-process communication functionality within the deltafs micro-service stack so all file-system related activities have been removed and converted to no-op. The main goal of running a shuffle test is to evaluate and quantify the overhead incurred by deltafs to move particles around.
