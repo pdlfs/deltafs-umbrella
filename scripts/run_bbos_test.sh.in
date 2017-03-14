@@ -208,4 +208,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
   done
 done
 
+rm -rf ${bb_dir}/bbos
+
 exit 0
