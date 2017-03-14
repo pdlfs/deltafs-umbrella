@@ -376,8 +376,8 @@ do_run() {
             die "baseline: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
+	du -sh $exp_dir
 
         if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
@@ -464,8 +464,8 @@ do_run() {
             die "deltafs: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
+	du -sh $exp_dir
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -514,8 +514,8 @@ do_run() {
             die "deltafs: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
+	du -sh $exp_dir
         ;;
     esac
 }
