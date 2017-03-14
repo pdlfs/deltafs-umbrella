@@ -69,15 +69,15 @@ Assuming `$INSTALL` is a global file system location that is accessible from all
 | |- include
 | |- lib
 | |- scripts
-| |- share
+| -- share
 |
 +$HOME/deltafs
-| |- src
-|     |- deltafs-umbrella
+| -- src
+|     +- deltafs-umbrella
 |         |- cache.0
 |         |- cache
-|         |- build
-|
+|         -- build
+=
 mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
 ```
@@ -128,10 +128,10 @@ The following scripts are involved in our mercury runner test.
 |  +- scripts
 |  |   |- common.sh
 |  |   |- lanl_do_mercury_runner.sh
-|  |   |- run_mercury_runner.sh
+|  |   -- run_mercury_runner.sh
 |  |
-|  |- share
-|
+|  -- share
+=
 ```
 **NOTE**: do not invoke `run_mercury_runner.sh` directly. Use the `lanl_do_mercury_runner.sh` wrapper script instead.
 
@@ -171,7 +171,9 @@ Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBI
 
 ## VPIC BASELINE
 
-The following scripts are involved to run vpic baseline tests. Each vpic baseline run consists of a `write` phase and a `read` phase.
+The following scripts are involved to run vpic baseline tests.
+
+Each vpic baseline run consists of a `write` phase that generates N-N particle timestep dumps and a `read` phase that performs queries on one or more particle trajectroies.
 
 **NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
@@ -183,10 +185,10 @@ The following scripts are involved to run vpic baseline tests. Each vpic baselin
 |  +- scripts
 |  |   |- common.sh
 |  |   |- lanl_do_vpic_baseline.sh
-|  |   |- run_vpic_baseline.sh
+|  |   -- run_vpic_baseline.sh
 |  |
-|  |- share
-|
+|  -- share
+=
 ```
 **NOTE**: do not invoke `run_vpic_baseline.sh` directly. Use the `lanl_do_vpic_baseline.sh` wrapper script instead.
 
@@ -194,11 +196,11 @@ To do that, open `lanl_do_vpic_baseline.sh`:
 
   **a**) check the **subnet** option and modify it to match your network settings;
 
-  **b**) set the **nodes** option to control the number of compute nodes to request -- all the cores installed on the compute nodes will be used to run vpic (if a node has 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally,
+  **b**) set the **nodes** and **cores_per_node** options to control the number of compute nodes and cores to request -- all the cores declared will be used to run vpic (if a node is declared to have 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally,
 
-  **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job output as well as the runtime of a job.
+  **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job outputs as well as the runtime of a job.
 
-**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2. This will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump.
+**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2. On a 32-core node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total.
 
 For doing a standard vpic baseline runs, set the above option to the follows:
 
@@ -209,8 +211,8 @@ For doing a standard vpic baseline runs, set the above option to the follows:
 |   num_vpic_dumps |   8   |   8   |   8   |   8   |
 |        px_factor |   16  |   16  |   16  |   16  |
 |        py_factor |   4   |   4   |   4   |   4   |
-|    num particles |  512M |   2B  |   8B  |  32B  |
-| estimated output | 256GB |  1TB  |  4TB  |  16TB |
+|    num_particles |  512M |   2G  |   8G  |  32G  |
+| estimated_output | 256GB |  1TB  |  4TB  |  16TB |
 
 Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
@@ -260,7 +262,7 @@ start: Tue Mar 14 14:15:25 MDT 2017
 
 ```
 
-Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/baseline_Pxx_Cyy_Nzz.log`. Here `xx` is the number of particles simulated, `yy` is the number of cores, and `zz` is the number of compute nodes used.
+Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/baseline_P{XX}_C{YY}_N{ZZ}.log`. Here `XX` will be the number of particles simulated, `YY` the number of cores, and `ZZ` the number of compute nodes used.
 
 ## SHUFFLE TEST [under construction]
 
