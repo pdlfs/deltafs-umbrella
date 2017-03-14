@@ -47,7 +47,7 @@ bb_sst_size=$((2 * (2**20)))    # BBOS SST table size in bytes
 bb_log_size=$((2 * (2**27))) # BBOS max per-core log size in bytes
 
 parts=$cores
-do_querying=0
+do_querying=1
 last=0
 while [ $dpoints -gt 0 ]
 do
