@@ -398,6 +398,23 @@ ExternalProject_Add_Step (ssg prepare
 )
 
 #
+# deltafs-bb
+#
+GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
+    ### GIT_TAG 03f7da52		# Feb 2017
+    ### GIT_TAG master
+)
+
+ExternalProject_Add (deltafs-bb
+    ${deltafsbb_download}
+    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+)
+
+#
 # deltafs
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
@@ -411,7 +428,7 @@ MaybeRunTests (deltafs_test
 )
 
 ExternalProject_Add (deltafs
-    DEPENDS mercury
+    DEPENDS mercury deltafs-bb
     ${deltafs_download}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
@@ -522,24 +539,6 @@ ExternalProject_Add (mercury-runner
 
     UPDATE_COMMAND ""
     # this is a test, no test command.
-)
-
-#
-# deltafs-bb
-#
-GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
-    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
-    ### GIT_TAG 03f7da52		# Feb 2017
-    ### GIT_TAG master
-)
-
-ExternalProject_Add (deltafs-bb
-    DEPENDS deltafs-vpic-preload vpic     # to make it compile at the end
-    ${deltafsbb_download}
-    ### CMAKE_ARGS -Dsomething=value
-    CMAKE_CACHE_ARGS ${init_cm_cache}
-
-    UPDATE_COMMAND ""
 )
 
 #
