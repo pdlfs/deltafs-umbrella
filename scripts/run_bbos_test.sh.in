@@ -12,9 +12,9 @@
 ##################
 # Tunables
 ##################
-num_bbos_client_nodes=1
-num_bbos_server_nodes=1
-num_cores=1
+num_bbos_client_nodes=4
+num_bbos_server_nodes=2
+num_cores=4
 
 # location of IOR bin, leave as "IOR" to use $PATH
 iorbin=IOR
@@ -31,11 +31,28 @@ gen_hostfile
 
 logfile=$jobdir/deltafs-bb.log
 
+DW_JOB_STRIPED=/panfs/probescratch/TableFS/bbos_test_1
+jobdir_last_component=$(basename $jobdir)
+bb_dir="$DW_JOB_STRIPED/$jobdir_last_component"
+
 touch $logfile
 
 # get client and server nodes
-bbos_client_nodes=$(echo "$all_nodes" | sort | head -n $num_bbos_client_nodes)
 bbos_server_nodes=$(echo "$all_nodes" | sort | tail -n $num_bbos_server_nodes)
+bbos_client_nodes=$(echo "$all_nodes" | sort | head -n $num_bbos_client_nodes)
+bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
+bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
+
+# extract IPs from hostnames because we want to work with IPs
+do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "hostname -i" "$jobdir/host-server-ips.txt"
+do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "hostname -i" "$jobdir/host-client-ips.txt"
+bbos_server_nodes=$(cat $jobdir/host-server-ips.txt | tr ' ' '\n')
+bbos_client_nodes=$(cat $jobdir/host-client-ips.txt | tr ' ' '\n')
+bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
+bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
+
+message "BBOS server IPs are $bbos_server_nodes_comma"
+message "BBOS client IPs are $bbos_client_nodes_comma"
 
 # Client transfer sizes we experiment with
 OBJECT_CHUNK_SIZE=($((1*(2**20))))
@@ -61,7 +78,7 @@ test_raw_bw() {
   blocksize=$2
   count=$3
   num_servers=$4
-  exe="${iorbin} -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $jobdir/bbos/ior.file -w"
+  exe="${iorbin} -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $bb_dir/bbos/ior.file -w"
 
   message "RAW IOR throughput: servers=$svrs bs=$blocksize count=$count"
   do_mpirun $num_servers 0 "" "$svrs" "$exe" "$logfile"
@@ -99,18 +116,14 @@ kill_server() {
   do_mpirun 1 1 "" "$svr" "pkill -SIGINT bbos_server" "$logfile"
 }
 
-message "Clients: $bbos_client_nodes"
-message "Servers: $bbos_server_nodes"
-
 # Test the burst buffer
-do_mpirun 1 1 "" "" "mkdir -p ${jobdir}/bbos" "$logfile"
+do_mpirun 1 1 "" "" "mkdir -p ${bb_dir}/bbos" "$logfile"
 echo "Basic ls of Burst Buffer ..."
-do_mpirun 1 1 "" "" "ls -l ${jobdir}/bbos" "$logfile"
+do_mpirun 1 1 "" "" "ls -l ${bb_dir}" "$logfile"
 
 # First perform basic BB benchmarking loop across all servers
 # BWS: This seems pointless, but whatever
 # SK - Goal: estimate bandwidth to burst buffer
-bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
 for c in ${PFS_CHUNK_SIZE[@]}; do
   count=$(((2**33) / c)) # 8 GB container file divided into count chunks of c MB each
 
@@ -124,6 +137,12 @@ done
 
 for pchunk in ${PFS_CHUNK_SIZE[@]}; do
   for hgchunk in ${OBJECT_CHUNK_SIZE[@]}; do
+    message "Forcibly killing stale BBOS clients"
+    do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "pkill -9 bbos_client" "$logfile"
+
+    message "Forcibly killing stale BBOS servers"
+    do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "pkill -9 bbos_server" "$logfile"
+
     message "TRIAL PFS Chunk: $pchunk Mercury Chunk: $hgchunk"
 
     # Start servers
@@ -131,7 +150,7 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     # SK: Because they have different initialization parameters.
     # This should be fixed when we go to env variables for initialization
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
-      container_dir=$jobdir/bbos/containers-$pchunk-$hgchunk-$svr
+      container_dir=$bb_dir/bbos/containers-$pchunk-$hgchunk-$svr
       do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
 
       # SK: moved background inside start_server
@@ -181,13 +200,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
 
     # Waiting for servers to finish binpacking
     wait
-
-    message "Forcibly killing all clients"
-    bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
-    do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "pkill -9 bbos_client" "$logfile"
-
-    message "Forcibly killing all servers"
-    do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "pkill -9 bbos_server" "$logfile"
   done
 done
 
