@@ -21,7 +21,7 @@ set (install-programs process_logs.sh process_runner.pl)
 # executable scripts to @-expand and then install
 set (install-programs-in common.sh.in run_mercury_runner.sh.in
      run_sndrcv_test.sh.in run_shuffle_test.sh.in run_trinity.sh.in
-     run_vpic_test.sh.in run_bbos_test.sh.in lanl_do_shuffle_test.sh.in
+     run_bbos_test.sh.in lanl_do_shuffle_test.sh.in
      lanl_do_mercury_runner.sh.in susitna_do_shuffle_test.sh.in
      susitna_do_mercury_runner.sh.in)
 
