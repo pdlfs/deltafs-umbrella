@@ -10,51 +10,52 @@ Download, build, and install deltafs, deltafs friends, and their dependencies in
 
 This guide is assuming a Linux Cray.
 
-### Step-0: Prepare git-lfs
+### STEP-0: prepare git-lfs
 
 First, we need to get a latest `git-lfs` release from github.com.
 
 **NOTE**: the latest release version may be higher than 2.0.0.
-```
+```bash
 wget https://github.com/git-lfs/git-lfs/releases/download/v2.0.0/git-lfs-linux-amd64-2.0.0.tar.gz
 tar xzf git-lfs-linux-amd64-2.0.0.tar.gz -C .
 ```
 The entire `git-lfs` release consists of a single executable file so we can easily install it by moving it to a directory that belongs to the `PATH`, such as
-```
+```bash
 mv git-lfs-2.0.0/git-lfs $HOME/bin/
+which git-lfs
 ```
 After that, initalize `git-lfs` once by
-```
+```bash
 module load git  # load the original git
 git lfs install
 ```
 
-### Step-1: Prepare cray programming env
+### STEP-1: prepare cray programming env
 
 First, let's set cray link type to dynamic (required to compile deltafs)
-```
+```bash
 export CRAYPE_LINK_TYPE="dynamic"
 ```
 If `CRAYOS_VERSION` is not in the env, we have to explicitly set it.
 On Nersc Edison, `CRAYOS_VERSION` is pre-set by the Cray system. On Nersc Cori, which has a newer version of Cray, it is not set.
-```
+```bash
 export CRAYOS_VERSION=6
 ```
 Make sure the desired processor-targeting module (such as `craype-sandybridge`, or `craype-haswell`, or `craype-mic-knl`, etc.) has been loaded. These targeting modules will configure the compiler driver scripts (`cc`, `CC`, `ftn`) to compile code optimized for the processors on the compute nodes.
-```
+```bash
 module load craype-haswell  # Or module load craype-sandybridge if you want to run code on monitor nodes
 ```
 Also make sure the desired compiler bundle (`PrgEnv-*` such as Intel, GNU, or Cray) has been configured, such as
-```
+```bash
 module load PrgEnv-intel  # Or module load PrgEnv-gnu
 ```
 Now, load a few addition modules needed by deltafs umbrella.
-```
+```bash
 module load boost  # needed by mercury rpc
 module load cmake  # at least v3.x
 ```
 
-### Step-2: Build deltafs suite
+### STEP-2: build deltafs suite
 
 Assuming `$INSTALL` is a global file system location that is accessible from all compute, monitor, and head nodes, our plan is to build deltafs under `$HOME/deltafs/src`, and to install everything under `$INSTALL/deltafs`.
 
@@ -62,45 +63,45 @@ Assuming `$INSTALL` is a global file system location that is accessible from all
 
 **NOTE**: do not rename the install dir after installation is done. If the current install location is bad, simply remove the install dir and reinstall deltafs to a new place.
 ```
-#
-# $INSTALL/deltafs
-#  -- bin
-#  -- decks (vpic input decks)
-#  -- include
-#  -- lib
-#  -- scripts
-#  -- share
-#
-# $HOME/deltafs
-#  -- src
-#      -- deltafs-umbrella
-#          -- cache.0
-#          -- cache
-#          -- build
-#
++$INSTALL/deltafs
+| |- bin
+| |- decks (vpic input decks)
+| |- include
+| |- lib
+| |- scripts
+| |- share
+|
++$HOME/deltafs
+| |- src
+|     |- deltafs-umbrella
+|         |- cache.0
+|         |- cache
+|         |- build
+|
 mkdir -p $HOME/deltafs/src
 cd $HOME/deltafs/src
 ```
 First, let's get a recent deltafs-umbrella release from github:
-```
-git lfs clone git@github.com:pdlfs/deltafs-umbrella.git
+```bash
+git lfs clone https://github.com/pdlfs/deltafs-umbrella.git
 cd deltafs-umbrella
 ```
 Second, prepolute the cache directory:
-```
+```bash
 cd cache
 ln -fs ../cache.0/* .
 cd ..
 ```
 Now, kick-off the cmake auto-building process:
 
-**NOTE**: set `-DVERBS=ON` to enable `cci-ibverbs`.
-```
+**NOTE**: set `-DVERBS=ON` if **cci-ibverbs** is to be enabled.
+```bash
 mkdir build
 cd build
-
-# Skip unit tests, and tell cmake that we are doing cross-compiling
-# Set -DVERBS=ON if we want to use [cci+ib]
+#
+# a. tell cmake that we are doing cross-compiling
+# b. skip unit tests, and 
+# c. set -DVERBS=ON if we are to use cci+ibverbs
 CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DVERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
@@ -119,23 +120,25 @@ The following scripts are involved in our mercury runner test.
 
 **NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
-# $INSTALL/deltafs
-#  -- bin
-#  -- decks (vpic input decks)
-#  -- include
-#  -- lib
-#  -- scripts
-#      -- common.sh
-#      -- lanl_do_mercury_runner.sh
-#      -- run_mercury_runner.sh
-#  -- share
++ $INSTALL/deltafs
+|  |- bin
+|  |- decks (vpic input decks)
+|  |- include
+|  |- lib
+|  +- scripts
+|  |   |- common.sh
+|  |   |- lanl_do_mercury_runner.sh
+|  |   |- run_mercury_runner.sh
+|  |
+|  |- share
+|
 ```
 **NOTE**: do not invoke `run_mercury_runner.sh` directly. Use the `lanl_do_mercury_runner.sh` wrapper script instead.
 
 To do that, open `lanl_do_mercury_runner.sh`, check the **subnet** option and modify it to match your network settings.
 
 Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
-```
+```bash
 export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
 export EXTRA_MPIOPTS="-cc cpu"
 ```
@@ -172,25 +175,45 @@ The following scripts are involved to run vpic baseline tests. Each vpic baselin
 
 **NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
-# $INSTALL/deltafs
-#  -- bin
-#  -- decks (vpic input decks)
-#  -- include
-#  -- lib
-#  -- scripts
-#      -- common.sh
-#      -- lanl_do_vpic_baseline.sh
-#      -- run_vpic_baseline.sh
-#  -- share
++ $INSTALL/deltafs
+|  |- bin
+|  |- decks (vpic input decks)
+|  |- include
+|  |- lib
+|  +- scripts
+|  |   |- common.sh
+|  |   |- lanl_do_vpic_baseline.sh
+|  |   |- run_vpic_baseline.sh
+|  |
+|  |- share
+|
 ```
 **NOTE**: do not invoke `run_vpic_baseline.sh` directly. Use the `lanl_do_vpic_baseline.sh` wrapper script instead.
 
-To do that, open `lanl_do_vpic_baseline.sh`, **a**) check the **subnet** option and modify it to match your network settings; **b**) set the **nodes** option to control the number of compute nodes to request -- all the cores installed on the compute nodes will be used to run vpic (if a node has 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally, **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job output as well as the runtime of the job.
+To do that, open `lanl_do_vpic_baseline.sh`:
+
+  **a**) check the **subnet** option and modify it to match your network settings;
+
+  **b**) set the **nodes** option to control the number of compute nodes to request -- all the cores installed on the compute nodes will be used to run vpic (if a node has 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally,
+
+  **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job output as well as the runtime of a job.
 
 **NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2. This will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump.
 
+For doing a standard vpic baseline runs, set the above option to the follows:
+
+|                  | Run 1 | Run 2 | Run 3 | Run 4 |
+|-----------------:|:-----:|:-----:|:-----:|:-----:|
+|            nodes |   1   |   4   |   16  |   64  |
+|            cores |   32  |  128  |  512  |  2048 |
+|   num_vpic_dumps |   8   |   8   |   8   |   8   |
+|        px_factor |   16  |   16  |   16  |   16  |
+|        py_factor |   4   |   4   |   4   |   4   |
+|    num particles |  512M |   2B  |   8B  |  32B  |
+| estimated output | 256GB |  1TB  |  4TB  |  16TB |
+
 Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
-```
+```bash
 export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
 export EXTRA_MPIOPTS="-cc cpu"
 ```
