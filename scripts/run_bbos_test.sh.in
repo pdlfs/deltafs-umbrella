@@ -19,6 +19,18 @@ num_cores=1
 # location of IOR bin, leave as "IOR" to use $PATH
 iorbin=IOR
 
+# Client transfer sizes we experiment with
+OBJECT_CHUNK_SIZE=($((1*(2**20))))
+#                   $((2*(2**20)))
+#                   $((4*(2**20)))
+#                   $((8*(2**20)))) # 1-8 MB
+
+# Lustre sizes we experiment with
+PFS_CHUNK_SIZE=($(( 8*(2**20))))
+#                $((16*(2**20)))
+#                $((32*(2**20)))
+#                $((64*(2**20)))) # 8-64 MB
+
 ##################
 # end of Tunables
 ##################
@@ -58,20 +70,6 @@ bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
 
 message "BBOS server IPs are $bbos_server_nodes_comma"
 message "BBOS client IPs are $bbos_client_nodes_comma"
-
-# Client transfer sizes we experiment with
-OBJECT_CHUNK_SIZE=($((1*(2**20))))
-#                   $((2*(2**20)))
-#                   $((4*(2**20)))
-#                   $((8*(2**20)))) # 1-8 MB
-
-# Lustre sizes we experiment with
-PFS_CHUNK_SIZE=($(( 8*(2**20))))
-#                $((16*(2**20)))
-#                $((32*(2**20)))
-#                $((64*(2**20)))) # 8-64 MB
-
-# message () { echo "$@" | tee -a $logfile; }
 
 if [ ! `which ${iorbin}` ]; then
     message "Cannot find iorbin (${iorbin})"
