@@ -100,7 +100,7 @@ mkdir build
 cd build
 #
 # a. tell cmake that we are doing cross-compiling
-# b. skip unit tests, and 
+# b. skip unit tests, and
 # c. set -DVERBS=ON if we are to use cci+ibverbs
 CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DVERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
@@ -194,25 +194,28 @@ Each vpic baseline run consists of a `write` phase that generates N-N particle t
 
 To do that, open `lanl_do_vpic_baseline.sh`:
 
-  **a**) check the **subnet** option and modify it to match your network settings;
+**a**) check the **subnet** option and modify it to match your network configurations;
 
-  **b**) set the **nodes** and **cores_per_node** options to control the number of compute nodes and cores to request -- all the cores declared will be used to run vpic (if a node is declared to have 32 cores, asking 4 nodes will result in a vpic run using 128 cores); and finally,
+**b**) set the **nodes** and **cores_per_node** options to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is safe and recommended to set the cores_per_node to just the total number of cores available on a compute node (32 for Trinitite);
 
-  **c**) set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job outputs as well as the runtime of a job.
+**c**) finally, set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job outputs as well as the runtime of a job.
 
-**NOTE**: to do an initial validation run to check code and scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2. On a 32-core node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total.
+**NOTE**: to do an initial validation run to check code and debug scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2 (on a 32-core Trinitite node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total).
 
-For doing a standard vpic baseline runs, set the above option to the follows:
+To do a standard vpic baseline test, set the above options as follows:
 
-|                  | Run 1 | Run 2 | Run 3 | Run 4 |
-|-----------------:|:-----:|:-----:|:-----:|:-----:|
-|            nodes |   1   |   4   |   16  |   64  |
-|            cores |   32  |  128  |  512  |  2048 |
-|   num_vpic_dumps |   8   |   8   |   8   |   8   |
-|        px_factor |   16  |   16  |   16  |   16  |
-|        py_factor |   4   |   4   |   4   |   4   |
-|    num_particles |  512M |   2G  |   8G  |  32G  |
-| estimated_output | 256GB |  1TB  |  4TB  |  16TB |
+|            write_path | Run 1 | Run 2 | Run 3 | Run 4 | Note                      |
+|----------------------:|:-----:|:-----:|:-----:|:-----:|:--------------------------|
+|                 nodes |   1   |   4   |   16  |   64  |                           |
+|                 cores |   32  |  128  |  512  |  2048 | 32 core per node          |
+|        num_vpic_dumps |   8   |   8   |   8   |   8   |                           |
+|             px_factor |   16  |   16  |   16  |   16  |                           |
+|             py_factor |   4   |   4   |   4   |   4   |                           |
+|         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core              |
+| estimated_output_size |<256GB | <1TB  | <4TB  | <16TB | <1GB per core per dump    |
+|   estimated_pfs_files |   1K  |   4K  |  16K  |  64K  | 4 files per core per dump |
+|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr |                           |
+|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |
 
 Next, set env `JOBDIRHOME` to the root of all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
