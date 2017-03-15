@@ -213,9 +213,10 @@ To do a standard vpic baseline test, set the above options as follows:
 |             py_factor |   4   |   4   |   4   |   4   |                                      |
 |         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                         |
 | estimated_output_size |<256GB | <1TB  | <4TB  | <16TB | less than 1GB per core per dump      |
-|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 Lustre/BB files per core per dump  |
+|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump  |
 |     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included              |
 |    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                      |
+|  estimated_query_time |  1min |  5min | 20min | 80min | 8 reader cores w/ each at 512MB/s    |
 
 Next, set env `JOBDIRHOME` to a desired root for all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
