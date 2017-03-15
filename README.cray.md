@@ -1,19 +1,20 @@
-**This file is written for our fine collaborators that are kind enough to experiment with deltafs on their Cray systems.**
-
-[![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
+**This guide is written for our LANL collaborators that are kind enough to experiment with deltafs on their Cray systems.**
 
 Deltafs-umbrella
 ================
 Download, build, and install deltafs, deltafs friends, and their dependencies in a single highly-automated step.
+
+[![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 
 TABLE OF CONTENTS
 =================
   * [Deltafs-umbrella](#deltafs-umbrella)
   * [Table of contents](#table-of-contents)
   * [Installation](#installation)
-  * Micro-banchmark
+  * **Micro-banchmarks**
     * [Mercury-runner](#mercury-runner)
-  * Macro-tests
+    * [IOR](#ior-test)
+  * **Macro-tests**
     * [Vpic-baseline](#vpic-baseline-test)
     * [Vpic-deltafs](#vpic-deltafs-test)
 
@@ -180,6 +181,11 @@ cci  16 0.000063 sec per op, cli/srv sys time 15.134000 / 13.526000 sec, r=2
 ```
 
 Those final results may also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/mercury-runner.log`.
+
+IOR TEST
+========
+
+// *TODO*
 
 VPIC BASELINE TEST
 ==================
