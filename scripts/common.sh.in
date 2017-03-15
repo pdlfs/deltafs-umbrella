@@ -371,14 +371,19 @@ do_run() {
 
     case $runtype in
     "baseline")
+        ### write path ###
         do_mpirun $cores 0 "" "$vpic_nodes" "$jobdir/current-deck.op" $logfile
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
         fi
 
-        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-        du -sh $exp_dir
+        ### check output size ###
+        echo "Output size: `du -sb $exp_dir | cut -f1`" | tee -a $logfile
+        if [ -d $exp_dir/particle ]; then
+            du -h $exp_dir/particle | tee -a $logfile
+        fi
 
+        ### read path ###
         if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
         fi
@@ -458,14 +463,18 @@ do_run() {
               "SHUFFLE_Mercury_proto" "bmi+tcp"
               "SHUFFLE_Subnet" "$ip_subnet")
 
+        ### write path ###
         do_mpirun $cores 0 vars[@] "$vpic_nodes" \
                   "$jobdir/current-deck.op" $logfile
         if [ $? -ne 0 ]; then
             die "deltafs: mpirun failed"
         fi
 
-        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-        du -sh $exp_dir
+        ### check output size ###
+        echo "Output size: `du -sb $exp_dir | cut -f1`" | tee -a $logfile
+        if [ -d $exp_dir/plfs/particle ]; then
+            du -h $exp_dir/plfs/particle | tee -a $logfile
+        fi
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -484,10 +493,12 @@ do_run() {
             wait
         fi # $bbos_buddies > 0
 
+        ### read path ###
         if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
         fi
         ;;
+
     "shuffle_test")
         np=$3
 
