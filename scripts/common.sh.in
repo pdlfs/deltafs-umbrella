@@ -106,6 +106,7 @@ get_jobdir() {
     else
         jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
+    message "-INFO- creating jobdir..."
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
     bbdir=${jobdir} ### XXX: auto set bbdir
     logfile=${jobdir}/$(basename $jobdir).log ### XXX: auto set logfile
@@ -127,6 +128,7 @@ get_bbdir() {
     else
       jobdir_last_component=$(basename $jobdir)
       bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
+      message "-INFO- creating bbdir..."
       do_mpirun 1 1 "" "" "mkdir -p ${bbdir}" "$logfile" || \
           die "cannot make bbdir ${bbdir}"
       do_mpirun 1 1 "" "" "ls ${bbdir}" "$logfile" || \
