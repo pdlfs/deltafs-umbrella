@@ -471,7 +471,7 @@ ExternalProject_Add (deltafs-vpic-preload
 #
 GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    GIT_TAG 8fa75d9
+    GIT_TAG 045cfaf
     ### GIT_TAG master
 )
 
