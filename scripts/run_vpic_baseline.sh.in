@@ -25,19 +25,13 @@ source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 ### skip all bbos code ###
 bbos_buddies=0
-
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
 ### lustre ###
 get_jobdir
-
-### default job-wise log ###
-logfile=$jobdir/$(basename $jobdir).log
-
 ### bb ###
 get_bbdir
-
 ### machine list ###
 gen_hosts
 
