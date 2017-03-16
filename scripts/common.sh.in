@@ -164,7 +164,7 @@ gen_hostfile() {
 
     # Populate a variable with hosts
     all_nodes=$(cat ${jobdir}/hosts.txt)
-    num_all_nodes=$(cat ${jobdir}/hosts.txt | wc -l)
+    num_all_nodes=$(cat ${jobdir}/hosts.txt | sort | wc -l)
     message "-INFO- num hosts = ${num_all_nodes}"
 }
 
@@ -206,11 +206,11 @@ gen_hosts() {
     ### set host list variables ###
 
     vpic_nodes=$(cat ${jobdir}/vpic.hosts)
-    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | wc -l)
+    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | sort | wc -l)
     message "-INFO- num vpic nodes = ${num_vpic_nodes}"
 
     bbos_nodes=$(cat ${jobdir}/bbos.hosts)
-    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | wc -l)
+    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | sort | wc -l)
     message "-INFO- num bbos nodes = ${num_bbos_nodes}"
 }
 
@@ -434,7 +434,7 @@ do_run() {
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
 
     message "--------------- [  RUNEXP  ] --------------"
-    message "!!! NOTICE !!! starting exp (${exp_tag})..."
+    message "!!! NOTICE !!! starting exp ${exp_tag}..."
     message ""
 
     ### ATTENTION: data might go to bb ###
@@ -452,12 +452,12 @@ do_run() {
     message "=================================================================="
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
     message "------------"
-    message "Using ${jobdir}/current-deck.op"
-    message "Job dir is ${jobdir}"
-    message "Experiment dir is ${exp_dir}"
-    message "Log to ${exp_logfile}"
-    message "Log to ${logfile}"
-    message "Log to STDOUT"
+    message "> Using ${jobdir}/current-deck.op"
+    message "> Job dir is ${jobdir}"
+    message "> Experiment dir is ${exp_dir}"
+    message "> Log to ${exp_logfile}"
+    message "  + Log to ${logfile}"
+    message "    + Log to STDOUT"
     message "=================================================================="
     message ""
 
@@ -668,11 +668,11 @@ query_particles() {
     message "=================================================================="
     message "!!! Query VPIC ($runtype) using $nnum cores !!!"
     message "------------"
-    message "Using ${reader_bin}"
-    message "Data dir is ${vpicout}"
-    message "Log to ${outfile1}"
-    message "Log to ${outfile2}"
-    message "Log to STDOUT"
+    message "> Using ${reader_bin}"
+    message "> Experiment dir is ${vpicout}"
+    message "> Log to ${outfile1}"
+    message "  + Log to ${outfile2}"
+    message "    + Log to STDOUT"
     message "=================================================================="
     message ""
 

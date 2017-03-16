@@ -51,6 +51,8 @@ do
     parts=$((px * py * 100))
 
     build_deck "file-per-process" $px $py
+    message ""
+    message ""
     do_run "baseline" $parts ### $procs_per_node ###
 
     if [ $procs_per_node -eq 1 ]; then
