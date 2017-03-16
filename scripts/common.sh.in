@@ -379,9 +379,9 @@ build_deck() {
     esac
 
     # Compile input deck
-    (cd ${ddir}/trecon-part && \
-     ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx) || \
-                                              die "compilation failed"
+    (cd ${ddir}/trecon-part && ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx \
+       2>&1 | tee -a $logfile | tee -a $exp_logfile) || \
+           die "compilation failed"
 
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
@@ -427,9 +427,10 @@ do_run() {
 
     exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
     ### log file for this particular exp run ###
-    exp_logfile="$jobdir/$exp_tag.log"   ### ATTENTION: absolute path !! ###
+    exp_logfile="$jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
     cd $jobdir || die "cd to $jobdir failed"
-    exp_jobdir="$jobdir/$exp_tag"
+    exp_jobdir="$jobdir/$exp_tag"   ### NOTE !! still on Lustre !! ###
+    mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
 
     message "--------------- [  RUNEXP  ] --------------"
