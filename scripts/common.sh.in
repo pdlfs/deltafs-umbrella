@@ -386,7 +386,7 @@ build_deck() {
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
 
-    message "-INFO- ($(ls -lh ${jobdir}/current-deck.op))"
+    message "[DECK] --- $(ls -lni --full-time ${jobdir}/current-deck.op)"
     message ""
     message "-INFO- vpic deck installed at ${jobdir}/current-deck.op"
     message "--------------- [    OK    ] --------------"
@@ -439,8 +439,10 @@ do_run() {
 
     ### ATTENTION: data might go to bb ###
     exp_dir="$bbdir/$exp_tag"
+    message "-INFO- creating exp dir..."
     do_mpirun 1 1 "" "" "mkdir -p ${exp_dir}" "$logfile" "$exp_logfile" || \
         die "cannot make $exp_dir"
+    message "-INFO- done"
 
     ### NOTE: cannot cd to $exp_dir since it may land in bb ###
 
@@ -449,6 +451,7 @@ do_run() {
     ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
 
     message ""
+    message "[DECK] --- $(ls -lni --full-time ${jobdir}/current-deck.op)"
     message "=================================================================="
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
     message "------------"
@@ -471,6 +474,7 @@ do_run() {
             die "baseline: mpirun failed"
         fi
 
+        message ""
         message "-INFO- checking output size..."
         do_mpirun 1 1 "" "" "du -sb $exp_dir" "$logfile" "$exp_logfile"
         do_mpirun 1 1 "" "" "du -h $exp_dir/particle" \
