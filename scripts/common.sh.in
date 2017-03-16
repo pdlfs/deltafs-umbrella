@@ -255,8 +255,8 @@ do_mpirun() {
     fi
     hosts="$4"
     exe="$5"
-    outfile1="${6:-''}"
-    outfile2="${7:-''}"
+    outfile1="${6:-/dev/null}"
+    outfile2="${7:-/dev/null}"
 
     envstr=""; npstr=""; hstr=""
 
@@ -648,8 +648,8 @@ query_particles() {
     runtype=$1
     vpicout=$2
     qparts=$3
-    outfile1="${4:-''}"
-    outfile2="${5:-''}"
+    outfile1="${4:-/dev/null}"
+    outfile2="${5:-/dev/null}"
 
     case $runtype in
     "baseline")
