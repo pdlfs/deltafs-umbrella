@@ -402,6 +402,7 @@ ExternalProject_Add_Step (ssg prepare
 #
 GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
+    GIT_TAG 004d9d2
     ### GIT_TAG 03f7da52		# Feb 2017
     ### GIT_TAG master
 )
