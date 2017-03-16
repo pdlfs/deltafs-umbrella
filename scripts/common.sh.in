@@ -16,7 +16,8 @@
 #  $do_querying - whether we will perform particle queries
 #  $ip_subnet - the ip subnet we want to use
 #  $jobdir - per-job shared output directory
-#  $logfile - job's logfile we append to
+#  $logfile - job's logfile we append to (shared among all exps)
+#  $exp_logfile - exp's own logfile
 #  $nodes - number of nodes for vpic
 #  $vpic_nodes - list of nodes for vpic
 #
@@ -108,7 +109,7 @@ get_jobdir() {
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
     bbdir=${jobdir} ### XXX: auto set bbdir
     logfile=${jobdir}/$(basename $jobdir).log ### XXX: auto set logfile
-    message "note: jobdir = ${jobdir}"
+    message "-INFO- jobdir = ${jobdir}"
 }
 
 #
@@ -122,7 +123,7 @@ get_jobdir() {
 get_bbdir() {
     if [ x${DW_JOB_STRIPED-} = x ]; then
       bbdir=${jobdir}
-      message "missing DW_JOB_STRIPED - putting data in jobdir for this test"
+      message "!!! WARNING !!! missing DW_JOB_STRIPED - putting data in jobdir for this test"
     else
       jobdir_last_component=$(basename $jobdir)
       bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
@@ -130,7 +131,7 @@ get_bbdir() {
           die "cannot make bbdir ${bbdir}"
       do_mpirun 1 1 "" "" "ls ${bbdir}" "$logfile" || \
           die "cannot ls bbdir ${bbdir}"
-      message "note: bbdir = ${bbdir}"
+      message "-INFO- bbdir = ${bbdir}"
     fi
 }
 
@@ -144,7 +145,7 @@ get_bbdir() {
 # creates: $jobdir/hosts.txt
 #
 gen_hostfile() {
-    message "generating hostfile ${jobdir}/hosts.txt..."
+    message "-INFO- generating hostfile ${jobdir}/hosts.txt..."
 
     if [ `which aprun` ]; then
         # Generate hostfile on CRAY and store on disk
@@ -164,7 +165,7 @@ gen_hostfile() {
     # Populate a variable with hosts
     all_nodes=$(cat ${jobdir}/hosts.txt)
     num_all_nodes=$(cat ${jobdir}/hosts.txt | wc -l)
-    message "note: num hosts = ${num_all_nodes}"
+    message "-INFO- num hosts = ${num_all_nodes}"
 }
 
 #
@@ -174,7 +175,7 @@ gen_hostfile() {
 # creates: $jobdir/vpic.hosts, $jobdir/bbos.hosts
 #
 gen_hosts() {
-    message "generating host lists..."
+    message "-INFO- generating host lists..."
 
     # XXX: sanity check: # of nodes in list from PBS_NODEFILE or
     # XXX:               emulab-listall >= $nodes+$bbos_buddies
@@ -202,9 +203,15 @@ gen_hosts() {
             die "failed to create bbos.hosts file"
     fi
 
-    # Populate host list variables
-    vpic_nodes=$(cat $jobdir/vpic.hosts)
-    bbos_nodes=$(cat $jobdir/bbos.hosts)
+    ### set host list variables ###
+
+    vpic_nodes=$(cat ${jobdir}/vpic.hosts)
+    num_vpic_nodes=$(cat ${jobdir}/vpic.txt | wc -l)
+    message "-INFO- num vpic nodes = ${num_vpic_nodes}"
+
+    bbos_nodes=$(cat ${jobdir}/bbos.hosts)
+    num_bbos_nodes=$(cat ${jobdir}/bbos.txt | wc -l)
+    message "-INFO- num bbos nodes = ${num_bbos_nodes}"
 }
 
 #
@@ -212,10 +219,10 @@ gen_hosts() {
 # uses: $vpic_nodes, $cores, $nodes
 #
 clear_caches() {
-    message "clearing node caches..."
+    message "-INFO- clearing node caches..."
 
     if [ `which aprun` ]; then
-        message "skipping cache clear ... no sudo access on cray"
+        message "!!! WARNING !!! skipping cache clear ... no sudo access on cray"
         #aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
         #    'echo 3 > /proc/sys/vm/drop_caches'
     else
@@ -250,6 +257,9 @@ do_mpirun() {
     outfile2="${7:-''}"
 
     envstr=""; npstr=""; hstr=""
+
+    message ""
+    message "---------------- [MPIEXEC] ----------------"
 
     if [ `which aprun` ]; then
         # This is likely a CRAY machine. Deploy an aprun job.
@@ -307,6 +317,9 @@ do_mpirun() {
     else
         die "could not find a supported mpirun or aprun command"
     fi
+
+     message "------------------ [END] ------------------"
+     message ""
 }
 
 #
@@ -433,9 +446,9 @@ do_run() {
     message "=================================================================="
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
     message "------------"
-    message "Using ${job_dir}/current-deck.op"
-    message " >>> [$(ls -lh ${job_dir}/current-deck.op)]"
-    message "Job dir is ${jod_dir}"
+    message "Using ${jobdir}/current-deck.op"
+    message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
+    message "Job dir is ${joddir}"
     message "Experiment dir is ${exp_dir}"
     message "Log to STDOUT"
     message "CC to ${logfile}"
