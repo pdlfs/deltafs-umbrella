@@ -228,10 +228,10 @@ To do a standard vpic baseline test, set the above options as follows:
 |                 nodes |   1   |   4   |   16  |   64  |                                      |
 |                 cores |   32  |  128  |  512  |  2048 | 32 cores per node                    |
 |        num_vpic_dumps |   8   |   8   |   8   |   8   |                                      |
-|             px_factor |   16  |   16  |   16  |   16  |                                      |
-|             py_factor |   4   |   4   |   4   |   4   |                                      |
+|             px_factor |   16  |   16  |   16  |   16  | px=512, 2k, 8k, 16k                  |
+|             py_factor |   4   |   4   |   4   |   4   | py=40                                |
 |         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                         |
-| estimated_output_size |<256GB | <1TB  | <4TB  | <16TB | less than 1GB per core per dump      |
+| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | less than 1GB per core per dump      |
 |       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump  |
 |     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included              |
 |    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                      |
@@ -244,6 +244,8 @@ export EXTRA_MPIOPTS="-cc cpu"
 ```
 
 **NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
+
+Finally, check if all `#MSUB` and `#DW` directives have been properly set.
 
 Time to submit the job to the batch system !!
 
