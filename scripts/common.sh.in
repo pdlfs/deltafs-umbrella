@@ -206,11 +206,11 @@ gen_hosts() {
     ### set host list variables ###
 
     vpic_nodes=$(cat ${jobdir}/vpic.hosts)
-    num_vpic_nodes=$(cat ${jobdir}/vpic.txt | wc -l)
+    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | wc -l)
     message "-INFO- num vpic nodes = ${num_vpic_nodes}"
 
     bbos_nodes=$(cat ${jobdir}/bbos.hosts)
-    num_bbos_nodes=$(cat ${jobdir}/bbos.txt | wc -l)
+    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | wc -l)
     message "-INFO- num bbos nodes = ${num_bbos_nodes}"
 }
 
