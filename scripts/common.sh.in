@@ -433,8 +433,8 @@ do_run() {
     mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
 
-    message "--------------- [  RUNEXP  ] --------------"
-    message "!!! NOTICE !!! starting exp ${exp_tag}..."
+    message "--------------- [   DOIT   ] --------------"
+    message "!!! NOTICE !!! starting exp >> >> ${exp_tag}..."
     message ""
 
     ### ATTENTION: data might go to bb ###
@@ -464,12 +464,14 @@ do_run() {
     case $runtype in
     "baseline")
         ### WRITE PATH ###
-        do_mpirun $cores 0 "" "$vpic_nodes" "${jobdir}/current-deck.op" \
+        env_vars=("VPIC_current_working_dir" "$exp_dir")
+        do_mpirun $cores 0 env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
             "$logfile" "$exp_logfile"
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
         fi
 
+        message "-INFO- checking output size..."
         do_mpirun 1 1 "" "" "du -sb $exp_dir" "$logfile" "$exp_logfile"
         do_mpirun 1 1 "" "" "du -h $exp_dir/particle" \
             "$logfile" "$exp_logfile"
