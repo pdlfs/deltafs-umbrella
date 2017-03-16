@@ -245,45 +245,98 @@ export EXTRA_MPIOPTS="-cc cpu"
 
 **NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
 
-Finally, check if all `#MSUB` and `#DW` directives have been properly set.
+**Finally**, check if all `#MSUB` and `#DW` directives have been properly set.
 
-Time to submit the job to the batch system !!
+== Time to submit the job to the batch system !!
 
 After the job completes, the main script will show the testing results, which may look like:
 ```
+-INFO- jobdir = /users/qingzhen/jobs/run_vpic_baseline.sh.21444
+!!! WARNING !!! missing DW_JOB_STRIPED - putting data in jobdir for this test
+-INFO- generating host lists...
+-INFO- num vpic nodes = 1
+-INFO- num bbos nodes = 0
+--------------- [INPUT-DECK] --------------
+!!! NOTICE !!! building vpic deck with cores = 4, px = 16, py = 100
+
+/usr/bin/mpicxx -DVPIC_INSTALLED -DPACKAGE_NAME="VPIC" -DPACKAGE_TARNAME="vpic" -DPACKAGE_VERSION="3.1.2.1" -DPACKAGE_STRING="VPIC\ 3.1.2.1" -DPACKAGE_BUGREPORT="bergen@lanl.gov" -DPACKAGE_URL="" -DPACKAGE="vpic" -DVERSION="3.1.2.1" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=".libs/" -DENABLE_HOST=1 -DBUILDSTYLE=standard -DADDRESSING_64=1 -DOMPI_SKIP_MPICXX=1  -std=c++98 -D_XOPEN_SOURCE=600 -Wno-long-long -g -O2 -ffast-math -fno-unsafe-math-optimizations -fno-strict-aliasing -fomit-frame-pointer -march=opteron -mfpmath=sse -DUSE_V4_SSE   -I/users/qingzhen/vpic-install/include -I/users/qingzhen/vpic-install/include/vpic /users/qingzhen/vpic-install/decks/main.cxx /users/qingzhen/vpic-install/decks/deck_wrapper.cxx -DINPUT_DECK=/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx -o /users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.op /users/qingzhen/vpic-install/lib/libvpic.a    -lpthread -lm
+[DECK] --- 19884215 -rwxr-xr-x 1 2616946 7004 1944312 2017-03-16 13:18:28.433460000 -0600 /users/qingzhen/jobs/run_vpic_baseline.sh.21444/current-deck.op
+
+-INFO- vpic deck installed at /users/qingzhen/jobs/run_vpic_baseline.sh.21444/current-deck.op
+--------------- [    OK    ] --------------
+
+
+--------------- [   DOIT   ] --------------
+!!! NOTICE !!! starting exp >> >> baseline_P160K_C4_N1...
+
+-INFO- creating exp dir...
+[MPIEXEC] mpirun.mpich -np 1 -ppn 1    mkdir -p /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1
+-INFO- done
+-INFO- clearing node caches...
+mpirunall n=4: sudo sh -c echo 3 > /proc/sys/vm/drop_caches
+-INFO- done
+
+[DECK] --- 19884215 -rwxr-xr-x 1 2616946 7004 1944312 2017-03-16 13:18:28.433460000 -0600 /users/qingzhen/jobs/run_vpic_baseline.sh.21444/current-deck.op
 ==================================================================
-Running VPIC (baseline) with 320K particles on 4 cores.
-Experiment dir is /users/qingzhen/jobs/run_vpic_baseline.sh.15665/baseline_P320K_C4_N1
+!!! Running VPIC (baseline) with 160K particles on 4 cores !!!
+------------
+> Using /users/qingzhen/jobs/run_vpic_baseline.sh.21444/current-deck.op
+> Job dir is /users/qingzhen/jobs/run_vpic_baseline.sh.21444
+> Experiment dir is /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1
+> Log to /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/baseline_P160K_C4_N1.log
+  + Log to /users/qingzhen/jobs/run_vpic_baseline.sh.21444/run_vpic_baseline.sh.21444.log
+    + Log to STDOUT
 ==================================================================
 
-mpirun.mpich -np 4  --host h0.fs.tablefs.narwhal.pdl.cmu.edu   /users/qingzhen/jobs/run_vpic_baseline.sh.15665/current-deck.op
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(325)[0]: Topology: X=4 Y=1 Z=1
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(333)[0]: num_step = 1000 nppc = 50
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(342)[0]: Particles: nx = 32 ny = 100 nz = 1
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(351)[0]: total # of particles = 320000
-/users/qingzhen/vpic-install/decks/main.cxx(86): **** Beginning simulation advance with 1 tpp ****
-Free Mem: 99.31%
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.500
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.161916
-Free Mem: 99.22%
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.1000
-/users/qingzhen/jobs/run_vpic_baseline.sh.15665/tmpdeck.15665/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.149855
-/users/qingzhen/vpic-install/decks/main.cxx(94): simulation time: 28.719526
+[MPIEXEC] mpirun.mpich -np 4  --host h0.fs.tablefs.narwhal.pdl.cmu.edu -env VPIC_current_working_dir /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1   /users/qingzhen/jobs/run_vpic_baseline.sh.21444/current-deck.op
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(325)[0]: Topology: X=4 Y=1 Z=1
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(333)[0]: num_step = 1000 nppc = 50
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(342)[0]: Particles: nx = 16 ny = 100 nz = 1
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(351)[0]: total # of particles = 160000
+/users/qingzhen/vpic-install/decks/main.cxx(93): **** Beginning simulation advance with 1 tpp ****
+Free Mem: 99.50%
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.500
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.104736
+Free Mem: 99.48%
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(1185)[0]: Dumping trajectory data: step T.1000
+/users/qingzhen/jobs/run_vpic_baseline.sh.21444/tmpdeck.21444/trecon-part/./turbulence.cxx(1201)[0]: Dumping duration 0.12373
+/users/qingzhen/vpic-install/decks/main.cxx(101): simulation time: 16.085537
 
-/users/qingzhen/vpic-install/decks/main.cxx(103): Maximum number of time steps reached.  Job has completed.
-mpirun.mpich -np 2  --host h0.fs.tablefs.narwhal.pdl.cmu.edu   /users/qingzhen/vpic-install/bin/vpic-reader -i /users/qingzhen/jobs/run_vpic_baseline.sh.15665/baseline_P320K_C4_N1 -n 1
+/users/qingzhen/vpic-install/decks/main.cxx(110): Maximum number of time steps reached.  Job has completed.
 
-Number of particles: 320000
+-INFO- checking output size...
+[MPIEXEC] mpirun.mpich -np 1 -ppn 1    du -sb /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1
+26944448        /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1
+[MPIEXEC] mpirun.mpich -np 1 -ppn 1    du -h /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/particle
+9.9M    /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/particle/T.500
+9.9M    /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/particle/T.1000
+20M     /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/particle
+
+==================================================================
+!!! Query VPIC (baseline) using 2 cores !!!
+------------
+> Using /users/qingzhen/vpic-install/bin/vpic-reader
+> Experiment dir is /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1
+> Log to /users/qingzhen/jobs/run_vpic_baseline.sh.21444/run_vpic_baseline.sh.21444.log
+  + Log to /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1/baseline_P160K_C4_N1.log
+    + Log to STDOUT
+==================================================================
+
+[MPIEXEC] mpirun.mpich -np 2  --host h0.fs.tablefs.narwhal.pdl.cmu.edu   /users/qingzhen/vpic-install/bin/vpic-reader -i /users/qingzhen/jobs/run_vpic_baseline.sh.21444/baseline_P160K_C4_N1 -n 1
+
+Number of particles: 160000
 
 Querying 1 particles (3 retries)
-Overall: 35ms / query, 35 ms / particle
-Overall: 37ms / query, 34 ms / particle
-Overall: 36ms / query, 33 ms / particle
-Querying results: 34 ms / query, 34 ms / particle
+Overall: 21ms / query, 20 ms / particle
+Overall: 18ms / query, 17 ms / particle
+Overall: 17ms / query, 16 ms / particle
+Querying results: 17 ms / query, 17 ms / particle
 
+
+--------------- [    OK    ] --------------
 Script complete.
-start: Tue Mar 14 14:15:25 MDT 2017
-  end: Tue Mar 14 14:16:02 MDT 2017
+start: Thu Mar 16 13:18:33 MDT 2017
+  end: Thu Mar 16 13:18:56 MDT 2017
 
 ```
 Those final results from the experiment can also be found at `$JOBDIRHOME/${MOAB_JOBNAME}.${PBS_JOBID}/baseline_P{XX}_C{YY}_N{ZZ}/baseline_P{XX}_C{YY}_N{ZZ}.log`. Here `XX` will be the number of particles simulated, `YY` the number of cores, and `ZZ` the number of compute nodes used.
