@@ -258,8 +258,8 @@ do_mpirun() {
 
     envstr=""; npstr=""; hstr=""
 
-    message ""
     message "---------------- [MPIEXEC] ----------------"
+    message ""
 
     if [ `which aprun` ]; then
         # This is likely a CRAY machine. Deploy an aprun job.
@@ -318,8 +318,8 @@ do_mpirun() {
         die "could not find a supported mpirun or aprun command"
     fi
 
-     message "------------------ [END] ------------------"
      message ""
+     message "---------------- [  END  ] ----------------"
 }
 
 #
@@ -346,7 +346,9 @@ build_deck() {
     mv ${ddir}/trecon-part/config.h ${ddir}/trecon-part/config.bkp || \
         die "mv failed"
 
-    message "building vpic deck with cores = ${cores}, px = ${px}, py = ${py}"
+    message "--------------- [INPUT-DECK] --------------"
+    message "-INFO- building vpic deck with cores = ${cores}, px = ${px}, py = ${py}"
+    message ""
 
     case $1 in
     "file-per-process")
@@ -387,10 +389,12 @@ build_deck() {
 
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
-    message "vpic deck installed at ${jobdir}/current-deck.op"
-    message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
+    message ""
 
+    message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
+    message "-INFO- vpic deck installed at ${jobdir}/current-deck.op"
     rm -rf ${ddir}      # don't need staging area anymore
+    message "--------------- [    OK    ] --------------"
 }
 
 #
@@ -448,7 +452,7 @@ do_run() {
     message "------------"
     message "Using ${jobdir}/current-deck.op"
     message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
-    message "Job dir is ${joddir}"
+    message "Job dir is ${jobdir}"
     message "Experiment dir is ${exp_dir}"
     message "Log to STDOUT"
     message "CC to ${logfile}"
