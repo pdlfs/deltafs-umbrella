@@ -8,6 +8,9 @@
 ##MSUB -V
 ##MSUB -m b
 ##MSUB -m $USER@lanl.gov
+#DW jobdw access_mode=striped capacity=25GiB type=scratch
+##DW stage_in type=directory source=/lustre/ttscratch1/users/$USER... destination=$DW_JOB_STRIPED
+##DW stage_out type=directory source=$DW_JOB_STRIPED destination=/lustre/ttscratch1/users/$USER
 
 ip_subnet="11.128"
 nodes=1
