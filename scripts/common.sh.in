@@ -230,6 +230,8 @@ clear_caches() {
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
     fi
+
+    message "-INFO- done"
 }
 
 #
@@ -258,9 +260,6 @@ do_mpirun() {
 
     envstr=""; npstr=""; hstr=""
 
-    message "---------------- [MPIEXEC] ----------------"
-    message ""
-
     if [ `which aprun` ]; then
         # This is likely a CRAY machine. Deploy an aprun job.
 
@@ -276,7 +275,7 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        message "[MPIEXEC] aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe"
         aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} \
             $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
@@ -293,7 +292,7 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        message "[MPIEXEC] mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
         mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
             $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
@@ -310,16 +309,13 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        message "[MPIEXEC] mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
         mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
             $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
     else
         die "could not find a supported mpirun or aprun command"
     fi
-
-     message ""
-     message "---------------- [  END  ] ----------------"
 }
 
 #
@@ -347,7 +343,7 @@ build_deck() {
         die "mv failed"
 
     message "--------------- [INPUT-DECK] --------------"
-    message "-INFO- building vpic deck with cores = ${cores}, px = ${px}, py = ${py}"
+    message "!!! NOTICE !!! building vpic deck with cores = ${cores}, px = ${px}, py = ${py}"
     message ""
 
     case $1 in
@@ -389,12 +385,14 @@ build_deck() {
 
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
-    message ""
 
-    message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
+    message "-INFO- ($(ls -lh ${jobdir}/current-deck.op))"
+    message ""
     message "-INFO- vpic deck installed at ${jobdir}/current-deck.op"
-    rm -rf ${ddir}      # don't need staging area anymore
     message "--------------- [    OK    ] --------------"
+
+    # don't need staging area anymore
+    rm -rf ${ddir}
 }
 
 #
@@ -431,8 +429,11 @@ do_run() {
     ### log file for this particular exp run ###
     exp_logfile="$jobdir/$exp_tag.log"   ### ATTENTION: absolute path !! ###
     cd $jobdir || die "cd to $jobdir failed"
-    message ""
-    message "!!! ATTENTION !!! starting exp ${exp_tag}..."
+    exp_jobdir="$jobdir/$exp_tag"
+    cd $exp_jobdir || die "cd to $exp_jobdir failed"
+
+    message "--------------- [  RUNEXP  ] --------------"
+    message "!!! NOTICE !!! starting exp (${exp_tag})..."
     message ""
 
     ### ATTENTION: data might go to bb ###
@@ -451,12 +452,11 @@ do_run() {
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
     message "------------"
     message "Using ${jobdir}/current-deck.op"
-    message " >>> [$(ls -lh ${jobdir}/current-deck.op)]"
     message "Job dir is ${jobdir}"
     message "Experiment dir is ${exp_dir}"
+    message "Log to ${exp_logfile}"
+    message "Log to ${logfile}"
     message "Log to STDOUT"
-    message "CC to ${logfile}"
-    message "CC to ${exp_logfile}"
     message "=================================================================="
     message ""
 
@@ -621,8 +621,7 @@ do_run() {
     esac
 
     message ""
-    message "!!! ATTENTION !!! completed exp ${exp_tag}"
-    message ""
+    message "--------------- [    OK    ] --------------"
 
     exp_logfile=""
 }
@@ -669,11 +668,10 @@ query_particles() {
     message "!!! Query VPIC ($runtype) using $nnum cores !!!"
     message "------------"
     message "Using ${reader_bin}"
-    message " >>> [$(ls -lh ${reader_bin})]"
     message "Data dir is ${vpicout}"
+    message "Log to ${outfile1}"
+    message "Log to ${outfile2}"
     message "Log to STDOUT"
-    message "CC to ${outfile1}"
-    message "CC to ${outfile2}"
     message "=================================================================="
     message ""
 
