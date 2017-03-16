@@ -426,12 +426,12 @@ do_run() {
     fi
 
     exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
-    ### log file for this particular exp run ###
-    exp_logfile="$jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
     cd $jobdir || die "cd to $jobdir failed"
     exp_jobdir="$jobdir/$exp_tag"   ### NOTE !! still on Lustre !! ###
     mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
+    ### log file for this exp ###
+    exp_logfile="$exp_jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
 
     message "--------------- [   DOIT   ] --------------"
     message "!!! NOTICE !!! starting exp >> >> ${exp_tag}..."
