@@ -13,10 +13,14 @@
 ##DW stage_out type=directory source=$DW_JOB_STRIPED destination=/lustre/ttscratch1/users/$USER
 
 ip_subnet="11.128"
-nodes=1
 cores_per_node=32
 init_procs_per_node=32
 procs_per_node_increase_step=32
+
+##########
+# RUN X
+# -----
+nodes=1
 num_vpic_dumps=2
 px_factor=4
 py_factor=2
