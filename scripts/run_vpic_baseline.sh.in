@@ -28,6 +28,10 @@ bbos_buddies=0
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
+message "Script begin..."
+# keep track of start time so we can see how long this takes
+timein=`date`
+
 ### lustre ###
 get_jobdir
 ### bb ###
@@ -38,10 +42,6 @@ gen_hosts
 ### set read path ###
 last=$query_multiple_partices
 do_querying=1
-
-message "Script begin..."
-# keep track of start time so we can see how long this takes
-timein=`date`
 
 procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
