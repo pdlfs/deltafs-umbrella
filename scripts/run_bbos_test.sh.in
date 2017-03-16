@@ -161,7 +161,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
 
       # SK: moved background inside start_server
       env_vars=("BB_Lustre_chunk_size" "$pchunk"
-                "BB_Ext" "${bb_ext}"
                 "BB_Mercury_transfer_size" "$hgchunk" "BB_Num_workers" "4"
                 "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
                 "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"
@@ -184,7 +183,7 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
       # one aprun for set of clients bound to one server
 
       for (( core = 0; core < num_cores; core++ )); do
-        env_vars=("BB_Mercury_transfer_size" "$hgchunk"
+        env_vars=("BB_Mercury_transfer_size" "$hgchunk" "BB_Ext" "${bb_ext}"
         "BB_Object_size" "$((2**32))" "BB_Server_IP_address" "$svr"
         "BB_Core_num" "$core")
         start_clients "$clts" "$env_vars" $num_clts
