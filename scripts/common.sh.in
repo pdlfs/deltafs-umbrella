@@ -106,8 +106,8 @@ get_jobdir() {
         jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
-    ### default job-wise log ###
-    logfile=$jobdir/$(basename $jobdir).log
+    bbdir=${jobdir} ### XXX: auto set bbdir
+    logfile=${jobdir}/$(basename $jobdir).log ### XXX: auto set logfile
     message "note: jobdir = ${jobdir}"
 }
 
