@@ -16,7 +16,8 @@
 #  $do_querying - whether we will perform particle queries
 #  $ip_subnet - the ip subnet we want to use
 #  $jobdir - per-job shared output directory
-#  $logfile - job's logfile we append to
+#  $logfile - job's logfile we append to (shared among all exps)
+#  $exp_logfile - exp's own logfile
 #  $nodes - number of nodes for vpic
 #  $vpic_nodes - list of nodes for vpic
 #
@@ -51,18 +52,36 @@
 #
 dfsu_prefix=@CMAKE_INSTALL_PREFIX@
 
+### ensure definition of a set of global vars ###
+
 #
 # number of epochs for VPIC runs
 #
 vpic_epochs=8
 
 #
-# message: echo message to stdout and append it to the logfile.  note
-# that if $logfile is undefined, tee will just print the output without
-# using a log file.
-# uses: $logfile
+# job-wise log - shared among all exp runs
 #
-message () { echo "$@" | tee -a $logfile; }
+logfile=""
+
+#
+# exp-wise log - one per exp run
+#
+exp_logfile=""
+
+#
+# num of bbos nodes to use
+#
+bbos_buddies=0
+
+#
+# message: echo message to stdout, cc it to a default job-wise log file, and
+# then cc it again to a specific exp-wise log file.
+# note that if either $logfile or $exp_logfile is empty, tee will
+# just print the message without writing to files
+# uses: $logfile, $exp_logfile
+#
+message () { echo "$@" | tee -a $logfile | tee -a $exp_logfile; }
 
 #
 # die: emit a mesage and exit 1
@@ -70,7 +89,9 @@ message () { echo "$@" | tee -a $logfile; }
 die () { message "Error $@"; exit 1; }
 
 #
-# get_jobdir: setup $jobdir var and makes sure jobdir is present
+# jobdir  ## Lustre
+#
+# get_jobdir: setup $jobdir var and makes sure $jobdir is present
 # uses: $MOAB_JOBNAME, $PBS_JOBID, $JOBDIRHOME
 # sets: $jobdir
 #
@@ -86,9 +107,36 @@ get_jobdir() {
         jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
-    message "note: jobdir = ${jobdir}"
+    bbdir=${jobdir} ### XXX: auto set bbdir
+    logfile=${jobdir}/$(basename $jobdir).log ### XXX: auto set logfile
+    message "-INFO- jobdir = ${jobdir}"
 }
 
+#
+# bbdir  ## shared XFS on CN only
+#
+# get_bbdir: setup $bbdir var and makes sure $bbdir is present, otherwise
+# falls back to $jobdir if BB is not available
+# uses: $DW_JOB_STRIPED, $jobdir
+# sets: $bbdir
+#
+get_bbdir() {
+    if [ x${DW_JOB_STRIPED-} = x ]; then
+      bbdir=${jobdir}
+      message "!!! WARNING !!! missing DW_JOB_STRIPED - putting data in jobdir for this test"
+    else
+      jobdir_last_component=$(basename $jobdir)
+      bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
+      do_mpirun 1 1 "" "" "mkdir -p ${bbdir}" "$logfile" || \
+          die "cannot make bbdir ${bbdir}"
+      do_mpirun 1 1 "" "" "ls ${bbdir}" "$logfile" || \
+          die "cannot ls bbdir ${bbdir}"
+      message "-INFO- bbdir = ${bbdir}"
+    fi
+}
+
+#
+# all_nodes
 #
 # gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
 # one host per line.
@@ -97,7 +145,7 @@ get_jobdir() {
 # creates: $jobdir/hosts.txt
 #
 gen_hostfile() {
-    message "Generating hostfile with all hosts..."
+    message "-INFO- generating hostfile ${jobdir}/hosts.txt..."
 
     if [ `which aprun` ]; then
         # Generate hostfile on CRAY and store on disk
@@ -115,7 +163,9 @@ gen_hostfile() {
     fi
 
     # Populate a variable with hosts
-    all_nodes=$(cat $jobdir/hosts.txt)
+    all_nodes=$(cat ${jobdir}/hosts.txt)
+    num_all_nodes=$(cat ${jobdir}/hosts.txt | sort | wc -l)
+    message "-INFO- num hosts = ${num_all_nodes}"
 }
 
 #
@@ -125,7 +175,7 @@ gen_hostfile() {
 # creates: $jobdir/vpic.hosts, $jobdir/bbos.hosts
 #
 gen_hosts() {
-    message "Generating host lists..."
+    message "-INFO- generating host lists..."
 
     # XXX: sanity check: # of nodes in list from PBS_NODEFILE or
     # XXX:               emulab-listall >= $nodes+$bbos_buddies
@@ -153,9 +203,15 @@ gen_hosts() {
             die "failed to create bbos.hosts file"
     fi
 
-    # Populate host list variables
-    vpic_nodes=$(cat $jobdir/vpic.hosts)
-    bbos_nodes=$(cat $jobdir/bbos.hosts)
+    ### set host list variables ###
+
+    vpic_nodes=$(cat ${jobdir}/vpic.hosts)
+    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | sort | wc -l)
+    message "-INFO- num vpic nodes = ${num_vpic_nodes}"
+
+    bbos_nodes=$(cat ${jobdir}/bbos.hosts)
+    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | sort | wc -l)
+    message "-INFO- num bbos nodes = ${num_bbos_nodes}"
 }
 
 #
@@ -163,10 +219,10 @@ gen_hosts() {
 # uses: $vpic_nodes, $cores, $nodes
 #
 clear_caches() {
-    message "Clearing node caches..."
+    message "-INFO- clearing node caches..."
 
     if [ `which aprun` ]; then
-        message "Skipping cache clear ... no sudo access on cray"
+        message "!!! WARNING !!! skipping cache clear ... no sudo access on cray"
         #aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
         #    'echo 3 > /proc/sys/vm/drop_caches'
     else
@@ -174,6 +230,8 @@ clear_caches() {
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
     fi
+
+    message "-INFO- done"
 }
 
 #
@@ -185,7 +243,8 @@ clear_caches() {
 # @3 array of env vars: ("name1", "val1", "name2", ... )
 # @4 host list (comma-separated)
 # @5 executable (and any options that don't fit elsewhere)
-# @6 outfile (used to log output)
+# @6 outfile1 (optional, typically a job-wise log)
+# @7 outfile2 (optional, typically an exp-wise log )
 do_mpirun() {
     procs=$1
     ppnode=$2
@@ -196,7 +255,8 @@ do_mpirun() {
     fi
     hosts="$4"
     exe="$5"
-    outfile="$6"
+    outfile1="${6:-''}"
+    outfile2="${7:-''}"
 
     envstr=""; npstr=""; hstr=""
 
@@ -215,8 +275,9 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe 2>&1 | tee -a $outfile
+        message "[MPIEXEC] aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} \
+            $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -231,8 +292,9 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe 2>&1 | tee -a $outfile
+        message "[MPIEXEC] mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
+            $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -247,8 +309,9 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe 2>&1 | tee -a "$outfile"
+        message "[MPIEXEC] mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
+        mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
+            $exe 2>&1 | tee -a $outfile1 | tee -a $outfile2
 
     else
         die "could not find a supported mpirun or aprun command"
@@ -277,7 +340,11 @@ build_deck() {
     rm -rf ${ddir}
     cp -r ${dfsu_prefix}/decks ${ddir}
     mv ${ddir}/trecon-part/config.h ${ddir}/trecon-part/config.bkp || \
-		die "mv failed"
+        die "mv failed"
+
+    message "--------------- [INPUT-DECK] --------------"
+    message "!!! NOTICE !!! building vpic deck with cores = ${cores}, px = ${px}, py = ${py}"
+    message ""
 
     case $1 in
     "file-per-process")
@@ -312,20 +379,26 @@ build_deck() {
     esac
 
     # Compile input deck
-    (cd ${ddir}/trecon-part && \
-     ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx) || \
-                                              die "compilation failed"
+    (cd ${ddir}/trecon-part && ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx \
+       2>&1 | tee -a $logfile | tee -a $exp_logfile) || \
+           die "compilation failed"
 
     mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
 
-    rm -rf ${ddir}      # don't need staging area anymore
+    message "-INFO- ($(ls -lh ${jobdir}/current-deck.op))"
+    message ""
+    message "-INFO- vpic deck installed at ${jobdir}/current-deck.op"
+    message "--------------- [    OK    ] --------------"
+
+    # don't need staging area anymore
+    rm -rf ${ddir}
 }
 
 #
 # do_run: run a vpic experiment
 #
-# uses: $dfsu_prefix, $jobdir, $cores, $nodes, $logfile, $vpic_nodes,
+# uses: $dfsu_prefix, $jobdir, $bbdir, $cores, $nodes, $logfile, $vpic_nodes,
 #        $bb_log_size, $bbos_buddies
 #        $jobdir/current-deck.op (precompiled deck)
 #        $jobdir/bbos.hosts, $jobdir/vpic.hosts
@@ -337,6 +410,7 @@ build_deck() {
 # Arguments:
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
+# @3 ppn XXX: not enabled - some scripts pass a different thing
 #
 do_run() {
     runtype=$1
@@ -352,35 +426,57 @@ do_run() {
     fi
 
     exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
-    exp_dir="$jobdir/$exp_tag"
+    ### log file for this particular exp run ###
+    exp_logfile="$jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
     cd $jobdir || die "cd to $jobdir failed"
-    mkdir "$exp_dir" || die "mkdir failed"
-    cd $exp_dir || die "cd to $exp_dir failed"
+    exp_jobdir="$jobdir/$exp_tag"   ### NOTE !! still on Lustre !! ###
+    mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
+    cd $exp_jobdir || die "cd to $exp_jobdir failed"
 
-    # Define logfile before calling message(), changes behavior of message()
-    logfile="${exp_tag}.log"
+    message "--------------- [  RUNEXP  ] --------------"
+    message "!!! NOTICE !!! starting exp ${exp_tag}..."
+    message ""
+
+    ### ATTENTION: data might go to bb ###
+    exp_dir="$bbdir/$exp_tag"
+    do_mpirun 1 1 "" "" "mkdir -p ${exp_dir}" "$logfile" "$exp_logfile" || \
+        die "cannot make $exp_dir"
+
+    ### NOTE: cannot cd to $exp_dir since it may land in bb ###
 
     clear_caches
 
+    ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
+
     message ""
     message "=================================================================="
-    message "Running VPIC ($runtype) with $pp particles on $cores cores."
-    message "Experiment dir is ${exp_dir}"
+    message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
+    message "------------"
+    message "> Using ${jobdir}/current-deck.op"
+    message "> Job dir is ${jobdir}"
+    message "> Experiment dir is ${exp_dir}"
+    message "> Log to ${exp_logfile}"
+    message "  + Log to ${logfile}"
+    message "    + Log to STDOUT"
     message "=================================================================="
     message ""
 
     case $runtype in
     "baseline")
-        do_mpirun $cores 0 "" "$vpic_nodes" "$jobdir/current-deck.op" $logfile
+        ### WRITE PATH ###
+        do_mpirun $cores 0 "" "$vpic_nodes" "${jobdir}/current-deck.op" \
+            "$logfile" "$exp_logfile"
         if [ $? -ne 0 ]; then
             die "baseline: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        do_mpirun 1 1 "" "" "du -sb $exp_dir" "$logfile" "$exp_logfile"
+        do_mpirun 1 1 "" "" "du -h $exp_dir/particle" \
+            "$logfile" "$exp_logfile"
 
+        ### READ PATH ###
         if [ $do_querying -eq 1 ]; then
-            query_particles $runtype $exp_dir $p $logfile
+            query_particles $runtype $exp_dir $p "$logfile" "$exp_logfile"
         fi
         ;;
 
@@ -458,14 +554,18 @@ do_run() {
               "SHUFFLE_Mercury_proto" "bmi+tcp"
               "SHUFFLE_Subnet" "$ip_subnet")
 
+        ### write path ###
         do_mpirun $cores 0 vars[@] "$vpic_nodes" \
                   "$jobdir/current-deck.op" $logfile
         if [ $? -ne 0 ]; then
             die "deltafs: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        ### check output size ###
+        echo "Output size: `du -sb $exp_dir | cut -f1`" | tee -a $logfile
+        if [ -d $exp_dir/plfs/particle ]; then
+            du -h $exp_dir/plfs/particle | tee -a $logfile
+        fi
 
         # Waiting for clients to finish data transfer to server
         for c_pid in "${!client_pids[@]}"; do
@@ -484,10 +584,12 @@ do_run() {
             wait
         fi # $bbos_buddies > 0
 
+        ### read path ###
         if [ $do_querying -eq 1 ]; then
             query_particles $runtype $exp_dir $p $logfile
         fi
         ;;
+
     "shuffle_test")
         np=$3
 
@@ -514,10 +616,15 @@ do_run() {
             die "deltafs: mpirun failed"
         fi
 
-        echo -n "Output size: " >> $logfile
-        du -b $exp_dir | tail -1 | cut -f1 >> $logfile
+        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
+        du -sh $exp_dir
         ;;
     esac
+
+    message ""
+    message "--------------- [    OK    ] --------------"
+
+    exp_logfile=""
 }
 
 #
@@ -529,12 +636,14 @@ do_run() {
 # @1 experiment type in {"baseline", "deltafs"}
 # @2 vpic output directory
 # @3 total number of particles
-# @4 logfile to print results in
+# @4 outfile1 (optional, typically a job-wise log)
+# @5 outfile2 (optional, typically an exp-wise log )
 query_particles() {
     runtype=$1
     vpicout=$2
     qparts=$3
-    logfile=$4
+    outfile1="${4:-''}"
+    outfile2="${5:-''}"
 
     case $runtype in
     "baseline")
@@ -555,11 +664,25 @@ query_particles() {
         ppn=0
     fi
 
+    message ""
+    message "=================================================================="
+    message "!!! Query VPIC ($runtype) using $nnum cores !!!"
+    message "------------"
+    message "> Using ${reader_bin}"
+    message "> Experiment dir is ${vpicout}"
+    message "> Log to ${outfile1}"
+    message "  + Log to ${outfile2}"
+    message "    + Log to STDOUT"
+    message "=================================================================="
+    message ""
+
     # Query particles to see when the DeltaFS approach breaks compared to old,
     # single-pass approach
     if [ $last -eq 1 ]; then
-        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout" $logfile
+        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout" \
+            "$outfile1" "$outfile2"
     else
-        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1" $logfile
+        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1" \
+            "$outfile1" "$outfile2"
     fi
 }

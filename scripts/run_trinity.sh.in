@@ -38,6 +38,9 @@ logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 get_jobdir
+### default job-wise log ###
+logfile=$jobdir/$(basename $jobdir).log
+
 gen_hosts
 
 # Notes:

@@ -19,9 +19,6 @@ num_cores=1
 # location of IOR bin, leave as "IOR" to use $PATH
 iorbin=IOR
 
-# set to non-zero to have client use external mercury API
-bb_ext=0
-
 # Client transfer sizes we experiment with
 OBJECT_CHUNK_SIZE=($((1*(2**20))))
 #                   $((2*(2**20)))
@@ -161,7 +158,6 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
 
       # SK: moved background inside start_server
       env_vars=("BB_Lustre_chunk_size" "$pchunk"
-                "BB_Ext" "${bb_ext}"
                 "BB_Mercury_transfer_size" "$hgchunk" "BB_Num_workers" "4"
                 "BB_Server_IP_address" "$svr" "BB_Output_dir" "$container_dir"
                 "BB_Max_container_size" "$((2**33))" "BB_Object_dirty_threshold"

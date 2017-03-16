@@ -1,0 +1,38 @@
+#!/bin/bash -eu
+#
+#MSUB -N vpic-baseline
+#MSUB -l walltime=0:40:00
+#MSUB -l nodes=1:haswell
+#MSUB -o /users/$USER/joblogs/vpic-baseline-$MOAB_JOBID.out
+#MSUB -j oe
+##MSUB -V
+##MSUB -m b
+##MSUB -m $USER@lanl.gov
+#DW jobdw access_mode=striped capacity=25GiB type=scratch
+##DW stage_in type=directory source=/lustre/ttscratch1/users/$USER... destination=$DW_JOB_STRIPED
+##DW stage_out type=directory source=$DW_JOB_STRIPED destination=/lustre/ttscratch1/users/$USER
+
+ip_subnet="11.128"
+cores_per_node=32
+init_procs_per_node=32
+procs_per_node_increase_step=32
+
+##########
+# RUN X
+# -----
+nodes=1
+num_vpic_dumps=2
+px_factor=4
+py_factor=2
+
+@CMAKE_INSTALL_PREFIX@/scripts/run_vpic_baseline.sh \
+    $ip_subnet \
+    $nodes \
+    $cores_per_node \
+    $init_procs_per_node \
+    $procs_per_node_increase_step \
+    $num_vpic_dumps \
+    $px_factor \
+    $py_factor
+
+exit 0

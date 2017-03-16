@@ -1,4 +1,7 @@
-#!/bin/bash -eu
+#!/bin/bash
+
+### instant die on misc errors ###
+set -euo pipefail
 
 ######################
 # Tunable parameters #
@@ -9,6 +12,7 @@ nodes=${2:-"16"}
 cores_per_node=${3:-"4"}
 init_procs_per_node=${4:-"1"}
 procs_per_node_increase_step=${5:-"4"}
+query_multiple_partices=0
 num_vpic_dumps=${6:-"8"}
 px_factor=${7:-"16"}
 py_factor=${8:-"4"}
@@ -17,20 +21,26 @@ py_factor=${8:-"4"}
 # Core script #
 ###############
 
-logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
+### skip all bbos code ###
+bbos_buddies=0
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
+### lustre ###
 get_jobdir
+### bb ###
+get_bbdir
+### machine list ###
 gen_hosts
+
+### set read path ###
+last=$query_multiple_partices
+do_querying=1
 
 # keep track of start time so we can see how long this takes
 timein=`date`
-
-do_querying=1
-last=0
 
 procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
@@ -41,6 +51,8 @@ do
     parts=$((px * py * 100))
 
     build_deck "file-per-process" $px $py
+    message ""
+    message ""
     do_run "baseline" $parts ### $procs_per_node ###
 
     if [ $procs_per_node -eq 1 ]; then
