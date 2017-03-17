@@ -223,19 +223,19 @@ To do that, open `lanl_do_vpic_baseline.sh`:
 
 To do a standard vpic baseline test, set the above options as follows:
 
-|         VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 | Note                                 |
-|----------------------:|:-----:|:-----:|:-----:|:-----:|:-------------------------------------|
-|                 nodes |   1   |   4   |   16  |   64  |                                      |
-|                 cores |   32  |  128  |  512  |  2048 | 32 cores per node                    |
-|        num_vpic_dumps |   8   |   8   |   8   |   8   |                                      |
-|             px_factor |   16  |   16  |   16  |   16  | px=512, 2K, 8K, 32K                  |
-|             py_factor |   4   |   4   |   4   |   4   | py=10K                               |
-|         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                         |
-| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | less than 1GB per core per dump      |
-|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump  |
-|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included              |
-|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                      |
-|  estimated_query_time |  1min |  5min | 20min | 80min | 8 reader cores w/ each at 512MB/s    |
+|         VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 | Note                                       |
+|----------------------:|:-----:|:-----:|:-----:|:-----:|:-------------------------------------------|
+|                 nodes |   1   |   4   |   16  |   64  |                                            |
+|                 cores |   32  |  128  |  512  |  2048 | 32 cpu cores per node                      |
+|        num_vpic_dumps |   8   |   8   |   8   |   8   |                                            |
+|             px_factor |   16  |   16  |   16  |   16  | px=512, 2K, 8K, 32K                        |
+|             py_factor |   4   |   4   |   4   |   4   | py=10K                                     |
+|         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                               |
+| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | 1GB per core (64B per particle) per dump   |
+|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump        |
+|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included                    |
+|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                            |
+|  estimated_query_time |  1min |  5min | 20min | 80min | 8 cores w/ each streaming at 512MB/s       |
 
 Next, set env `JOBDIRHOME` to a desired root for all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
