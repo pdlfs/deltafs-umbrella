@@ -1,7 +1,0 @@
-#!/bin/bash -eu
-
-subnet="10.53"
-
-@CMAKE_INSTALL_PREFIX@/scripts/run_mercury_runner.sh $subnet
-
-exit 0
