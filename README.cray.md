@@ -228,8 +228,8 @@ To do a standard vpic baseline test, set the above options as follows:
 |                 nodes |   1   |   4   |   16  |   64  |                                      |
 |                 cores |   32  |  128  |  512  |  2048 | 32 cores per node                    |
 |        num_vpic_dumps |   8   |   8   |   8   |   8   |                                      |
-|             px_factor |   16  |   16  |   16  |   16  | px=512, 2k, 8k, 32k                  |
-|             py_factor |   4   |   4   |   4   |   4   | py=40                                |
+|             px_factor |   16  |   16  |   16  |   16  | px=512, 2K, 8K, 32K                  |
+|             py_factor |   4   |   4   |   4   |   4   | py=10K                               |
 |         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                         |
 | estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | less than 1GB per core per dump      |
 |       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump  |
