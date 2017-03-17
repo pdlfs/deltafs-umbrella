@@ -28,7 +28,7 @@ bbos_buddies=0
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
-message "Script begin..."
+message "== Script begin..."
 # keep track of start time so we can see how long this takes
 timein=`date`
 
@@ -65,7 +65,8 @@ done
 
 # overall time
 timeout=`date`
-message "Script complete!"
+
+message "== Script complete!"
 message "start: ${timein}"
 message "  end: ${timeout}"
 
