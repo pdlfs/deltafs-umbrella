@@ -7,26 +7,25 @@
 
 #
 # global variables we set/use:
-#  $all_nodes - list of all nodes (sep: whitespace)
+#  $dfsu_prefix - deltafs umbrella prefix directory (abspath)
+#  $ip_subnet - the ip subnet we want to use (x.y.z.t)
+#  $jobdir - per-job shared output directory (abspath)
+#  $logfile - log shared by all exp runs (abspath)
+#  $exp_logfile - log used by one specific exp run (abspath)
+#  $nodes - number of nodes for vpic (int)
+#  $bbos_buddies - number of nodes for bbos (int)
+#  $cores - total cores across all nodes (int)
+#  $all_nodes - list of all nodes (string - sep: comma)
+#  $vpic_nodes - list of nodes for vpic (string - sep: comma)
+#  $bbos_nodes - list of nodes for bbos (string - sep: comma)
 #  $bb_log_size - BBOS max per-core log size in bytes
-#  $bbos_buddies - number of nodes for bbos
-#  $bbos_nodes - list of nodes for bbos
-#  $cores - total cores across all nodes
-#  $dfsu_prefix - deltafs umbrella prefix directory
-#  $do_querying - whether we will perform particle queries
-#  $ip_subnet - the ip subnet we want to use
-#  $jobdir - per-job shared output directory
-#  $logfile - job's logfile we append to (shared among all exps)
-#  $exp_logfile - exp's own logfile
-#  $nodes - number of nodes for vpic
-#  $vpic_nodes - list of nodes for vpic
+#  $do_querying - whether we will perform particle queries (bool - 0 or 1)
 #
 
 # environment variables we set/use:
 #  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
 #                example: /lustre/ttscratch1/users/$USER
-#  $EXTRA_MPIOPTS - additional options that need to be
-#                       passed to mpirun
+#  $EXTRA_MPIOPTS - additional options that need to be passed to mpirun
 #
 
 #
@@ -35,6 +34,7 @@
 #  $MOAB_JOBNAME - jobname (cray)
 #  $PBS_JOBID - job id (cray)
 #  $PBS_NODEFILE - file with list of all nodes (cray)
+#  $DW_JOB_STRIPED - data wrap mount (cray)
 #
 
 #
