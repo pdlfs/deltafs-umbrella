@@ -166,7 +166,7 @@ gen_hostfile() {
 
     # Populate a variable with hosts
     all_nodes=$(cat ${jobdir}/hosts.txt)
-    num_all_nodes=$(cat ${jobdir}/hosts.txt | sort | wc -l)
+    num_all_nodes=$(cat ${jobdir}/hosts.txt | tr ',' '\n' | sort | wc -l)
     message "-INFO- num hosts = ${num_all_nodes}"
 }
 
@@ -211,11 +211,11 @@ gen_hosts() {
     ### set host list variables ###
 
     vpic_nodes=$(cat ${jobdir}/vpic.hosts)
-    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | sort | wc -l)
+    num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | tr ',' '\n' | sort | wc -l)
     message "-INFO- num vpic nodes = ${num_vpic_nodes}"
 
     bbos_nodes=$(cat ${jobdir}/bbos.hosts)
-    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | sort | wc -l)
+    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | tr ',' '\n' | sort | wc -l)
     message "-INFO- num bbos nodes = ${num_bbos_nodes}"
 }
 
