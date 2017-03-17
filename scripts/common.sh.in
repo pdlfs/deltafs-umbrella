@@ -408,15 +408,15 @@ build_deck() {
 #        $jobdir/current-deck.op (precompiled deck)
 #        $jobdir/bbos.hosts, $jobdir/vpic.hosts
 # creates: an experiment tag: {runtype}_P{particles}_C${cores}_N${nodes}
-#          $jobdir/$exp_tag - output directory for the experiment
-#          $jobdir/$exp_tag.log - logfile for the output dir
-# side effects: changes current directory to $exp_dir
+#          $bbdir/$exp_tag - primary output directory for the experiment
+#          $jobdir/$exp_tag - secondary output directory for the experiment
+#          $jobdir/$exp_tag/$exp_tag.log - logfile for the experiment
+# side effects: changes current directory to $jobdir/$exp_tag
 #
 # Arguments:
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 # @3 ppn XXX: not enabled - some scripts pass a different thing
-#
 do_run() {
     runtype=$1
     p=$2
@@ -471,129 +471,63 @@ do_run() {
 
     case $runtype in
     "baseline")
+        vpic_dir=$exp_dir/vpic
+
+        ### BOOTSTRAPING ###
+        message "-INFO- creating more exp dirs..."
+        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
+        message "-INFO- done"
+
         ### WRITE PATH ###
-        env_vars=("VPIC_current_working_dir" "$exp_dir")
+        env_vars=("VPIC_current_working_dir" "$vpic_dir")
         do_mpirun $cores 0 env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
 
         message ""
         message "-INFO- checking output size..."
-        do_mpirun 1 1 "" "" "du -sb $exp_dir"
-        do_mpirun 1 1 "" "" "du -h $exp_dir/particle"
+        do_mpirun 1 1 "" "" "du -sb $vpic_dir/particle"
+        do_mpirun 1 1 "" "" "du -h $vpic_dir/particle"
         message "-INFO- done"
 
         ### READ PATH ###
-        if [ $do_querying -eq 1 ]; then
-            query_particles $runtype $exp_dir $pp
+        if [ $do_querying -ne 0 ]; then
+            query_particles $runtype $vpic_dir $pp
         fi
         ;;
 
     "deltafs")
-        if [ $bbos_buddies -gt 0 ]; then
-            # Start BBOS servers and clients
-            message "BBOS Per-core log size: $((bb_log_size / (2**20)))MB"
+        plfs_dir=$exp_dir/plfs
+        vpic_dir=$exp_dir/vpic
 
-            bb_server_list=$(cat $jobdir/bbos.hosts | tr ',' ' ')
-            n=1
-            for s in $bb_server_list; do
-                container_dir=$exp_dir/bbos/containers.$n
-                do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
+        ### BOOTSTRAPING ###
+        message "-INFO- creating more exp dirs..."
+        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir"
+        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
+        message "-INFO- done"
 
-                env_vars=("BB_Lustre_chunk_size" "$((2**23))"
-                          "BB_Mercury_transfer_size" "$bb_sst_size"
-                          "BB_Num_workers" "4"
-                          "BB_Server_IP_address" "$s"
-                          "BB_Output_dir" "$container_dir"
-                          "BB_Max_container_size" "$bb_log_size"
-                          "BB_Object_dirty_threshold" "$((2**26))"
-                          "BB_Binpacking_threshold" "$bb_log_size")
-                do_mpirun 1 1 env_vars[@] "$s" \
-                      "${dfsu_prefix}/bin/bbos_server" "$logfile" &
+        ### WRITE PATH ###
+        env_vars=(
+            "VPIC_current_working_dir" "${vpic_dir}",
+            "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
+            "PRELOAD_Deltafs_root" "particle"
+            "PRELOAD_Local_root" "${plfs_dir}"
+            "PRELOAD_Bypass_deltafs_namespace" "1"
+            "PRELOAD_Enable_verbose_error" "1"
+            "SHUFFLE_Virtual_factor" "1024"
+            "SHUFFLE_Mercury_proto" "bmi+tcp"
+            "SHUFFLE_Subnet" "${ip_subnet}"
+        )
 
-                message "BBOS server started at $s"
+        do_mpirun $cores 0 env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
 
-                n=$((n + 1))
-            done
+        message ""
+        message "-INFO- checking output size..."
+        do_mpirun 1 1 "" "" "du -sb $plfs_dir/particle"
+        do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
+        message "-INFO- done"
 
-            sleep 5
-
-            c=1; j=1; p=1
-            all_clients=$(echo $vpic_nodes | tr ',' '\n')
-            num_clts_per_svr=$((nodes / bbos_buddies))
-            for s in $bb_server_list; do
-                # Generate string of comma-separated client hostnames for aprun
-                filter=$(seq -s, $j $((c * num_clts_per_svr)))
-                j=$(((c * num_clts_per_svr) + 1))
-                clts=$(echo $all_clients | cut -d ' ' --fields $filter | tr ' ' ',' )
-                echo "======== $clts bound to server $c ========="
-
-                # one aprun for set of clients bound to one server
-                for (( core = 0; core < cores_per_node; core++ )); do
-                    env_vars=("BB_Mercury_transfer_size" "$bb_sst_size"
-                            "BB_Object_size" "$bb_log_size"
-                            "BB_Server_IP_address" "$s"
-                            "BB_Core_num" "$core")
-
-                    do_mpirun $num_clts_per_svr 1 env_vars[@] "$clts" \
-		                    "${dfsu_prefix}/bin/bbos_client" "$logfile" &
-
-            	    client_pids[$p]=$! # so we can wait for clients to finish
-                    p=$((p+1))
-                done
-
-                c=$((c+1))
-            done
-        fi # $bbos_buddies > 0
-
-        # Start DeltaFS processes
-        mkdir -p $exp_dir/metadata || die "deltafs metadata mkdir failed"
-        mkdir -p $exp_dir/data || die "deltafs data mkdir failed"
-        mkdir -p $exp_dir/plfs || die "deltafs plfs mkdir failed"
-
-        preload_lib_path="${dfsu_prefix}/lib/libdeltafs-preload.so"
-        deltafs_srvr_path="${dfsu_prefix}/bin/deltafs-srvr"
-
-        vars=("LD_PRELOAD" "$preload_lib_path"
-              "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${exp_dir}/plfs"
-              "PRELOAD_Bypass_deltafs_namespace" "1"
-              "PRELOAD_Enable_verbose_error" "1"
-              "SHUFFLE_Virtual_factor" "1024"
-              "SHUFFLE_Mercury_proto" "bmi+tcp"
-              "SHUFFLE_Subnet" "$ip_subnet")
-
-        ### write path ###
-        do_mpirun $cores 0 vars[@] "$vpic_nodes" \
-                  "$jobdir/current-deck.op" $logfile
-        if [ $? -ne 0 ]; then
-            die "deltafs: mpirun failed"
-        fi
-
-        ### check output size ###
-        echo "Output size: `du -sb $exp_dir | cut -f1`" | tee -a $logfile
-        if [ -d $exp_dir/plfs/particle ]; then
-            du -h $exp_dir/plfs/particle | tee -a $logfile
-        fi
-
-        # Waiting for clients to finish data transfer to server
-        for c_pid in "${!client_pids[@]}"; do
-            wait ${client_pids[$c_pid]}
-        done
-
-        if [ $bbos_buddies -gt 0 ]; then
-            bb_server_list=$(cat $jobdir/bbos.hosts | tr ' ' ',')
-
-            # Kill BBOS clients and servers
-            message ""
-            message "Killing BBOS servers"
-            do_mpirun $bbos_buddies 0 "" "$bb_server_list" "pkill -SIGINT bbos_server" "$logfile"
-
-            # Wait for BBOS binpacking to complete
-            wait
-        fi # $bbos_buddies > 0
-
-        ### read path ###
-        if [ $do_querying -eq 1 ]; then
-            query_particles $runtype $exp_dir $p $logfile
+        ### READ PATH ###
+        if [ $do_querying -ne 0 ]; then
+            query_particles $runtype $exp_dir $pp
         fi
         ;;
 
