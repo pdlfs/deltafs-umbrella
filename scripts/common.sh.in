@@ -56,23 +56,27 @@ dfsu_prefix=@CMAKE_INSTALL_PREFIX@
 
 #
 # number of epochs for VPIC runs
+# default: 8
 #
-vpic_epochs=8
+vpic_epochs=${vpic_epochs:-8}
 
 #
 # job-wise log - shared among all exp runs
+# default: null
 #
-logfile=""
+logfile=${logfile-}
 
 #
 # exp-wise log - one per exp run
+# default: null
 #
-exp_logfile=""
+exp_logfile=${exp_logfile-}
 
 #
 # num of bbos nodes to use
+# default: 0
 #
-bbos_buddies=0
+bbos_buddies=${bbos_buddies:-0}
 
 #
 # message: echo message to stdout, cc it to a default job-wise log file, and
@@ -460,8 +464,8 @@ do_run() {
     message "> Job dir is ${jobdir}"
     message "> Experiment dir is ${exp_dir}"
     message "> Log to ${exp_logfile}"
-    message "  + Log to ${logfile}"
-    message "    + Log to STDOUT"
+    message "  (+) Log to ${logfile}"
+    message "      (+) Log to STDOUT"
     message "=================================================================="
     message ""
 
@@ -479,7 +483,7 @@ do_run() {
 
         ### READ PATH ###
         if [ $do_querying -eq 1 ]; then
-            query_particles $runtype $exp_dir $p
+            query_particles $runtype $exp_dir $pp
         fi
         ;;
 
@@ -642,7 +646,7 @@ do_run() {
 query_particles() {
     runtype=$1
     vpicout=$2
-    qparts=$3
+    pp=$3  ### for printing only ###
 
     case $runtype in
     "baseline")
@@ -665,13 +669,13 @@ query_particles() {
 
     message ""
     message "=================================================================="
-    message "!!! Query VPIC ($runtype) using $nnum cores !!!"
+    message "!!! Query VPIC ($runtype) with $pp particles on $nnum cores !!!"
     message "------------"
     message "> Using ${reader_bin}"
     message "> Experiment dir is ${vpicout}"
     message "> Log to ${exp_logfile}"
-    message "  + Log to ${logfile}"
-    message "    + Log to STDOUT"
+    message "  (+) Log to ${logfile}"
+    message "      (+) Log to STDOUT"
     message "=================================================================="
     message ""
 

@@ -1,13 +1,7 @@
-#!/bin/bash -eu
-#
-#MSUB -N deltafs-exp
-#MSUB -l walltime=1:00:00
-#MSUB -l nodes=4:haswell
-#MSUB -o /users/$USER/joblogs/deltafs-exp-$MOAB_JOBID.out
-#MSUB -j oe
-##MSUB -V
-##MSUB -m b
-##MSUB -m $USER@lanl.gov
+#!/bin/bash
+
+### instant death on misc errors ###
+set -euo pipefail
 
 ######################
 # Tunable parameters #
@@ -34,13 +28,13 @@ ip_subnet="10.92"
 # Core script #
 ###############
 
-logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
+### lustre ###
 get_jobdir
-### default job-wise log ###
-logfile=$jobdir/$(basename $jobdir).log
-
+### bb ###
+get_bbdir
+### machine list ###
 gen_hosts
 
 # Notes:
