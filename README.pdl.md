@@ -18,10 +18,9 @@ properly setting up the repository and syncing the mirrors at both github.com an
 ## Install git-lfs client
 
 ```bash
-// First, get latest git-lfs from https://git-lfs.github.com/
-// The latest version may be higher than 1.5.3.
-//
-// For example, on 64-bit Ubuntu:
+# First, get latest git-lfs from https://git-lfs.github.com/
+# The latest version may be higher than 1.5.3.#
+# For example, on 64-bit Ubuntu:
 wget https://github.com/git-lfs/git-lfs/releases/download/v1.5.3/git-lfs-linux-amd64-1.5.3.tar.gz
 tar xzf git-lfs-linux-amd64-1.5.3.tar.gz -C .
 
@@ -29,7 +28,7 @@ cd git-lfs-1.5.3
 
 sudo ./install.sh
 
-// Second and optionally, add a convenient git-lfs config
+# Secondly, add a convenient git-lfs config
 git config --global --add lfs.skipdownloaderrors true
 ```
 
@@ -42,31 +41,31 @@ This ensures our external collaborators can `git-lfs pull` files without knowing
 Here, it is assumed that git-lfs has been installed.
 
 ```bash
-// First, git-clone from dev.pdl.cmu.edu but avoid fetching
-// any git-lfs files because this will fail anyway
+# First, git-clone from dev.pdl.cmu.edu but avoid fetching
+# any git-lfs files because this will fail anyway
 git lfs clone --exclude="cache.0" git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
 
 cd deltafs-umbrella
 
-// install git lfs for the repository (if you haven't globally enabled it)
+# Install git lfs for the repository (if you haven't globally enabled it)
 git lfs install --local
 
-// Secondly, config git-lfs to use github.com as the service provider,
-// which by default will be dev.pdl.cmu.edu
+# Secondly, config git-lfs to use github.com as the service provider,
+# which by default will be dev.pdl.cmu.edu
 git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
 git config --add lfs.pushurl git@github.com:pdlfs/deltafs-umbrella.git
 
-// Update lfs lock setting
+# Update lfs lock setting
 git config 'lfs.https://github.com/pdlfs/deltafs-umbrella.git.locksverify' true
 
-// Next and optionally, fetch all git-lfs files
+# Next, fetch all git-lfs files
 git lfs pull
 
-// Finally, add a push alias "all" that pushes to both dev.pdl and github
+# Finally, add a push alias "all" that pushes to both dev.pdl and github
 git remote add all git@github.com:pdlfs/deltafs-umbrella.git
 git remote set-url --add --push all git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
 git remote set-url --add --push all git@github.com:pdlfs/deltafs-umbrella.git
 
-// verify settings
+# Verify settings
 git remote -v
 ```
