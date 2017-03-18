@@ -594,16 +594,12 @@ do_run() {
         do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "$jobdir/current-deck.op" \
             "${EXTRA_MPIOPTS-}"
 
-        message ""
-        message "-INFO- checking output size..."
-        do_mpirun 1 1 "" "" "du -sb $plfs_dir/particle"
-        do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
-        message "-INFO- done"
-
         ### READ PATH ###
         message ""
         message "!!! WARNING !!! shuffle only - skipping read phase..."
         message ""
+        ;;
+
     esac
 
     message ""
