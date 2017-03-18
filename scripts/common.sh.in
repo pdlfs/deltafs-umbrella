@@ -506,7 +506,7 @@ do_run() {
 
         ### WRITE PATH ###
         env_vars=(
-            "VPIC_current_working_dir" "${vpic_dir}",
+            "VPIC_current_working_dir" "${vpic_dir}"
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Deltafs_root" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
