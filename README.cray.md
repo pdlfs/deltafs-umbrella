@@ -75,26 +75,26 @@ Assuming `$INSTALL` is a global file system location that is accessible from all
 
 **NOTE**: do not rename the install dir after installation is done. If the current install location is bad, simply remove the install dir and reinstall deltafs to a new place.
 ```
-+$INSTALL/deltafs
-| |- bin
-| |- decks (vpic input decks)
-| |- include
-| |- lib
-| |- scripts
-| -- share
++ $INSTALL/deltafs
+|  |- bin
+|  |- decks (vpic input decks)
+|  |- include
+|  |- lib
+|  |- scripts
+|  -- share
 |
-+$HOME/deltafs
-| -- src
-|     +- deltafs-umbrella
-|         |- cache.0
-|         |- cache
-|         -- build
++ $HOME/deltafs
+|  -- src
+|      +- deltafs-umbrella
+|          |- cache.0
+|          |- cache
+|          -- build
 =
-mkdir -p $HOME/deltafs/src
-cd $HOME/deltafs/src
 ```
 First, let's get a recent deltafs-umbrella release from github:
 ```bash
+mkdir -p $HOME/deltafs/src
+cd $HOME/deltafs/src
 git lfs clone https://github.com/pdlfs/deltafs-umbrella.git
 cd deltafs-umbrella
 ```
@@ -192,7 +192,7 @@ VPIC BASELINE TEST
 
 The following scripts are involved to run vpic baseline tests.
 
-Each vpic baseline run consists of a `write` phase that generates N-N particle timestep dumps and a `read` phase that performs queries on one or more particle trajectroies.
+Each vpic baseline run consists of a **write** phase that generates N-N particle timestep dumps and a **read** phase that performs queries on one or more particle trajectroies.
 
 **NOTE**: all scripts are in the install dir. Do not use the script templates in the build dir.
 ```
@@ -213,29 +213,29 @@ Each vpic baseline run consists of a `write` phase that generates N-N particle t
 
 To do that, open `lanl_do_vpic_baseline.sh`:
 
-**a**) check the **subnet** option and modify it to match your network configurations;
+**a**) set **subnet** to match your network configurations, such as "11.128";
 
-**b**) set the **nodes** and **cores_per_node** options to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is safe and recommended to set the cores_per_node to just the total number of cores available on a compute node (32 for Trinitite);
+**b**) set **nodes** and **ppn** to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is recommended to set ppn to the total number of cores available on a compute node (32 for Trinitite compute nodes);
 
-**c**) finally, set the **num_vpic_dumps**,  **px_factor**, and **py_factor** options to control the size of job outputs as well as the runtime of a job.
+**c**) finally, set **num_vpic_dumps**,  **px_factor**, and **py_factor** to control the size of vpic outputs as well as the runtime of a job.
 
 **NOTE**: to do an initial validation run to check code and debug scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2 (on a 32-core Trinitite node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total).
 
 To do a standard vpic baseline test, set the above options as follows:
 
-|         VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 | Note                                       |
-|----------------------:|:-----:|:-----:|:-----:|:-----:|:-------------------------------------------|
-|                 nodes |   1   |   4   |   16  |   64  |                                            |
-|                 cores |   32  |  128  |  512  |  2048 | 32 cpu cores per node                      |
-|        num_vpic_dumps |   8   |   8   |   8   |   8   |                                            |
-|             px_factor |   16  |   16  |   16  |   16  | px=512, 2K, 8K, 32K                        |
-|             py_factor |   4   |   4   |   4   |   4   | py=10K                                     |
-|         num_particles |  512M |   2G  |   8G  |  32G  | 16M per core                               |
-| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | 1GB per core (64B per particle) per dump   |
-|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump        |
-|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included                    |
-|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                            |
-|  estimated_query_time |  1min |  5min | 20min | 80min | 8 cores w/ each streaming at 512MB/s       |
+|         VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 | Note                                                 |
+|----------------------:|:-----:|:-----:|:-----:|:-----:|:-----------------------------------------------------|
+|             **nodes** |   1   |   4   |   16  |   64  |                                                      |
+|                 cores |   32  |  128  |  512  |  2048 | 32 cpu cores per node (**ppn**=32)                   |
+|    **num_vpic_dumps** |   8   |   8   |   8   |   8   |                                                      |
+|         **px_factor** |   16  |   16  |   16  |   16  | *px=512, 2K, 8K, 32K*                                |
+|         **py_factor** |   4   |   4   |   4   |   4   | *py=10K*                                             |
+|         num_particles |  512M |   2G  |   8G  |  32G  | 16M particles per core                               |
+| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | less than 1GB per core (64B per particle) per dump   |
+|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump                  |
+|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included                              |
+|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                                      |
+|  estimated_query_time |  1min |  5min | 20min | 80min | assuming 8 cores w/ each streaming at 512MB/s        |
 
 Next, set env `JOBDIRHOME` to a desired root for all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
@@ -247,7 +247,7 @@ export EXTRA_MPIOPTS="-cc cpu"
 
 **Finally**, check if all `#MSUB` and `#DW` directives have been properly set.
 
-== Time to submit the job to the batch system !!
+!!! Time to submit the job to the batch system !!!
 
 After the job completes, the main script will show the testing results, which may look like:
 ```
