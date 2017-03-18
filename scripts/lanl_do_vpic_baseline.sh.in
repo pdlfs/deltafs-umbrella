@@ -7,9 +7,10 @@
 #MSUB -j oe
 #DW jobdw access_mode=striped capacity=25GiB type=scratch
 ip_subnet="11.128"
-ppn=32 ## aprun -N 32
+ppn=32 ## aprun -N $ppn
 export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
-export EXTRA_MPIOPTS="--cc cpu"  ## only applies to main vpic calls
+## export DEFAULT_MPIOPTS=""  ## applies to all mpiexec calls
+export EXTRA_MPIOPTS="--cc cpu"  ## only applies to vpic mpiexec calls
 #|
 #|  VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 |#########################
 #|---------------:|:-----:|:-----:|:-----:|:-----:|#########################
@@ -26,15 +27,15 @@ nodes=1  ## aprun -n $(( nodes * ppn )) -N $ppn ...
 num_vpic_dumps=2  ## see table above
 px_factor=4  ## see table above
 py_factor=2  ## see table above
-##DOIT
+## DOIT
 @CMAKE_INSTALL_PREFIX@/scripts/run_vpic_baseline.sh \
-    $ip_subnet \
-    $nodes \
-    $ppn \
-    $ppn \
-    $ppn \
-    $num_vpic_dumps \
-    $px_factor \
-    $py_factor
+$ip_subnet \
+$nodes \
+$ppn \
+$ppn \
+$ppn \
+$num_vpic_dumps \
+$px_factor \
+$py_factor
 
 exit 0
