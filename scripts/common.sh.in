@@ -312,9 +312,11 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "[MPIEXEC] aprun $hstr -n $procs $npstr $envstr $extra_opts $exe"
-        aprun $hstr -n $procs $npstr $envstr $extra_opts \
-            $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
+        message "[MPIEXEC]" "aprun -n $procs" $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe
+        aprun -n $procs $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
+                tee -a $exp_logfile | tee -a $logfile
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -329,9 +331,11 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC] mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts $exe"
+        message "[MPIEXEC]" "mpirun.mpich -np $procs" $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe
         mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts \
-            $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
+            ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
+                tee -a $exp_logfile | tee -a $logfile
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -346,9 +350,11 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC] mpirun.openmpi -np $procs $npstr $hstr $envstr $extra_opts $exe"
-        mpirun.openmpi -np $procs $npstr $hstr $envstr $extra_opts \
-            $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
+        message "[MPIEXEC]" "mpirun.openmpi -n $procs" $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe
+        mpirun.openmpi -n $procs $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
+                tee -a $exp_logfile | tee -a $logfile
 
     else
         die "could not find a supported mpirun or aprun command"
