@@ -65,11 +65,13 @@ do
     parts=$((px * py * 100))
     bb_clients=$cores
 
+    ### XXX: set ppn to control the number of mpi procs per node ###
+
     build_deck "file-per-process" $px $py
-    do_run "baseline" $parts $last
+    do_run "baseline" $parts ## $ppn ##
 
     build_deck "file-per-particle" $px $py
-    do_run "deltafs" $parts $last
+    do_run "deltafs" $parts ## $ppn ##
 
     cores=$(( cores * 2 ))
 done

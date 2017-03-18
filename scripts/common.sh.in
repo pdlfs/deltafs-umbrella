@@ -416,10 +416,11 @@ build_deck() {
 # Arguments:
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
-# @3 ppn XXX: not enabled - some scripts pass a different thing
+# @3 ppn
 do_run() {
     runtype=$1
     p=$2
+    ppn=${3:-0}
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -480,7 +481,7 @@ do_run() {
 
         ### WRITE PATH ###
         env_vars=("VPIC_current_working_dir" "$vpic_dir")
-        do_mpirun $cores 0 env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
 
         message ""
         message "-INFO- checking output size..."
@@ -517,7 +518,7 @@ do_run() {
             "SHUFFLE_Subnet" "${ip_subnet}"
         )
 
-        do_mpirun $cores 0 env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
 
         message ""
         message "-INFO- checking output size..."
@@ -532,8 +533,6 @@ do_run() {
         ;;
 
     "shuffle_test")
-        np=$3
-
         # Start DeltaFS processes
         mkdir -p $exp_dir/metadata || die "shuffle test metadata mkdir failed"
         mkdir -p $exp_dir/data || die "shuffle test data mkdir failed"
@@ -551,11 +550,7 @@ do_run() {
               "SHUFFLE_Mercury_proto" "bmi+tcp"
               "SHUFFLE_Subnet" "$ip_subnet")
 
-        do_mpirun $cores $np vars[@] "$vpic_nodes" \
-                  "$jobdir/current-deck.op" $logfile
-        if [ $? -ne 0 ]; then
-            die "deltafs: mpirun failed"
-        fi
+        do_mpirun $cores $ppn vars[@] "$vpic_nodes" "$jobdir/current-deck.op"
 
         echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
         du -sh $exp_dir
