@@ -282,6 +282,7 @@ clear_caches() {
 # @3 array of env vars: ("name1", "val1", "name2", ... )
 # @4 host list (comma-separated)
 # @5 executable (and any options that don't fit elsewhere)
+# @6 extra_opts (optional)
 do_mpirun() {
     procs=$1
     ppnode=$2
@@ -292,6 +293,7 @@ do_mpirun() {
     fi
     hosts="$4"
     exe="$5"
+    extra_opts=${6-}
 
     envstr=""; npstr=""; hstr=""
 
@@ -310,8 +312,8 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "[MPIEXEC] aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        aprun $hstr -n $procs $npstr $envstr ${EXTRA_MPIOPTS-} \
+        message "[MPIEXEC] aprun $hstr -n $procs $npstr $envstr $extra_opts $exe"
+        aprun $hstr -n $procs $npstr $envstr $extra_opts \
             $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
 
     elif [ `which mpirun.mpich` ]; then
@@ -327,8 +329,8 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC] mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        mpirun.mpich -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
+        message "[MPIEXEC] mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts $exe"
+        mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts \
             $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
 
     elif [ `which mpirun.openmpi` ]; then
@@ -344,8 +346,8 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC] mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} $exe"
-        mpirun.openmpi -np $procs $npstr $hstr $envstr ${EXTRA_MPIOPTS-} \
+        message "[MPIEXEC] mpirun.openmpi -np $procs $npstr $hstr $envstr $extra_opts $exe"
+        mpirun.openmpi -np $procs $npstr $hstr $envstr $extra_opts \
             $exe 2>&1 | tee -a $exp_logfile | tee -a $logfile
 
     else
@@ -513,7 +515,8 @@ do_run() {
 
         ### WRITE PATH ###
         env_vars=("VPIC_current_working_dir" "$vpic_dir")
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
+            "${EXTRA_MPIOPTS-}"
 
         message ""
         message "-INFO- checking output size..."
@@ -550,7 +553,8 @@ do_run() {
             "SHUFFLE_Subnet" "${ip_subnet}"
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
+            "${EXTRA_MPIOPTS-}"
 
         message ""
         message "-INFO- checking output size..."
@@ -587,7 +591,8 @@ do_run() {
             "SHUFFLE_Subnet" "${ip_subnet}"
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "$jobdir/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "$jobdir/current-deck.op" \
+            "${EXTRA_MPIOPTS-}"
 
         message ""
         message "-INFO- checking output size..."
