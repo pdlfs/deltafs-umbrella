@@ -533,28 +533,40 @@ do_run() {
         ;;
 
     "shuffle_test")
-        # Start DeltaFS processes
-        mkdir -p $exp_dir/metadata || die "shuffle test metadata mkdir failed"
-        mkdir -p $exp_dir/data || die "shuffle test data mkdir failed"
-        mkdir -p $exp_dir/plfs || die "shuffle test plfs mkdir failed"
+        plfs_dir=$exp_dir/plfs
+        vpic_dir=$exp_dir/vpic
 
-        preload_lib_path="${dfsu_prefix}/lib/libdeltafs-preload.so"
-        deltafs_srvr_path="${dfsu_prefix}/bin/deltafs-srvr"
+        ### BOOTSTRAPING ###
+        message "-INFO- creating more exp dirs..."
+        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir"
+        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
+        message "-INFO- done"
 
-        vars=("LD_PRELOAD" "$preload_lib_path"
-              "PRELOAD_Deltafs_root" "particle"
-              "PRELOAD_Local_root" "${exp_dir}/plfs"
-              "PRELOAD_Bypass_write" "y"
-              "PRELOAD_Enable_verbose_error" "y"
-              "SHUFFLE_Virtual_factor" "1024"
-              "SHUFFLE_Mercury_proto" "bmi+tcp"
-              "SHUFFLE_Subnet" "$ip_subnet")
+        ### WRITE PATH ###
+        env_vars=(
+            "VPIC_current_working_dir" "${vpic_dir}"
+            "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
+            "PRELOAD_Deltafs_root" "particle"
+            "PRELOAD_Local_root" "${plfs_dir}"
+            "PRELOAD_Bypass_write" "1"
+            "PRELOAD_Enable_verbose_error" "1"
+            "SHUFFLE_Virtual_factor" "1024"
+            "SHUFFLE_Mercury_proto" "bmi+tcp"
+            "SHUFFLE_Subnet" "${ip_subnet}"
+        )
 
-        do_mpirun $cores $ppn vars[@] "$vpic_nodes" "$jobdir/current-deck.op"
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "$jobdir/current-deck.op"
 
-        echo "Output size: `du -sb $exp_dir | cut -f1`" >> $logfile
-        du -sh $exp_dir
-        ;;
+        message ""
+        message "-INFO- checking output size..."
+        do_mpirun 1 1 "" "" "du -sb $plfs_dir/particle"
+        do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
+        message "-INFO- done"
+
+        ### READ PATH ###
+        message ""
+        message "!!! WARNING !!! shuffle only - skipping read phase..."
+        message ""
     esac
 
     message ""
