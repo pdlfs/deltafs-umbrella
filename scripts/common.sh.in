@@ -105,6 +105,12 @@ exp_logfile=${exp_logfile-}
 bbos_buddies=${bbos_buddies:-0}
 
 #
+# if a read phase should follow a write phase
+# default: 0
+#
+do_querying=${do_querying:-0}
+
+#
 # message: echo message to stdout, cc it to a default job-wise log file, and
 # then cc it again to a specific exp-wise log file.
 # note that if either $logfile or $exp_logfile is empty, tee will
