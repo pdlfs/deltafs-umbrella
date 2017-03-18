@@ -9,7 +9,7 @@
 ip_subnet="11.128"
 ppn=32 ## aprun -N 32
 export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
-export EXTRA_MPIOPTS="--cc cpu"
+export EXTRA_MPIOPTS="--cc cpu"  ## only applies to main vpic calls
 #|
 #|  VPIC baseline | Run 1 | Run 2 | Run 3 | Run 4 |#########################
 #|---------------:|:-----:|:-----:|:-----:|:-----:|#########################
@@ -17,15 +17,15 @@ export EXTRA_MPIOPTS="--cc cpu"
 #| num_vpic_dumps |   8   |   8   |   8   |   8   |#########################
 #|      px_factor |   16  |   16  |   16  |   16  |#########################
 #|      py_factor |   4   |   4   |   4   |   4   |#########################
-#|  num_particles |  512M |   2G  |   8G  |  32G  |#########################
+#|            ppn |   32  |   32  |   32  |   32  |#########################
 #|
-#|-------------
+#|--------------
 #| RUN CONF
 #|----------
 nodes=1  ## aprun -n $(( nodes * ppn )) -N $ppn ...
-num_vpic_dumps=2
-px_factor=4
-py_factor=2
+num_vpic_dumps=2  ## see table above
+px_factor=4  ## see table above
+py_factor=2  ## see table above
 ##DOIT
 @CMAKE_INSTALL_PREFIX@/scripts/run_vpic_baseline.sh \
     $ip_subnet \
