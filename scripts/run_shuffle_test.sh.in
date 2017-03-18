@@ -1,36 +1,42 @@
-#!/bin/bash -eu
+#!/bin/bash
+
+### instant death on misc errors ###
+set -euo pipefail
 
 ######################
 # Tunable parameters #
 ######################
 
 ip_subnet=${1:-"10.92"}
-nodes=${2:-"16"}
+nodes=${2:-"1"}
 cores_per_node=${3:-"4"}
-init_procs_per_node=${4:-"1"}
+init_procs_per_node=${4:-"4"}
 procs_per_node_increase_step=${5:-"4"}
-num_vpic_dumps=${6:-"8"}
-px_factor=${7:-"16"}
-py_factor=${8:-"4"}
+num_vpic_dumps=${6:-"2"}
+px_factor=${7:-"4"}
+py_factor=${8:-"2"}
 
 ###############
 # Core script #
 ###############
 
-logfile=""
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
+### skip all bbos code ###
+bbos_buddies=0
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
-### bbos not intergreated ###
-bbos_buddies=0
-
-get_jobdir
-gen_hosts
-
+message "Script begin..."
 # keep track of start time so we can see how long this takes
 timein=`date`
+
+### lustre ###
+get_jobdir
+### bb ###
+get_bbdir
+### machine list ###
+gen_hosts
 
 procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
