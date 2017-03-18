@@ -17,7 +17,7 @@ properly setting up the repository and syncing the mirrors at both github.com an
 
 ## Install git-lfs client
 
-```
+```bash
 // First, get latest git-lfs from https://git-lfs.github.com/
 // The latest version may be higher than 1.5.3.
 //
@@ -37,11 +37,11 @@ git config --global --add lfs.skipdownloaderrors true
 
 We will use dev.pdl.cmu.edu as our primary git repository, and github.com as our secondary repository.
 For git-lfs, however, both will use the service provided by github.com.
-This ensures our external collaborators can `git-lfs pull` files without knowing the existence of dev.pdl.cmu.edu. 
+This ensures our external collaborators can `git-lfs pull` files without knowing the existence of dev.pdl.cmu.edu.
 
 Here, it is assumed that git-lfs has been installed.
 
-```
+```bash
 // First, git-clone from dev.pdl.cmu.edu but avoid fetching
 // any git-lfs files because this will fail anyway
 git lfs clone --exclude="cache.0" git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
@@ -57,7 +57,7 @@ git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
 git config --add lfs.pushurl git@github.com:pdlfs/deltafs-umbrella.git
 
 // Update lfs lock setting
-git config lfs.https://github.com/pdlfs/deltafs-umbrella.git/info/lfs.locksverify true
+git config 'lfs.https://github.com/pdlfs/deltafs-umbrella.git.locksverify' true
 
 // Next and optionally, fetch all git-lfs files
 git lfs pull
@@ -69,5 +69,4 @@ git remote set-url --add --push all git@github.com:pdlfs/deltafs-umbrella.git
 
 // verify settings
 git remote -v
-
 ```
