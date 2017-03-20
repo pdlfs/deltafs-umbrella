@@ -282,7 +282,9 @@ clear_caches() {
 # @3 array of env vars: ("name1", "val1", "name2", ... )
 # @4 host list (comma-separated)
 # @5 executable (and any options that don't fit elsewhere)
-# @6 extra_opts (optional)
+# @6 extra_opts: extra options to mpiexec (optional)
+# @7 log1: primary log file for mpi stdout (optional)
+# @8 log2: secondary log file for mpi stdout (optional)
 do_mpirun() {
     procs=$1
     ppnode=$2
@@ -293,7 +295,11 @@ do_mpirun() {
     fi
     hosts="$4"
     exe="$5"
+    ### extra options to mpiexec ###
     extra_opts=${6-}
+    ### log files ###
+    log1=${7-$logfile}
+    log2=${8-$exp_logfile}
 
     envstr=""; npstr=""; hstr=""
 
@@ -316,7 +322,7 @@ do_mpirun() {
             ${DEFAULT_MPIOPTS-} $exe
         aprun -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
-                tee -a $exp_logfile | tee -a $logfile
+            tee -a $log2 | tee -a $log1
 
     elif [ `which mpirun.mpich` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -335,7 +341,7 @@ do_mpirun() {
             ${DEFAULT_MPIOPTS-} $exe
         mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
-                tee -a $exp_logfile | tee -a $logfile
+            tee -a $log2 | tee -a $log1
 
     elif [ `which mpirun.openmpi` ]; then
         if [ ${#envs[@]} -gt 0 ]; then
@@ -354,7 +360,7 @@ do_mpirun() {
             ${DEFAULT_MPIOPTS-} $exe
         mpirun.openmpi -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
-                tee -a $exp_logfile | tee -a $logfile
+            tee -a $log2 | tee -a $log1
 
     else
         die "could not find a supported mpirun or aprun command"
