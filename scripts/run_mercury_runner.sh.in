@@ -210,10 +210,10 @@ run_one() {
 # do normal test first
 now=`date`
 message "== Starting normal tests: ${now}"
-for proto in ${n_protos[@]}; do
-    for num in ${instances[@]}; do
-        for sz in ${n_sizes[@]}; do
-            for lm in ${n_limits[@]}; do
+for proto in ${n_protos[@]-}; do
+    for num in ${instances[@]-}; do
+        for sz in ${n_sizes[@]-}; do
+            for lm in ${n_limits[@]-}; do
 
                 if [[ $proto == "bmi+tcp" && $num -gt 1 ]]; then
                     continue;  # BMI doesn't do well with >1 instances
@@ -234,11 +234,10 @@ now=`date`
 message "DONE normal tests: ${now}"
 
 message "Generate result files"
-for proto in ${n_protos[@]}; do
-    for num in ${instances[@]}; do
-        for sz in ${n_sizes[@]}; do
-            cat ${jobdir}/${proto}/ncli-${proto}-${num}-${sz}-* \
-                ${jobdir}/${proto}/nsrv-${proto}-${num}-${sz}-* | \
+for proto in ${n_protos[@]-}; do
+    for num in ${instances[@]-}; do
+        for sz in ${n_sizes[@]-}; do
+            find ${jobdir}/${proto} -iname "n*-${proto}-${num}-${sz}-*" | xargs cat | \
                 ${dfsu_prefix}/scripts/process_runner.pl > \
                 ${jobdir}/norm-${proto}-${num}-${sz}.result
             if [ ! -s ${jobdir}/norm-${proto}-${num}-${sz}.result ]; then
@@ -254,10 +253,10 @@ message "DONE generate result files"
 # do bulk test next
 now=`date`
 message "== Starting bulk tests: ${now}"
-for proto in ${b_protos[@]}; do
-    for num in ${instances[@]}; do
-        for sz in ${b_Sizes[@]}; do
-            for lm in ${b_limits[@]}; do
+for proto in ${b_protos[@]-}; do
+    for num in ${instances[@]-}; do
+        for sz in ${b_Sizes[@]-}; do
+            for lm in ${b_limits[@]-}; do
 
                 if [[ $proto == "bmi+tcp" && $num -gt 1 ]]; then
                     continue;  # BMI doesn't do well with >1 instances
@@ -278,11 +277,10 @@ now=`date`
 message "DONE bulk tests: ${now}"
 
 message "Generate result files"
-for proto in ${b_protos[@]}; do
-    for num in ${instances[@]}; do
-        for sz in ${b_Sizes[@]}; do
-            cat ${jobdir}/${proto}/bcli-${proto}-${num}-${sz}-* \
-                ${jobdir}/${proto}/bsrv-${proto}-${num}-${sz}-* | \
+for proto in ${b_protos[@]-}; do
+    for num in ${instances[@]-}; do
+        for sz in ${b_Sizes[@]-}; do
+            find ${jobdir}/${proto} -iname "b*-${proto}-${num}-${sz}-*" | xargs cat | \
                 ${dfsu_prefix}/scripts/process_runner.pl > \
                 ${jobdir}/bulk-${proto}-${num}-${sz}.result
             if [ ! -s ${jobdir}/bulk-${proto}-${num}-${sz}.result ]; then
@@ -295,7 +293,7 @@ done
 message "DONE generate result files"
 
 message "== Listing results ..."
-for result in $jobdir/*.result; do
+for result in $(find $jobdir -iname "*.result"); do
     message ""
     message "$result"
     cat $result | tee -a $logfile
