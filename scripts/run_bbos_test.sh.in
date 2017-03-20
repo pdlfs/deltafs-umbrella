@@ -64,8 +64,8 @@ bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
 bbos_client_nodes_comma=$(echo $bbos_client_nodes | sed "s/ /,/g")
 
 # extract IPs from hostnames because we want to work with IPs
-do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "hostname -i" "$jobdir/host-server-ips.txt"
-do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "hostname -i" "$jobdir/host-client-ips.txt"
+do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "hostname -i" "" "$logfile" "$jobdir/host-server-ips.txt"
+do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "hostname -i" "" "$logfile" "$jobdir/host-client-ips.txt"
 bbos_server_nodes=$(cat $jobdir/host-server-ips.txt | tr ' ' '\n')
 bbos_client_nodes=$(cat $jobdir/host-client-ips.txt | tr ' ' '\n')
 bbos_server_nodes_comma=$(echo $bbos_server_nodes | sed "s/ /,/g")
@@ -87,7 +87,7 @@ test_raw_bw() {
   exe="${iorbin} -a POSIX -b $blocksize -s $count -F 1 -i 1 -k -o $bb_dir/bbos/ior.file -w"
 
   message "RAW IOR throughput: servers=$svrs bs=$blocksize count=$count"
-  do_mpirun $num_servers 0 "" "$svrs" "$exe" "$logfile"
+  do_mpirun $num_servers 0 "" "$svrs" "$exe" "" "$logfile"
 
   # Let the IORs finish on all the servers
   wait
@@ -99,7 +99,7 @@ start_server() {
   exe=@CMAKE_INSTALL_PREFIX@/bin/bbos_server
 
   message "Starting Server: server=$svr_name"
-  do_mpirun 1 1 env_vars[@] "$svr_name" "$exe" "$logfile" &
+  do_mpirun 1 1 env_vars[@] "$svr_name" "$exe" "" "$logfile" &
 }
 
 start_clients() {
@@ -112,20 +112,20 @@ start_clients() {
   # SK: line below is a temporary fix to get each client to create an object
   # whose name is the same as the client. Eventually env variables will obviate
   # the need to do this.
-  do_mpirun $num_clients 1 env_vars[@] "$clients" "time $exe" "$logfile" &
+  do_mpirun $num_clients 1 env_vars[@] "$clients" "time $exe" "" "$logfile" &
 }
 
 kill_server() {
   svr_name=$1
 
   message "Killing server: server=$svr_name"
-  do_mpirun 1 1 "" "$svr" "pkill -SIGINT bbos_server" "$logfile"
+  do_mpirun 1 1 "" "$svr" "pkill -SIGINT bbos_server" "" "$logfile"
 }
 
 # Test the burst buffer
-do_mpirun 1 1 "" "" "mkdir -p ${bb_dir}/bbos" "$logfile"
+do_mpirun 1 1 "" "" "mkdir -p ${bb_dir}/bbos" "" "$logfile"
 echo "Basic ls of Burst Buffer ..."
-do_mpirun 1 1 "" "" "ls -l ${bb_dir}" "$logfile"
+do_mpirun 1 1 "" "" "ls -l ${bb_dir}" "" "$logfile"
 
 # First perform basic BB benchmarking loop across all servers
 # BWS: This seems pointless, but whatever
@@ -144,10 +144,10 @@ done
 for pchunk in ${PFS_CHUNK_SIZE[@]}; do
   for hgchunk in ${OBJECT_CHUNK_SIZE[@]}; do
     message "Forcibly killing stale BBOS clients"
-    do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "pkill -9 bbos_client" "$logfile"
+    do_mpirun $num_bbos_client_nodes 1 "" "$bbos_client_nodes_comma" "pkill -9 bbos_client" | tee $logfile
 
     message "Forcibly killing stale BBOS servers"
-    do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "pkill -9 bbos_server" "$logfile"
+    do_mpirun $num_bbos_server_nodes 1 "" "$bbos_server_nodes_comma" "pkill -9 bbos_server" | tee $logfile
 
     message "TRIAL PFS Chunk: $pchunk Mercury Chunk: $hgchunk"
 
@@ -157,7 +157,7 @@ for pchunk in ${PFS_CHUNK_SIZE[@]}; do
     # This should be fixed when we go to env variables for initialization
     for svr in $(echo $bbos_server_nodes | sed "s/,/ /g"); do
       container_dir=$bb_dir/bbos/containers-$pchunk-$hgchunk-$svr
-      do_mpirun 1 1 "" "" "mkdir -p $container_dir" "$logfile"
+      do_mpirun 1 1 "" "" "mkdir -p $container_dir" | tee $logfile
 
       # SK: moved background inside start_server
       env_vars=("BB_Lustre_chunk_size" "$pchunk"
