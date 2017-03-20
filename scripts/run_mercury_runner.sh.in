@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash
 
 #
 # Copyright (c) 2017, Carnegie Mellon University.
@@ -29,6 +29,9 @@
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+
+### instant death on misc errors ###
+set -euo pipefail
 
 ######################
 # Tunable parameters #
@@ -67,12 +70,12 @@ instances=(1)                                   # currently not changing this
 
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
-get_jobdir
-gen_hostfile
-
 message "Script begin..."
 # keep track of start time so we can see how long this takes
 timein=`date`
+
+get_jobdir
+gen_hostfile
 
 runner="${dfsu_prefix}/bin/mercury-runner"
 
@@ -87,8 +90,8 @@ host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
 # and put results in host*-ips.txt in $jobdir, load into
 # host1_ip and host2_ip, also taking $subnet into consideration
 #
-do_mpirun 1 1 "" $host1 "hostname -i" "" $log_file $jobdir/host1-ips.txt
-do_mpirun 1 1 "" $host2 "hostname -i" "" $log_file $jobdir/host2-ips.txt
+do_mpirun 1 1 "" $host1 "hostname -i" "" $logfile $jobdir/host1-ips.txt
+do_mpirun 1 1 "" $host2 "hostname -i" "" $logfile $jobdir/host2-ips.txt
 host1_ip=$(cat $jobdir/host1-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
 if [ -z $host1_ip ]; then die "wrong subnet"; fi
 host2_ip=$(cat $jobdir/host2-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
@@ -164,7 +167,7 @@ run_one() {
     if [ $dryrun = 1 ]; then
         message "DRY RUN SERVER @ $host1 -> $srvr_cmd"
     else
-        do_mpirun 1 1 "" $host1 "$srvr_cmd" "" "$slogfile" "" &
+        do_mpirun 1 1 "" $host1 "$srvr_cmd" "" "$logfile" "$slogfile" &
         server_pid=$!
     fi
 
@@ -176,7 +179,7 @@ run_one() {
     if [ $dryrun = 1 ]; then
         message "DRY RUN CLIENT @ $host2 -> $clnt_cmd"
     else
-        do_mpirun 1 1 "" $host2 "$clnt_cmd" "" "$clogfile" ""
+        do_mpirun 1 1 "" $host2 "$clnt_cmd" "" "$logfile" "$clogfile"
     fi
 
     # Collect return codes
