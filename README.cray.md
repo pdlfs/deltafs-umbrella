@@ -203,21 +203,23 @@ Each vpic baseline run consists of a **write** phase that generates N-N particle
 |  |- lib
 |  +- scripts
 |  |   |- common.sh
-|  |   |- lanl_do_vpic_baseline.sh
-|  |   -- run_vpic_baseline.sh
+|  |   |- lanl_do_vpic_test.sh
+|  |   -- run_vpic_test.sh
 |  |
 |  -- share
 =
 ```
-**NOTE**: do not invoke `run_vpic_baseline.sh` directly. Use the `lanl_do_vpic_baseline.sh` wrapper script instead.
+**NOTE**: do not invoke `run_vpic_test.sh` directly. Use the `lanl_do_vpic_test.sh` wrapper script instead.
 
-To do that, open `lanl_do_vpic_baseline.sh`:
+To do that, open `lanl_do_vpic_test.sh`:
 
-**a**) set **subnet** to match your network configurations, such as "11.128";
+**a**) set **test** to baseline;
 
-**b**) set **nodes** and **ppn** to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is recommended to set ppn to the total number of cores available on a compute node (32 for Trinitite compute nodes);
+**b**) set **subnet** to match your network configurations, such as "11.128";
 
-**c**) finally, set **num_vpic_dumps**,  **px_factor**, and **py_factor** to control the size of vpic outputs as well as the runtime of a job.
+**c**) set **nodes** and **ppn** to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is recommended to set ppn to the total number of cores available on a compute node (32 for Trinitite compute nodes);
+
+**d**) set **num_vpic_dumps**,  **px_factor**, and **py_factor** to control the size of vpic outputs as well as the runtime of a job.
 
 **NOTE**: to do an initial validation run to check code and debug scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2 (on a 32-core Trinitite node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total).
 
@@ -245,7 +247,7 @@ export EXTRA_MPIOPTS="-cc cpu"
 
 **NOTE**: if `JOBDIRHOME` has been set to `/lustre/ttscratch1/users/$USER`, our script will auto expand it to `/lustre/ttscratch1/users/${USER}/${MOAB_JOBNAME}.${PBS_JOBID}`.
 
-**Finally**, check if all `#MSUB` and `#DW` directives have been properly set.
+**Lastly**, check if all `#MSUB` and `#DW` directives have been properly set.
 
 !!! Time to submit the job to the batch system !!!
 
