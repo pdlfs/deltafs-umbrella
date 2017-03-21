@@ -5,6 +5,7 @@ Deltafs-umbrella
 Download, build, and install deltafs, deltafs friends, and their dependencies in a single highly-automated step.
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
+[![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](LICENSE)
 
 TABLE OF CONTENTS
 =================
