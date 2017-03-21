@@ -533,7 +533,7 @@ do_run() {
         message ""
         message "-INFO- checking output size..."
         do_mpirun 1 1 "" "" "du -sb $vpic_dir/particle" | tee -a $exp_jobdir/outsize.txt
-        echo "Output size: " `cat $exp_jobdir/outsize.txt | \
+        echo "Output size:" `cat $exp_jobdir/outsize.txt | \
             grep -F -v "[MPIEXEC]" | head -1 | cut -f1` "bytes" | \
                 tee -a $exp_logfile | tee -a $logfile
         do_mpirun 1 1 "" "" "du -h $vpic_dir/particle"
@@ -576,7 +576,7 @@ do_run() {
         message ""
         message "-INFO- checking output size..."
         do_mpirun 1 1 "" "" "du -sb $plfs_dir/particle" | tee -a $exp_jobdir/outsize.txt
-        echo "Output size: " `cat $exp_jobdir/outsize.txt | \
+        echo "Output size:" `cat $exp_jobdir/outsize.txt | \
             grep -F -v "[MPIEXEC]" | head -1 | cut -f1` "bytes" | \
                 tee -a $exp_logfile | tee -a $logfile
         do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
