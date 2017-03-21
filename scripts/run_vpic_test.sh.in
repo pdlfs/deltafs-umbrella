@@ -98,11 +98,13 @@ do
     case $test_type in
     "shuffle_test")
         export BYPASS_WRITE=1
-        do_querying=0
         ;;
 
     esac
 
+    if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
+        do_querying=0
+    fi
     build_deck $deck $px $py
     message ""
     message ""
