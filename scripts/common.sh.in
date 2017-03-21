@@ -565,6 +565,7 @@ do_run() {
             "PRELOAD_Bypass_shuffle" ${BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${BYPASS_WRITE:-"0"}
             "PRELOAD_Skip_mon" ${SKIP_MON:-"0"}
+            "PRELOAD_No_epoch_pre_flushing" ${NO_PREFLUSH:-"0"}
             "PRELOAD_Enable_verbose_error" "1"
             "SHUFFLE_Virtual_factor" "1024"
             "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
