@@ -37,7 +37,7 @@ set -euo pipefail
 # Tunable parameters #
 ######################
 
-test_type=${1:-"baseline"}
+test_type=${1:-"baseline"}  ## or deltafs, shuffle_test, ...
 ip_subnet=${2:-"10.92"}
 nodes=${3:-"1"}
 cores_per_node=${4:-"4"}
@@ -82,6 +82,7 @@ do
     py=$((10**py_factor))
     parts=$((px * py * 100))
 
+    ### determine vpic input deck ###
     case $test_type in
     "baseline")
         deck="file-per-process"
@@ -89,6 +90,15 @@ do
 
     *)
         deck="file-per-particle"
+        ;;
+
+    esac
+
+    ### other options ###
+    case $test_type in
+    "shuffle_test")
+        export BYPASS_WRITE=1
+        do_querying=0
         ;;
 
     esac

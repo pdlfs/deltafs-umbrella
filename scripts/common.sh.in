@@ -505,7 +505,7 @@ do_run() {
 
     ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
     message "=================================================================="
-    message "!!! Running VPIC ($runtype) with $pp particles on $cores cores !!!"
+    message "!!! Running VPIC ($runtype) with $pp particles on $cores cores and $node nodes !!!"
     message "------------"
     message "> Using ${jobdir}/current-deck.op"
     message "> Job dir is ${jobdir}"
@@ -545,13 +545,13 @@ do_run() {
         fi
         ;;
 
-    "deltafs")
+    *)
         plfs_dir=$exp_dir/plfs
         vpic_dir=$exp_dir/vpic
 
         ### BOOTSTRAPING ###
         message "-INFO- creating more exp dirs..."
-        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir"
+        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir/particle"
         do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
         message "-INFO- done"
 
@@ -562,9 +562,11 @@ do_run() {
             "PRELOAD_Deltafs_root" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
             "PRELOAD_Bypass_deltafs_namespace" "1"
+            "PRELOAD_Bypass_shuffle" ${BYPASS_SHUFFLE:-"0"}
+            "PRELOAD_Bypass_write" ${BYPASS_WRITE:-"0"}
             "PRELOAD_Enable_verbose_error" "1"
             "SHUFFLE_Virtual_factor" "1024"
-            "SHUFFLE_Mercury_proto" "bmi+tcp"
+            "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
             "SHUFFLE_Subnet" "${ip_subnet}"
         )
 
@@ -581,41 +583,13 @@ do_run() {
         message "-INFO- done"
 
         ### READ PATH ###
-        if [ $do_querying -ne 0 ]; then
+        if [ $do_querying -eq 0 ]; then
+            message ""
+            message "!!! WARNING !!! write only - skipping read phase..."
+            message ""
+        else
             query_particles $runtype $exp_dir $pp
         fi
-        ;;
-
-    "shuffle_test")
-        plfs_dir=$exp_dir/plfs
-        vpic_dir=$exp_dir/vpic
-
-        ### BOOTSTRAPING ###
-        message "-INFO- creating more exp dirs..."
-        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir"
-        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
-        message "-INFO- done"
-
-        ### WRITE PATH ###
-        env_vars=(
-            "VPIC_current_working_dir" "${vpic_dir}"
-            "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
-            "PRELOAD_Deltafs_root" "particle"
-            "PRELOAD_Local_root" "${plfs_dir}"
-            "PRELOAD_Bypass_write" "1"
-            "PRELOAD_Enable_verbose_error" "1"
-            "SHUFFLE_Virtual_factor" "1024"
-            "SHUFFLE_Mercury_proto" "bmi+tcp"
-            "SHUFFLE_Subnet" "${ip_subnet}"
-        )
-
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "$jobdir/current-deck.op" \
-            "${EXTRA_MPIOPTS-}"
-
-        ### READ PATH ###
-        message ""
-        message "!!! WARNING !!! shuffle only - skipping read phase..."
-        message ""
         ;;
 
     esac
