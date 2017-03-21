@@ -569,6 +569,7 @@ do_run() {
             "PRELOAD_Enable_verbose_error" "1"
             "SHUFFLE_Virtual_factor" "1024"
             "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
+            "SHUFFLE_Buffer_per_queue" ${RPC_BUFFER:-"4000"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"32m"}
             "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2m"}
