@@ -564,10 +564,15 @@ do_run() {
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${BYPASS_WRITE:-"0"}
+            "PRELOAD_Skip_mon" ${SKIP_MON:-"0"}
             "PRELOAD_Enable_verbose_error" "1"
             "SHUFFLE_Virtual_factor" "1024"
             "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
             "SHUFFLE_Subnet" "${ip_subnet}"
+            "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"32m"}
+            "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2m"}
+            "PLFSDIR_Data_buf_size" ${DATA_BUF:-"8m"}
+            "PLFSDIR_Lg_parts" ${LG_PARTS:-"0"}
         )
 
         do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
