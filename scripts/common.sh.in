@@ -505,7 +505,7 @@ do_run() {
 
     ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
     message "=================================================================="
-    message "!!! Running VPIC ($runtype) with $pp particles on $cores cores and $node nodes !!!"
+    message "!!! Running VPIC ($runtype) with $pp particles on $cores cores and $nodes nodes !!!"
     message "------------"
     message "> Using ${jobdir}/current-deck.op"
     message "> Job dir is ${jobdir}"
