@@ -436,6 +436,7 @@ ExternalProject_Add (deltafs
                -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                -DPDLFS_VERBOSE=${DELTAFS_VERBOSE}
+               -DDELTAFS_COMMON_INTREE=ON
                -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
