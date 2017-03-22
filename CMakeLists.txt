@@ -99,6 +99,14 @@ set (VERBS_PREFIX "" CACHE PATH "VERBS prefix path (optional)")
 set (VERBS_LIBDIR "" CACHE PATH "VERBS lib directory override (optional)")
 
 #
+# MY_PDLFS_OPTIONS: our deltafs-common (aka pdlfs-common) settings...
+# these should match deltafs
+#
+set (MY_PDLFS_OPTIONS -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
+                      -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
+                      -DPDLFS_VERBOSE=${DELTAFS_VERBOSE} )
+
+#
 # print the current config so users are aware of the current settings...
 #
 message (STATUS "Current Umbrella settings:")
@@ -398,6 +406,33 @@ ExternalProject_Add_Step (ssg prepare
 )
 
 #
+# deltafs-common (aka the deltafs version of pdlfs-common)
+#
+GenDownloadConfig (deltafs-common_download deltafs-common
+                   deltafs-common-0.9.2.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-common.git"
+    # XXX: switch this off until we decide we want to tag it off
+    ###GIT_TAG "v0.9.2"
+)
+
+MaybeRunTests (deltafs-common_test
+    TEST_COMMAND ctest -E "gigaplus_test|autocompact_test|db_test|index_block_test"
+)
+
+ExternalProject_Add (deltafs-common
+    DEPENDS mercury
+    ${deltafs-common_download}
+    CMAKE_ARGS ${MY_PDLFS_OPTIONS}
+               -DBUILD_SHARED_LIBS=ON
+               -DBUILD_TESTS=ON
+               -DPDLFS_COMMON_LIBNAME=deltafs-common
+               -DPDLFS_COMMON_DEFINES=DELTAFS
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+    UPDATE_COMMAND ""
+    ${deltafs-common_test}
+)
+
+#
 # deltafs-bb
 #
 GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
@@ -430,13 +465,12 @@ MaybeRunTests (deltafs_test
 )
 
 ExternalProject_Add (deltafs
-    DEPENDS mercury deltafs-bb
+    DEPENDS mercury deltafs-common deltafs-bb
     ${deltafs_download}
-    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=ON
-               -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
-               -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
-               -DPDLFS_VERBOSE=${DELTAFS_VERBOSE}
-               -DDELTAFS_COMMON_INTREE=ON
+    CMAKE_ARGS ${MY_PDLFS_OPTIONS}
+               -DBUILD_SHARED_LIBS=ON
+               -DBUILD_TESTS=ON
+               -DDELTAFS_COMMON_INTREE=OFF
                -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
