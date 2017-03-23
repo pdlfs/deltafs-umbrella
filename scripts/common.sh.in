@@ -624,17 +624,16 @@ query_particles() {
     case $runtype in
     "baseline")
         reader_bin="${dfsu_prefix}/bin/vpic-reader"
-        nnum=$vpic_epochs
         ;;
     "deltafs")
         reader_bin="${dfsu_prefix}/bin/vpic-deltafs-reader"
-        nnum=$cores
         ;;
     *)
         die "query_particles: unknown runtype '$runtype'"
     esac
 
-    if [ $nodes -ge $vpic_epochs ]; then
+    nnum=$cores
+    if [ $nnum -le $nodes ]; then
         ppn=1
     else
         ppn=0
