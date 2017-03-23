@@ -456,8 +456,9 @@ ExternalProject_Add (deltafs-bb
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
+    GIT_TAG 23cef4c
     # XXX: switch this off until we decide we want to tag it off
-    ###GIT_TAG "v0.9.2"
+    ###GIT_TAG "master"
 )
 
 MaybeRunTests (deltafs_test
