@@ -162,6 +162,9 @@ get_bbdir() {
       bbdir=${jobdir}
       message "!!! WARNING !!! missing DW_JOB_STRIPED - putting data in jobdir for this test"
     else
+      dwsessid=$(dwcli ls session)
+      dwconfid=$(dwcli ls configuration)
+      message "-INFO- >>> dwsessid=$dwsessid | dwconfid=$dwconfid"
       jobdir_last_component=$(basename $jobdir)
       bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
       message "-INFO- creating bbdir..."
@@ -538,6 +541,26 @@ do_run() {
                 tee -a $exp_logfile | tee -a $logfile
         do_mpirun 1 1 "" "" "du -h $vpic_dir/particle"
         message "-INFO- done"
+
+        ### STAGE DATA OUT ###
+        if [ x$jobdir != x$bbdir ]; then
+            message "-INFO- staging data out... "
+            mkdir -p $exp_jobdir/bb || die "mkdir $exp_jobdir/bb failed"
+            message ""
+            message "FROM : $exp_dir" ### BB ###
+            message "  TO : $exp_jobdir/bb"  ### Luster ###
+            message ""
+
+            message "[DWCLI] dwcli" "stage out" "--session $dwsessid" "--configuration $dwconfid" \
+                "--backing-path $exp_jobdir/bb" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
+            dwcli stage out --session $dwsessid --configuration $dwconfid \
+                --backing-path $exp_jobdir/bb --dir ${exp_dir:${#DW_JOB_STRIPED}}
+
+            message "-INFO- done"
+
+            exp_dir=$exp_jobdir/bb
+            vpic_dir=$exp_dir/vpic
+        fi
 
         ### READ PATH ###
         if [ $do_querying -ne 0 ]; then
