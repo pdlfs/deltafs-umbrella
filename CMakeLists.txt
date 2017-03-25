@@ -456,7 +456,7 @@ ExternalProject_Add (deltafs-bb
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
-    GIT_TAG 23cef4c
+    GIT_TAG a30dd43
     # XXX: switch this off until we decide we want to tag it off
     ###GIT_TAG "master"
 )
