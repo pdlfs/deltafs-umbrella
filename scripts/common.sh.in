@@ -552,9 +552,9 @@ do_run() {
             message ""
 
             message "[DWCLI] dwcli" "stage out" "--session $dwsessid" "--configuration $dwconfid" \
-                "--backing-path $exp_jobdir/bb" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
+                "--backing-path $exp_jobdir/bb/" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
             dwcli stage out --session $dwsessid --configuration $dwconfid \
-                --backing-path $exp_jobdir/bb --dir ${exp_dir:${#DW_JOB_STRIPED}}
+                --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
 
             message "-INFO- done"
 
@@ -612,6 +612,27 @@ do_run() {
                 tee -a $exp_logfile | tee -a $logfile
         do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
         message "-INFO- done"
+
+        ### STAGE DATA OUT ###
+        if [ x$jobdir != x$bbdir ]; then
+            message "-INFO- staging data out... "
+            mkdir -p $exp_jobdir/bb || die "mkdir $exp_jobdir/bb failed"
+            message ""
+            message "FROM : $exp_dir" ### BB ###
+            message "  TO : $exp_jobdir/bb"  ### Luster ###
+            message ""
+
+            message "[DWCLI] dwcli" "stage out" "--session $dwsessid" "--configuration $dwconfid" \
+                "--backing-path $exp_jobdir/bb/" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
+            dwcli stage out --session $dwsessid --configuration $dwconfid \
+                --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
+
+            message "-INFO- done"
+
+            exp_dir=$exp_jobdir/bb
+            plfs_dir=$exp_dir/plfs
+            vpic_dir=$exp_dir/vpic
+        fi
 
         ### READ PATH ###
         if [ $do_querying -eq 0 ]; then
