@@ -598,7 +598,7 @@ do_run() {
             "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"32m"}
             "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2m"}
             "PLFSDIR_Data_buf_size" ${DATA_BUF:-"8m"}
-            "PLFSDIR_Lg_parts" ${LG_PARTS:-"1"}
+            "PLFSDIR_Lg_parts" ${LG_PARTS:-"2"}
         )
 
         do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
