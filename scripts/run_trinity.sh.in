@@ -54,6 +54,9 @@ bbos_buddies=0
 # DeltaFS config
 ip_subnet="10.92"
 
+# Number of mpi procs per node
+ppn=4
+
 ###############
 # Core script #
 ###############
@@ -94,8 +97,6 @@ do
     py=$((10**4))
     parts=$((px * py * 100))
     bb_clients=$cores
-
-    ### XXX: set ppn to control the number of mpi procs per node ###
 
     build_deck "file-per-process" $px $py
     do_run "baseline" $parts ## $ppn ##
