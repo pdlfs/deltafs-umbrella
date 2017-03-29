@@ -88,6 +88,7 @@ if (NOT CMAKE_BUILD_TYPE)
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
 set (SKIP_TESTS "OFF" CACHE BOOL "skip running unit tests")
+set (BUILD_TESTS "ON" CACHE BOOL "if go build unit tests")
 set (DELTAFS_VERBOSE "0" CACHE STRING "deltafs verbose level")
 set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
               "1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
@@ -125,6 +126,7 @@ message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
 message (STATUS "  transport config: verbs=${VERBS}, GNI=${GNI}")
 message (STATUS "    gni hints: prefix=${GNI_PREFIX}, libs=${GNI_LIBDIR}")
 message (STATUS "    verbs hints: prefix=${VERBS_PREFIX}, libs=${VERBS_LIBDIR}")
+message (STATUS "  build tests: ${BUILD_TESTS} (skip running: ${SKIP_TESTS}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -333,7 +335,7 @@ ExternalProject_Add (mercury
     DEPENDS cci bmi
     ${mercury_download}
     CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=ON
-               -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
+               -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${BUILD_TESTS}
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
@@ -424,7 +426,7 @@ ExternalProject_Add (deltafs-common
     ${deltafs-common_download}
     CMAKE_ARGS ${MY_PDLFS_OPTIONS}
                -DBUILD_SHARED_LIBS=ON
-               -DBUILD_TESTS=ON
+               -DBUILD_TESTS=${BUILD_TESTS}
                -DPDLFS_COMMON_LIBNAME=deltafs-common
                -DPDLFS_COMMON_DEFINES=DELTAFS
     CMAKE_CACHE_ARGS ${init_cm_cache}
@@ -470,7 +472,7 @@ ExternalProject_Add (deltafs
     ${deltafs_download}
     CMAKE_ARGS ${MY_PDLFS_OPTIONS}
                -DBUILD_SHARED_LIBS=ON
-               -DBUILD_TESTS=ON
+               -DBUILD_TESTS=${BUILD_TESTS}
                -DDELTAFS_COMMON_INTREE=OFF
                -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
