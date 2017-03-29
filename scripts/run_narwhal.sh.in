@@ -57,6 +57,8 @@ ip_subnet="10.92"
 # Number of mpi procs per node
 ppn=4
 
+export JOBDIRHOME=/panfs/probescratch/TableFS/vpic.dc
+
 ###############
 # Core script #
 ###############
