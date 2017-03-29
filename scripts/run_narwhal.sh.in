@@ -99,10 +99,10 @@ do
     bb_clients=$cores
 
     build_deck "file-per-process" $px $py
-    do_run "baseline" $parts ## $ppn ##
+    do_run "baseline" $parts $ppn
 
     build_deck "file-per-particle" $px $py
-    do_run "deltafs" $parts ## $ppn ##
+    do_run "deltafs" $parts $ppn
 
     cores=$(( cores * 2 ))
 done
