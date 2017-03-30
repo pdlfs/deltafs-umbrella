@@ -679,9 +679,9 @@ query_particles() {
 
     nnum=$cores
     if [ $nnum -le $nodes ]; then
-        ppn=1
+        qppn=1
     else
-        ppn=0
+        qppn=0
     fi
 
     message ""
@@ -699,8 +699,8 @@ query_particles() {
     # Query particles to see when the DeltaFS approach breaks compared to old,
     # single-pass approach
     if [ $last -eq 1 ]; then
-        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout"
     else
-        do_mpirun $nnum $ppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1"
     fi
 }
