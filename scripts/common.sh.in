@@ -383,10 +383,12 @@ do_mpirun() {
 # @1 in {"file-per-process", "file-per-particle"}
 # @2 particles on x dimension
 # @3 particles on y dimension
+# @4 particles on z dimension
 #
 build_deck() {
     px=$2
     py=$3
+    pz=$4
 
     ddir=${jobdir}/tmpdeck.$$     # tmp staging area for stacking the deck
     rm -rf ${ddir}
@@ -395,7 +397,7 @@ build_deck() {
         die "mv failed"
 
     message "--------------- [INPUT-DECK] --------------"
-    message "!!! NOTICE !!! building vpic deck >> $1 >> cores = ${cores}, px = ${px}, py = ${py}"
+    message "!!! NOTICE !!! building vpic deck >> $1 >> cores = ${cores}, px = ${px}, py = ${py}, pz = ${pz}"
     message ""
 
     case $1 in
@@ -408,7 +410,7 @@ build_deck() {
             sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' >  \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
                    ${ddir}/trecon-part/config.h || \
             die "config.h editing failed"
         ;;
@@ -421,7 +423,7 @@ build_deck() {
             sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1/' >  \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
                    ${ddir}/trecon-part/config.h || \
             die "config.h editing failed"
         ;;

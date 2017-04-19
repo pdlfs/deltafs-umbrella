@@ -97,13 +97,14 @@ do
 
     px=$((cores * 16))
     py=$((10**4))
-    parts=$((px * py * 100))
+    pz=$((1))
+    parts=$((px * py * pz * 100))
     bb_clients=$cores
 
-    build_deck "file-per-process" $px $py
+    build_deck "file-per-process" $px $py $pz
     do_run "baseline" $parts $ppn
 
-    build_deck "file-per-particle" $px $py
+    build_deck "file-per-particle" $px $py $pz
     do_run "deltafs" $parts $ppn
 
     cores=$(( cores * 2 ))

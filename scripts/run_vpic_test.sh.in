@@ -47,6 +47,7 @@ query_multiple_partices=0
 num_vpic_dumps=${7:-"2"}
 px_factor=${8:-"4"}
 py_factor=${9:-"2"}
+pz_factor=${10:-"1"}
 
 ###############
 # Core script #
@@ -80,7 +81,8 @@ do
     cores=$((procs_per_node * nodes))
     px=$((cores * px_factor))
     py=$((10**py_factor))
-    parts=$((px * py * 100))
+    pz=$((1))
+    parts=$((px * py * pz * 100))
 
     ### determine vpic input deck ###
     case $test_type in
@@ -105,7 +107,7 @@ do
     if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
         do_querying=0
     fi
-    build_deck $deck $px $py
+    build_deck $deck $px $py $pz
     message ""
     message ""
 
