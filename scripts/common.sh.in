@@ -81,10 +81,16 @@ dfsu_prefix=@CMAKE_INSTALL_PREFIX@
 ### ensure definition of a set of global vars ###
 
 #
-# number of epochs for VPIC runs
-# default: 8
+# number of frames/epochs for VPIC runs
+# default: 25
 #
-vpic_epochs=${vpic_epochs:-8}
+vpic_epochs=${vpic_epochs:-25}
+
+#
+# number of time steps for VPIC runs
+# default: 2500
+#
+vpic_steps=${vpic_steps:-2500}
 
 #
 # job-wise log - shared among all exp runs
@@ -403,6 +409,7 @@ build_deck() {
     case $1 in
     "file-per-process")
         cat ${ddir}/trecon-part/config.bkp | \
+            sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 1/' | \
@@ -416,6 +423,7 @@ build_deck() {
         ;;
     "file-per-particle")
         cat ${ddir}/trecon-part/config.bkp | \
+            sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
