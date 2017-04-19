@@ -79,9 +79,9 @@ procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
 do
     cores=$((procs_per_node * nodes))
-    px=$((cores * px_factor))
-    py=$((10**py_factor))
-    pz=$((1))
+    py=$((cores * py_factor))
+    px=$((10**px_factor))
+    pz=$((10**pz_factor))
     parts=$((px * py * pz * 100))
 
     ### determine vpic input deck ###

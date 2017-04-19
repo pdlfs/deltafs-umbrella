@@ -16,9 +16,9 @@ export EXTRA_MPIOPTS="--cc cpu"  ## only applies to vpic mpiexec calls
 #|---------------:|:-----:|:-----:|:-----:|:-----:|#########################
 #|          nodes |   1   |   4   |   16  |   64  |#########################
 #| num_vpic_dumps |   8   |   8   |   8   |   8   |#########################
-#|      px_factor |   16  |   16  |   16  |   16  |#########################
-#|      py_factor |   4   |   4   |   4   |   4   |#########################
-#|      pz_factor |   1   |   1   |   1   |   1   |#########################
+#|      px_factor |   2   |   2   |   2   |   2   |#########################
+#|      py_factor |   16  |   16  |   16  |   16  |#########################
+#|      pz_factor |   2   |   2   |   2   |   2   |#########################
 #|            ppn |   32  |   32  |   32  |   32  |#########################
 #|
 #|--------------
@@ -26,9 +26,9 @@ export EXTRA_MPIOPTS="--cc cpu"  ## only applies to vpic mpiexec calls
 #|----------
 nodes=1  ## aprun -n $(( nodes * ppn )) -N $ppn ...
 num_vpic_dumps=2  ## see table above
-px_factor=4  ## see table above
-py_factor=2  ## see table above
-pz_factor=1  ## see table above
+px_factor=2  ## see table above
+py_factor=16  ## see table above
+pz_factor=2  ## see table above
 ppn=32 ## aprun -N $ppn
 ## DOIT
 @CMAKE_INSTALL_PREFIX@/scripts/run_vpic_test.sh \

@@ -95,9 +95,9 @@ do
         last=1
     fi
 
-    px=$((cores * 16))
-    py=$((10**4))
-    pz=$((1))
+    py=$((cores * 16))
+    px=$((10**2))
+    pz=$((10**2))
     parts=$((px * py * pz * 100))
     bb_clients=$cores
 
