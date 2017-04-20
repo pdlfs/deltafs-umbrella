@@ -707,10 +707,11 @@ query_particles() {
     message ""
 
     # Query particles to see when the DeltaFS approach breaks compared to old,
-    # single-pass approach
+    # single-pass approach. Otherwise query 100 particles to get a dependable
+    # confidence interval.
     if [ $last -eq 1 ]; then
         do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout"
     else
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout -n 1"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout -n 100"
     fi
 }
