@@ -34,6 +34,7 @@
 #
 # global variables we set/use:
 #  $dfsu_prefix - deltafs umbrella prefix directory (abspath)
+#  $common_noinit - set to non-null disable call to common_init (for dbg)
 #  $ip_subnet - the ip subnet we want to use (x.y.z.t)
 #  $jobdir - per-job shared output directory (abspath)
 #  $logfile - log shared by all exp runs (abspath)
@@ -42,25 +43,45 @@
 #  $bbos_buddies - number of nodes for bbos (int)
 #  $cores - total cores across all nodes (int)
 #  $all_nodes - list of all nodes (string - sep: comma)
+#  $num_all_nodes - number of nodes in all_nodes (int)
 #  $vpic_nodes - list of nodes for vpic (string - sep: comma)
+#  $num_vpic_nodes - number of nodes in vpic_nodes (int)
 #  $bbos_nodes - list of nodes for bbos (string - sep: comma)
+#  $num_bbos_nodes - number of nodes in bbos_nodes (int)
 #  $bb_log_size - BBOS max per-core log size in bytes
+#  $vpic_epochs - number of frames/epochs for VPIC runs (int)
+#  $vpic_steps - number of time steps for VPIC runs (int)
 #  $do_querying - whether we will perform particle queries (bool - 0 or 1)
 #
 
 # environment variables we set/use:
 #  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
 #                example: /lustre/ttscratch1/users/$USER
+#  $JOBENV - operating env (one of moab, slurm, openmpi, or mpich)
+#            we'll try and figure it out if not provided by user
+#  $JOBRUNCMD - aprun/srun/mpirun command to use, should match $JOBENV
+#               (only used if JOBENV is set by user)
 #  $EXTRA_MPIOPTS - additional options that need to be passed to mpirun
+#  $DW_SESSION_OVERRIDE - (cray) override the datawarp sessionid (for dbg)
 #
 
 #
 # environment variables we use as input:
 #  $HOME - your home directory
-#  $MOAB_JOBNAME - jobname (cray)
-#  $PBS_JOBID - job id (cray)
-#  $PBS_NODEFILE - file with list of all nodes (cray)
 #  $DW_JOB_STRIPED - data wrap mount (cray)
+#
+#  Cray env running moab:
+#    $MOAB_JOBNAME - jobname
+#    $PBS_JOBID - job id
+#    $PBS_NODEFILE - file with list of all nodes
+#
+#  Cray env running slurm:
+#    $SLURM_JOB_NAME - jobname
+#    $SLURM_JOBID - job id
+#    $SLURM_JOB_NODELIST - list of all nodes
+#       XXX: this node list is in compact form, we need to expand it
+#            to get a full list of nodes.  there is a helper perl script
+#            called "generate_pbs_nodefile" that will do this for us
 #
 
 #
@@ -94,7 +115,7 @@ vpic_steps=${vpic_steps:-2500}
 
 #
 # job-wise log - shared among all exp runs
-# default: null
+# default: null (XXX: but we override this in get_jobdir)
 #
 logfile=${logfile-}
 
@@ -117,6 +138,65 @@ bbos_buddies=${bbos_buddies:-0}
 do_querying=${do_querying:-0}
 
 #
+# common_init: init the common.sh layer (mainly detecting env)
+# uses/sets: $JOBENV, $JOBRUNCMD
+#
+common_init() {
+
+  if [ x$JOBENV = x ]; then
+    # try and guess our job environment
+    export JOBRUNCMD=""            # only allowed through if JOBENV set by usr
+    if [ x$PBS_JOBID != x ]; then
+      export JOBENV=moab
+    elif [ x$SLURM_JOBID != x ]; then
+      export JOBENV=slurm
+    elif [ `which mpirun.mpich` ]; then
+      export JOBENV=mpich
+    elif [ `which mpirun.openmpi` ]; then
+      export JOBENV=openmpi
+    else
+      die "common.sh UNABLE TO DETERMINE ENV - ABORTING"
+    fi
+  else
+    # verify user selected something we know about
+    if [ $JOBENV != moab -a $JOBENV != slurm -a \
+         $JOBENV != mpich -a $JOBENV != openmpi ]; then
+      die "bad JOBENV ($JOBENV) provided by user - ABORTING"
+    fi
+  fi
+
+  # set JOBRUNCMD to the default if not provided by user
+  if [ x$JOBRUNCMD = x ]; then
+    if [ $JOBENV = moab ]; then
+      export JOBRUNCMD=aprun
+    elif [ $JOBENV = slurm ]; then
+      export JOBRUNCMD=srun
+    elif [ $JOBENV = mpich ]; then
+      export JOBRUNCMD=mpirun.mpich
+    elif [ $JOBENV = openmpi ]; then
+      export JOBRUNCMD=mpirun.openmpi
+    fi
+  fi
+
+  message "-INFO- common_init: JOBENV=$JOBENV, JOBRUNCMD=$JOBRUNCMD"
+
+  # verify cray env is set as expected
+  if [ $JOBENV = moab ]; then
+    if [ x$PBS_JOBID = x -o x$MOAB_JOBNAME = x -o ! -f "$PBS_NODEFILE" ]; then
+      die "bad moab setup - check jobname and nodefile"
+    fi
+  elif [ $JOBENV = slurm ]; then
+    if [ x$SLURM_JOBID = x -o x$SLURM_JOB_NAME = x -o \
+         x$SLURM_JOB_NODELIST = x ]; then
+      die "bad slurm setup - check jobname and nodelist"
+    fi
+    if [ ! `which generate_pbs_nodefile` ]; then
+      die "slurm helper script generate_pbs_nodefile not found in path"
+    fi
+  fi
+}
+
+#
 # message: echo message to stdout, cc it to a default job-wise log file, and
 # then cc it again to a specific exp-wise log file.
 # note that if either $logfile or $exp_logfile is empty, tee will
@@ -134,8 +214,9 @@ die () { message "!!! ERROR !!! $@"; exit 1; }
 # jobdir  ## Lustre
 #
 # get_jobdir: setup $jobdir var and makes sure $jobdir is present
-# uses: $MOAB_JOBNAME, $PBS_JOBID, $JOBDIRHOME
-# sets: $jobdir
+# uses: $JOBENV, $MOAB_JOBNAME, $PBS_JOBID,
+#       $SLURM_JOB_NAME, $SLURM_JOBID, $JOBDIRHOME
+# sets: $jobdir  (XXX: also $logfile)
 #
 get_jobdir() {
     if [ x${JOBDIRHOME-} != x ]; then
@@ -143,34 +224,60 @@ get_jobdir() {
     else
         jobdirhome=${HOME}/jobs
     fi
-    if [ x${MOAB_JOBNAME-} != x ]; then
-        jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID-}
+
+    if [ $JOBENV = moab ]; then
+        jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID}
+    elif [ $JOBENV = slurm ]; then
+        jobdir=${jobdirhome}/${SLURM_JOB_NAME}.${SLURM_JOBID}
     else
         jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
+
     message "-INFO- creating jobdir..."
     mkdir -p ${jobdir} || die "cannot make jobdir ${jobdir}"
-    logfile=${jobdir}/$(basename $jobdir).log ### XXX: auto set logfile
-    bbdir=${jobdir} ### XXX: auto set bbdir
     message "-INFO- jobdir = ${jobdir}"
+
+    # XXX: override default and auto set logfile
+    logfile=${jobdir}/$(basename $jobdir).log
 }
 
 #
 # bbdir  ## shared XFS on CN only
 #
 # get_bbdir: setup $bbdir var and makes sure $bbdir is present, otherwise
-# falls back to $jobdir if BB is not available
-# uses: $DW_JOB_STRIPED, $jobdir
+# falls back to $jobdir if BB is not available.  note that the
+# $DW_JOB_STRIPED directory is only present on the compute nodes, so we
+# must cycle through do_mpirun to access it...
+# uses: $DW_JOB_STRIPED, $DW_SESSION_OVERRIDE, $jobdir
 # sets: $bbdir
 #
 get_bbdir() {
     if [ x${DW_JOB_STRIPED-} = x ]; then
       bbdir=${jobdir}
-      message "!!! WARNING !!! missing DW_JOB_STRIPED - putting data in jobdir for this test"
+      message "!!! WARNING !!! missing DW_JOB_STRIPED"
+      message "!!! WARNING !!! putting bbdir data in jobdir for this test"
     else
-      dwsessid=$(dwcli ls session)
-      dwconfid=$(dwcli ls configuration)
-      message "-INFO- >>> dwsessid=$dwsessid | dwconfid=$dwconfid"
+
+      ### XXXCDC: previous version
+      ###dwsessid=$(dwcli ls session)
+      ###dwconfid=$(dwcli ls configuration)
+      ###message "-INFO- >>> dwsessid=$dwsessid | dwconfid=$dwconfid"
+
+      # new version from brad:
+      # XXX: no error/sanity check on dwcli output
+      if [ x$DW_SESSION_OVERRIDE = x ]; then
+        #  (XXX: where does ACDW_JOBID come from?)
+          dwsessid=$(dwstat sessions |grep $((ACDW_JOBID+1)) |awk '{print $1}')
+      else
+          dwsessid=$DW_SESSION_OVERRIDE
+      fi
+      dwinstid=$(dwstat instances | \
+                 awk -v sess=$dwsessid '{if ($3 == sess) print $1}')
+      dwconfid=$(dwstat configurations | \
+                 awk -v inst=$dwinstid '{if ($3 == inst) print $1}')
+
+      message "-INFO- >>> dw ids sess/inst/conf=$dwsessid/$dwinstid/$dwconfid"
+
       jobdir_last_component=$(basename $jobdir)
       bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
       message "-INFO- creating bbdir..."
@@ -181,23 +288,54 @@ get_bbdir() {
 }
 
 #
+# bb_stageoutwait: wait for a stageout to complete
+# uses: $dwsessid, $dwconfid
+#
+bb_stageoutwait() {
+    status=""
+    count=0
+    while [ "$status" != "-" -a $count -lt 100 ]; do
+        sleep 30
+        dwcli stage query --session $dwsessid --configuration $dwconfid
+        status=$(dwcli stage query --session $dwsessid \
+                 --configuration $dwconfid | tail -2 | head -1 | \
+                 awk '{ print $8 }')
+        count=$((count++))
+        echo "Files remaining to be staged: <$status>"
+    done
+
+    message "Stage Out Completed" "Status $status" "Count $count"
+}
+
+#
 # all_nodes
 #
 # gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
 # one host per line.
-# uses: $PBS_NODEFILE, $jobdir
-# sets: $all_nodes
+# uses: $JOBENV, $PBS_NODEFILE
+#       $SLURMJOB_NODELIST/generate_pbs_nodefile, $jobdir
+# sets: $all_nodes, $num_all_nodes
 # creates: $jobdir/hosts.txt
 #
 gen_hostfile() {
     message "-INFO- generating hostfile ${jobdir}/hosts.txt..."
 
-    if [ `which aprun` ]; then
+    if [ $JOBENV = moab ]; then
+
         # Generate hostfile on CRAY and store on disk
         cat $PBS_NODEFILE | uniq | sort > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
 
+    elif [ $JOBENV = slurm ]; then
+
+        # Generate hostfile on CRAY and store on disk
+        tmp_nodefile=`generate_pbs_nodefile`
+        cat $tmp_nodefile | uniq | sort > $jobdir/hosts.txt || \
+            die "failed to create hosts.txt file"
+        rm -f $tmp_nodefile
+
     else
+
         # Generate hostfile on Emulab and store on disk
         fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
@@ -215,41 +353,26 @@ gen_hostfile() {
 
 #
 # generate host list files: $jobdir/vpic.hosts, $jobdir/bbos.hosts
-# uses: $PBS_NODEFILE, $jobdir, $nodes, $bbos_buddies
+# uses: $jobdir, $nodes, $bbos_buddies
 # sets: $vpic_nodes, $bbos_nodes
 # creates: $jobdir/vpic.hosts, $jobdir/bbos.hosts
 #
 gen_hosts() {
-    message "-INFO- generating host lists..."
+    message "-INFO- generating vpic/bbos host lists..."
 
     # XXX: sanity check: # of nodes in list from PBS_NODEFILE or
     # XXX:               emulab-listall >= $nodes+$bbos_buddies
 
-    if [ `which aprun` ]; then
-        # Generate host lists on CRAY and store them on disk
-        cat $PBS_NODEFILE | uniq | sort > $jobdir/hosts.txt || \
-            die "failed to create hosts.txt file"
+    # first generate the generic hosts.txt
+    gen_hostfile
 
-        cat $jobdir/hosts.txt | head -n $nodes | \
-            tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
-            die "failed to create vpic.hosts file"
-        cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
-            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
-            die "failed to create bbos.hosts file"
-
-    else
-        # Generate host lists on Emulab and store them on disk
-        fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
-        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
-                    sed 's/$/'$fqdn_suffix'/g'`"
-
-        echo "$exp_hosts" | head -n $nodes | \
-            tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
-            die "failed to create vpic.hosts file"
-        echo "$exp_hosts" | tail -n $bbos_buddies | \
-            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
-            die "failed to create bbos.hosts file"
-    fi
+    # divide hosts.txt into parts based on $nodes and $bbos_nodes
+    cat $jobdir/hosts.txt | head -n $nodes | \
+        tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
+        die "failed to create vpic.hosts file"
+    cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
+        tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
+        die "failed to create bbos.hosts file"
 
     ### set host list variables ###
 
@@ -264,17 +387,18 @@ gen_hosts() {
 
 #
 # clear_caches: clear node caches on vpic nodes
-# uses: $vpic_nodes, $cores, $nodes
+# uses: $JOBENV, $vpic_nodes, $cores, $nodes
 #
 clear_caches() {
     message "-INFO- clearing node caches..."
 
-    if [ `which aprun` ]; then
-        message "!!! WARNING !!! skipping cache clear ... no sudo access on cray"
+    if [ $JOBENV = moab -o $JOBENV = slurm ]; then
+        message "!!! WARNING !!! skipping cache clear ... no cray sudo access"
         #aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
         #    'echo 3 > /proc/sys/vm/drop_caches'
     else
         # this does more than just $vpic_nodes (does them all)
+        # but that isn't really a problem...
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
     fi
@@ -312,9 +436,9 @@ do_mpirun() {
 
     envstr=""; npstr=""; hstr=""
 
-    if [ `which aprun` ]; then
-        # This is likely a CRAY machine. Deploy an aprun job.
+    if [ $JOBENV = moab ]; then
 
+        # CRAY running moab....  we need to use aprun
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-e %s=%s " ${envs[@]}`
         fi
@@ -327,13 +451,39 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "[MPIEXEC]" "aprun -n $procs" $npstr $hstr $envstr $extra_opts \
-            ${DEFAULT_MPIOPTS-} $exe
+        message "[MPIEXEC]" "aprun -n $procs" $npstr $hstr $envstr \
+                $extra_opts ${DEFAULT_MPIOPTS-} $exe
         aprun -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ `which mpirun.mpich` ]; then
+    elif [ $JOBENV = slurm ]; then
+
+        # CRAY running slurm....  we need to use srun
+        if [ ${#envs[@]} -gt 0 ]; then
+            envstr=`printf -- "%s=%s," ${envs[@]}`
+            # XXX: "ALL" isn't documented in srun(1) man page, but it works.
+            # without it, all other env vars are removed (e.g. as described
+            # in the sbatch(1) man page ...).
+            envstr="--export=${envstr}ALL"
+        fi
+
+        if [ $ppnode -gt 0 ]; then
+            npstr="--ntasks-per-node=$ppnode"
+        fi
+
+        if [ ! -z "$hosts" ]; then
+            hstr="-w $hosts"
+        fi
+
+        message "[MPIEXEC]" "srun -n $procs" $npstr $hstr $envstr \
+            $extra_opts ${DEFAULT_MPIOPTS-} $exe
+        srun -n $procs $npstr $hstr $envstr $extra_opts \
+            ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
+            tee -a $log2 | tee -a $log1
+
+    elif [ $JOBENV = mpich ]; then
+
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-env %s %s " ${envs[@]}`
         fi
@@ -346,13 +496,14 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC]" "mpirun.mpich -np $procs" $npstr $hstr $envstr $extra_opts \
-            ${DEFAULT_MPIOPTS-} $exe
+        message "[MPIEXEC]" "mpirun.mpich -np $procs" $npstr $hstr $envstr \
+            $extra_opts ${DEFAULT_MPIOPTS-} $exe
         mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ `which mpirun.openmpi` ]; then
+    elif [ $JOBENV = openmpi ]; then
+
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-x %s=%s " ${envs[@]}`
         fi
@@ -365,14 +516,16 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC]" "mpirun.openmpi -n $procs" $npstr $hstr $envstr $extra_opts \
-            ${DEFAULT_MPIOPTS-} $exe
+        message "[MPIEXEC]" "mpirun.openmpi -n $procs" $npstr $hstr $envstr \
+            $extra_opts ${DEFAULT_MPIOPTS-} $exe
         mpirun.openmpi -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
     else
+
         die "could not find a supported mpirun or aprun command"
+
     fi
 }
 
@@ -564,7 +717,9 @@ do_run() {
             message "[DWCLI] dwcli" "stage out" "--session $dwsessid" "--configuration $dwconfid" \
                 "--backing-path $exp_jobdir/bb/" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
             dwcli stage out --session $dwsessid --configuration $dwconfid \
-                --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
+              --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
+
+            bb_stageoutwait
 
             message "-INFO- done"
 
@@ -635,7 +790,9 @@ do_run() {
             message "[DWCLI] dwcli" "stage out" "--session $dwsessid" "--configuration $dwconfid" \
                 "--backing-path $exp_jobdir/bb/" "--dir ${exp_dir:${#DW_JOB_STRIPED}}"
             dwcli stage out --session $dwsessid --configuration $dwconfid \
-                --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
+              --backing-path $exp_jobdir/bb/ --dir ${exp_dir:${#DW_JOB_STRIPED}}
+
+            bb_stageoutwait
 
             message "-INFO- done"
 
@@ -715,3 +872,11 @@ query_particles() {
         do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout -n 100"
     fi
 }
+
+
+#
+# call common_init unless its been disabled (e.g. for debugging)
+#
+if [ x$common_noinit = x ]; then
+    common_init
+fi
