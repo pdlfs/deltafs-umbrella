@@ -143,12 +143,12 @@ do_querying=${do_querying:-0}
 #
 common_init() {
 
-  if [ x$JOBENV = x ]; then
+  if [ x${JOBENV-} = x ]; then
     # try and guess our job environment
     export JOBRUNCMD=""            # only allowed through if JOBENV set by usr
-    if [ x$PBS_JOBID != x ]; then
+    if [ x${PBS_JOBID-} != x ]; then
       export JOBENV=moab
-    elif [ x$SLURM_JOBID != x ]; then
+    elif [ x${SLURM_JOBID-} != x ]; then
       export JOBENV=slurm
     elif [ `which mpirun.mpich` ]; then
       export JOBENV=mpich
@@ -166,7 +166,7 @@ common_init() {
   fi
 
   # set JOBRUNCMD to the default if not provided by user
-  if [ x$JOBRUNCMD = x ]; then
+  if [ x${JOBRUNCMD-} = x ]; then
     if [ $JOBENV = moab ]; then
       export JOBRUNCMD=aprun
     elif [ $JOBENV = slurm ]; then
@@ -182,12 +182,13 @@ common_init() {
 
   # verify cray env is set as expected
   if [ $JOBENV = moab ]; then
-    if [ x$PBS_JOBID = x -o x$MOAB_JOBNAME = x -o ! -f "$PBS_NODEFILE" ]; then
+    if [ x${PBS_JOBID-} = x -o x${MOAB_JOBNAME-} = x \
+         -o ! -f "$PBS_NODEFILE" ]; then
       die "bad moab setup - check jobname and nodefile"
     fi
   elif [ $JOBENV = slurm ]; then
-    if [ x$SLURM_JOBID = x -o x$SLURM_JOB_NAME = x -o \
-         x$SLURM_JOB_NODELIST = x ]; then
+    if [ x${SLURM_JOBID-} = x -o x${SLURM_JOB_NAME-} = x -o \
+         x${SLURM_JOB_NODELIST-} = x ]; then
       die "bad slurm setup - check jobname and nodelist"
     fi
     if [ ! `which generate_pbs_nodefile` ]; then
@@ -877,6 +878,6 @@ query_particles() {
 #
 # call common_init unless its been disabled (e.g. for debugging)
 #
-if [ x$common_noinit = x ]; then
+if [ x${common_noinit-} = x ]; then
     common_init
 fi
