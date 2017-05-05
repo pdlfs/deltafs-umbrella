@@ -57,7 +57,10 @@ ip_subnet="10.92"
 # Number of mpi procs per node
 ppn=4
 
-export JOBDIRHOME=/panfs/probescratch/TableFS/vpic.dc
+# don't override JOBDIRHOME if it is already set
+if [ x${JOBDIRHOME-} = x ]; then
+    export JOBDIRHOME=/panfs/probescratch/TableFS/vpic.dc
+fi
 
 ###############
 # Core script #
