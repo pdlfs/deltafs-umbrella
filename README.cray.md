@@ -220,9 +220,9 @@ To do that, open `lanl_do_vpic_test.sh`:
 
 **c**) set **nodes** and **ppn** to control the number of compute nodes and cores to request -- since this will be a vpic-only test, it is recommended to set ppn to the total number of cores available on a compute node (32 for Trinitite compute nodes);
 
-**d**) set **num_vpic_dumps**,  **px_factor**, and **py_factor** to control the size of vpic outputs as well as the runtime of a job.
+**d**) set **num_vpic_dumps**,  **px_factor**, **py_factor**, and **pz_factor** to control the size of vpic simulations as well as the ratio between compute and I/O.
 
-**NOTE**: to do an initial validation run to check code and debug scripts, set **nodes** to 1, **num_vpic_dumps** to 2,  **px_factor** to 4, and **py_factor** to 2 (on a 32-core Trinitite node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total).
+**NOTE**: to do an initial validation run to check code and debug scripts, set **nodes** to 1, **num_vpic_dumps** to 2, **px_factor**, **pz_factor** to 1, and **py_factor** to 4 (on a 32-core Trinitite node, this will result in a tiny run that lasts no more than 5 minites and generates data at 4MB/core/dump, and 256MB of data in total).
 
 To do a standard vpic baseline test, set the above options as follows:
 
@@ -231,14 +231,12 @@ To do a standard vpic baseline test, set the above options as follows:
 |             **nodes** |   1   |   4   |   16  |   64  |                                                      |
 |                 cores |   32  |  128  |  512  |  2048 | 32 cpu cores per node (**ppn**=32)                   |
 |    **num_vpic_dumps** |   8   |   8   |   8   |   8   |                                                      |
-|         **px_factor** |   16  |   16  |   16  |   16  | *px=512, 2K, 8K, 32K*                                |
-|         **py_factor** |   4   |   4   |   4   |   4   | *py=10K*                                             |
-|         num_particles |  512M |   2G  |   8G  |  32G  | 16M particles per core                               |
-| estimated_output_size | 256GB |  1TB  |  4TB  |  16TB | less than 1GB per core (64B per particle) per dump   |
-|       estimated_files |   1K  |   4K  |  16K  |  64K  | 4 PFS or BB files per core per dump                  |
-|     estimated_runtime |  2hr  |  2hr  |  2hr  | 2.5hr | query time not included                              |
-|    estimated_hpc_util |  95%  |  95%  |  95%  |  90%  |                                                      |
-|  estimated_query_time |  1min |  5min | 20min | 80min | assuming 8 cores w/ each streaming at 512MB/s        |
+|         **px_factor** |   2   |   2   |   2   |   2   | *px=100*                                             |
+|         **py_factor** |   20  |   20  |   20  |   20  | *py=640, 2560, 10K, 40K*                             |
+|         **pz_factor** |   2   |   2   |   2   |   2   | *pz=100*                                             |
+|         num_particles |  640M | 2560M |  10G  |  40G  | 20M particles per core                               |
+| estimated_output_size | 320GB |1280GB |  5TB  |  20TB | roughly 1.28GB per core (64B per particle) per dump  |
+|       estimated_files | 1.25K |   5K  |  20K  |  80K  | 4 PFS or BB files per core per dump                  |
 
 Next, set env `JOBDIRHOME` to a desired root for all job outputs, and env `EXTRA_MPIOPTS` to a list of extra `aprun` options.
 ```bash
