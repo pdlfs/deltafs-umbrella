@@ -561,14 +561,15 @@ ExternalProject_Add (sndrcv-test
     # this is a test, no test command.
 )
 
-# only do sndrcv-test if we directly asked for it 
+# only do sndrcv-test if we directly asked for it
 set_property (TARGET sndrcv-test PROPERTY EXCLUDE_FROM_ALL True)
 
 #
 # mercury-runner
 #
-GenDownloadConfig (mrun_download mercury-runner mercury-runner.tar.gz
+GenDownloadConfig (mrun_download mercury-runner mercury-runner-0c91734d.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/mercury-runner.git"
+    GIT_TAG 0c91734d
     ### GIT_TAG master
 )
 
