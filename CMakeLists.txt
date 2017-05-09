@@ -563,6 +563,9 @@ ExternalProject_Add (sndrcv-test
     # this is a test, no test command.
 )
 
+# only do sndrcv-test if we directly asked for it 
+set_property (TARGET sndrcv-test PROPERTY EXCLUDE_FROM_ALL True)
+
 #
 # mercury-runner
 #
