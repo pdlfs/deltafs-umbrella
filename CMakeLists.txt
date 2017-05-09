@@ -387,9 +387,10 @@ ExternalProject_Add_Step(ch-placement prepare
 #
 # ssg
 #
-GenDownloadConfig (ssg_download ssg ssg-TBD.tar.gz
+GenDownloadConfig (ssg_download ssg ssg-0164e690.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/ssg.git"
-    GIT_TAG master
+    GIT_TAG 0164e690
+    ##GIT_TAG master
 )
 
 ExternalProject_Add (ssg
