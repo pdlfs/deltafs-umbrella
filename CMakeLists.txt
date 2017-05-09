@@ -411,10 +411,10 @@ ExternalProject_Add_Step (ssg prepare
 # deltafs-common (aka the deltafs version of pdlfs-common)
 #
 GenDownloadConfig (deltafs-common_download deltafs-common
-                   deltafs-common-0.9.2.tar.gz
+                   deltafs-common-5b6f919.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-common.git"
-    # XXX: switch this off until we decide we want to tag it off
-    ###GIT_TAG "v0.9.2"
+    GIT_TAG "5b6f919"  # May 2017
+    ### GIT_TAG master
 )
 
 MaybeRunTests (deltafs-common_test
@@ -437,10 +437,10 @@ ExternalProject_Add (deltafs-common
 #
 # deltafs-bb
 #
-GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-03f7da52.tar.gz
+GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-004d9d2.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
-    GIT_TAG 004d9d2
-    ### GIT_TAG 03f7da52		# Feb 2017
+    GIT_TAG 004d9d2  # Apr 2017
+    ### GIT_TAG 03f7da52  # Feb 2017
     ### GIT_TAG master
 )
 
@@ -456,11 +456,10 @@ ExternalProject_Add (deltafs-bb
 #
 # deltafs
 #
-GenDownloadConfig (deltafs_download deltafs deltafs-0.9.2.tar.gz
+GenDownloadConfig (deltafs_download deltafs deltafs-a30dd43.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
-    GIT_TAG a30dd43
-    # XXX: switch this off until we decide we want to tag it off
-    ###GIT_TAG "master"
+    GIT_TAG a30dd43  # Apr 2017
+    ### GIT_TAG master
 )
 
 MaybeRunTests (deltafs_test
@@ -484,11 +483,10 @@ ExternalProject_Add (deltafs
 # deltafs-vpic-preload
 #
 GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
-                   deltafs-vpic-preload.tar.gz
+                   deltafs-vpic-preload-v1.4b.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
-    GIT_TAG v1.4a
-    # XXX: switch this off until we decide we want to tag it off
-    ###GIT_TAG master
+    GIT_TAG v1.4b
+    ### GIT_TAG master
 )
 
 MaybeRunTests (deltafs-vpic-preload_test
@@ -508,9 +506,9 @@ ExternalProject_Add (deltafs-vpic-preload
 #
 # vpic
 #
-GenDownloadConfig (vpic_download vpic vpic_deltafs.tar.gz
+GenDownloadConfig (vpic_download vpic vpic-0b8b035.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    GIT_TAG 4bc7d19
+    GIT_TAG 0b8b035
     ### GIT_TAG master
 )
 
