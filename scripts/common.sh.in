@@ -580,8 +580,8 @@ build_deck() {
             sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
-            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$cores'/' | \
-            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
+            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 1/' | \
+            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y '$cores'/' | \
             sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
