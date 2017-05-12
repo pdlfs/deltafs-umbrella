@@ -1,34 +1,43 @@
 #!/bin/bash -eux
 #
 #MSUB -N vpic-test
-#MSUB -l walltime=0:40:00
+#MSUB -l walltime=3:30:00
 #MSUB -l nodes=1:haswell
 #MSUB -o /users/$USER/joblogs/vpic-test-$MOAB_JOBID.out
 #MSUB -j oe
 #DW jobdw access_mode=striped capacity=25GiB type=scratch
-ip_subnet="11.128"
-test="baseline"
-export JOBDIRHOME="/lustre/ttscratch1/users/$USER"
+ip_subnet="11.128"  ## XXX: Trinitite
+test="deltafs"  ## or baseline to do a vpic-only run
+export JOBDIRHOME="/lustre/ttscratch1/users/$USER"  ## XXX: Trinitite
 ## export DEFAULT_MPIOPTS=""  ## applies to all mpiexec calls
-export EXTRA_MPIOPTS="--cc cpu"  ## only applies to vpic mpiexec calls
+
+## VPICOPTS="-cc cpu"
+
+# This gives each deltafs/vpic process two haswell hw threads, such as
+#  - process 0  -> logic cpu 0  and 32
+#  - process 1  -> logic cpu 1  and 33
+#  - process 31 -> logic cpu 31 and 63
+VPICOPTS="-j 2 -d 2 -cc 0,32:1,33:2,34:3,35:4,36:5,37:6,38:7,39:8,40:9,41:10,42:11,43:12,44:13,45:14,46:15,47:16,48:17,49:18,50:19,51:20,52:21,53:22,54:23,55:24,56:25,57:26,58:27,59:28,60:29,61:30,62:31,63"
+export EXTRA_MPIOPTS="$VPICOPTS"  ## only applies to vpic mpiexec calls
+
 #|
-#|      VPIC test | Run 1 | Run 2 | Run 3 | Run 4 |#########################
-#|---------------:|:-----:|:-----:|:-----:|:-----:|#########################
-#|          nodes |   1   |   4   |   16  |   64  |#########################
-#| num_vpic_dumps |   8   |   8   |   8   |   8   |#########################
-#|      px_factor |   2   |   2   |   2   |   2   |#########################
-#|      py_factor |   16  |   16  |   16  |   16  |#########################
-#|      pz_factor |   2   |   2   |   2   |   2   |#########################
-#|            ppn |   32  |   32  |   32  |   32  |#########################
+#|      VPIC test | Run 0 | Run 1 | Run 2 | Run 3 | Run 4 |#################
+#|---------------:|:-----:|:-----:|:-----:|:-----:|:-----:|#################
+#|          nodes |   1   |   1   |   4   |   16  |   64  |#################
+#| num_vpic_dumps |   2   |   8   |   8   |   8   |   8   |#################
+#|      px_factor |   1   |   2   |   2   |   2   |   2   |#################
+#|      py_factor |   4   |   20  |   20  |   20  |   20  |#################
+#|      pz_factor |   1   |   2   |   2   |   2   |   2   |#################
+#|            ppn |   32  |   32  |   32  |   32  |   32  |#################
 #|
 #|--------------
 #| RUN CONF
 #|----------
 nodes=1  ## aprun -n $(( nodes * ppn )) -N $ppn ...
 num_vpic_dumps=2  ## see table above
-px_factor=2  ## see table above
-py_factor=16  ## see table above
-pz_factor=2  ## see table above
+px_factor=1   ## see table above
+py_factor=4   ## see table above
+pz_factor=1   ## see table above
 ppn=32 ## aprun -N $ppn
 ## DOIT
 @CMAKE_INSTALL_PREFIX@/scripts/run_vpic_test.sh \
