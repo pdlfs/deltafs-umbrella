@@ -505,6 +505,29 @@ ExternalProject_Add (deltafs-vpic-preload
 )
 
 #
+# deltafs-nexus
+#
+GenDownloadConfig (deltafs-nexus_download deltafs-nexus
+                   deltafs-nexus.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-nexus.git"
+    GIT_TAG master
+)
+
+MaybeRunTests (deltafs-nexus_test
+    TEST_COMMAND ctest -R nexus -V
+)
+
+ExternalProject_Add (deltafs-nexus
+    DEPENDS mercury
+    ${deltafs-nexus_download}
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+    ${deltafs-nexus_test}
+)
+
+#
 # vpic
 #
 GenDownloadConfig (vpic_download vpic vpic-0b8b035.tar.gz
