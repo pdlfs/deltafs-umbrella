@@ -530,9 +530,9 @@ ExternalProject_Add (deltafs-nexus
 #
 # vpic
 #
-GenDownloadConfig (vpic_download vpic vpic-0b8b035.tar.gz
+GenDownloadConfig (vpic_download vpic vpic-6a9efff8.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    GIT_TAG 0b8b035
+    GIT_TAG 6a9efff8
     ### GIT_TAG master
 )
 
