@@ -477,9 +477,11 @@ do_mpirun() {
             hstr="-w $hosts"
         fi
 
-        message "[MPIEXEC]" "srun -n $procs" $npstr $hstr $envstr \
+        nnodes=$(( procs / ppnode ))
+
+        message "[MPIEXEC]" "srun -N $nnodes" $npstr $hstr $envstr \
             $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        srun -n $procs $npstr $hstr $envstr $extra_opts \
+        srun -N $nnodes $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
