@@ -470,18 +470,17 @@ do_mpirun() {
         fi
 
         if [ $ppnode -gt 0 ]; then
-            npstr="--ntasks-per-node=$ppnode"
+            nnodes=$(( procs / ppnode ))
+            npstr="-N $nnodes --ntasks-per-node=$ppnode"
         fi
 
         if [ ! -z "$hosts" ]; then
             hstr="-w $hosts"
         fi
 
-        nnodes=$(( procs / ppnode ))
-
-        message "[MPIEXEC]" "srun -N $nnodes" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "srun -n $procs" $npstr $hstr $envstr \
             $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        srun -N $nnodes $npstr $hstr $envstr $extra_opts \
+        srun -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
