@@ -267,8 +267,8 @@ get_bbdir() {
       # new version from brad:
       # XXX: no error/sanity check on dwcli output
       if [ x${DW_SESSION_OVERRIDE-} = x ]; then
-        #  (XXX: where does ACDW_JOBID come from?)
-          dwsessid=$(dwstat sessions |grep $((ACDW_JOBID+1)) |awk '{print $1}')
+          # XXX: assume session-id is encoded in the dir path
+          dwsessid=$(basename $DW_JOB_STRIPED | cut -f 1 -d _)
       else
           dwsessid=$DW_SESSION_OVERRIDE
       fi
