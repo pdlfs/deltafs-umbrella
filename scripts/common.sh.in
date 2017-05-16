@@ -267,8 +267,11 @@ get_bbdir() {
       # new version from brad:
       # XXX: no error/sanity check on dwcli output
       if [ x${DW_SESSION_OVERRIDE-} = x ]; then
-          # XXX: assume session-id is encoded in the dir path
-          dwsessid=$(basename $DW_JOB_STRIPED | cut -f 1 -d _)
+          # XXX: assume token is encoded in the dir path
+          # (at least on slurm the token is the job id)
+          dwtoken=$(basename $DW_JOB_STRIPED | cut -f 1 -d _)
+          dwsessid=$(dwstat sessions | \
+                     awk -v token=$dwtoken '{if ($3 == token) print $1}')
       else
           dwsessid=$DW_SESSION_OVERRIDE
       fi
