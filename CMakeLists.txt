@@ -526,6 +526,7 @@ ExternalProject_Add (deltafs-nexus
     UPDATE_COMMAND ""
     ${deltafs-nexus_test}
 )
+set_property (TARGET deltafs-nexus PROPERTY EXCLUDE_FROM_ALL True)
 
 #
 # vpic
