@@ -13,10 +13,10 @@ cmake_minimum_required (VERSION 3.0)
 project (deltafs-umbrella-scripts NONE)
 
 # data files to install  (non-executable)
-set (install-files README.md vpic_plots.R)
+set (install-files README.md -vpic_plots.R)
 
 # executable scripts to install
-set (install-programs basic-bb.sh process_logs.sh process_runner.pl)
+set (install-programs basic-bb.sh ethq.pl process_logs.sh process_runner.pl)
 
 # executable scripts to @-expand and then install
 set (install-programs-in common.sh.in run_mercury_runner.sh.in
