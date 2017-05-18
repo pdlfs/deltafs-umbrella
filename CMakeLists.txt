@@ -325,9 +325,9 @@ ExternalProject_Add_Step(bmi prepare
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury-2ec20802.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-bdf8845b.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
-    GIT_TAG 2ec20802    # Feb 2017
+    GIT_TAG bdf8845b    # May 2017
     ### GIT_TAG master
 )
 
@@ -438,9 +438,9 @@ ExternalProject_Add (deltafs-common
 #
 # deltafs-bb
 #
-GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-004d9d2.tar.gz
+GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-f9040bd1.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
-    GIT_TAG 004d9d2  # Apr 2017
+    GIT_TAG f9040bd1  # May 2017
     ### GIT_TAG 03f7da52  # Feb 2017
     ### GIT_TAG master
 )
@@ -592,9 +592,9 @@ set_property (TARGET sndrcv-test PROPERTY EXCLUDE_FROM_ALL True)
 #
 # mercury-runner
 #
-GenDownloadConfig (mrun_download mercury-runner mercury-runner-0c91734d.tar.gz
+GenDownloadConfig (mrun_download mercury-runner mercury-runner-2624612c.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/mercury-runner.git"
-    GIT_TAG 0c91734d
+    GIT_TAG 2624612c
     ### GIT_TAG master
 )
 
