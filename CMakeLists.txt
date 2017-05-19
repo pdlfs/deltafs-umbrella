@@ -325,9 +325,9 @@ ExternalProject_Add_Step(bmi prepare
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury-bdf8845b.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-dfe56cb4.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
-    GIT_TAG bdf8845b    # May 2017
+    GIT_TAG dfe56cb4    # May 2017
     ### GIT_TAG master
 )
 
@@ -335,6 +335,7 @@ ExternalProject_Add (mercury
     DEPENDS cci bmi
     ${mercury_download}
     CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=ON
+               -DNA_USE_SM=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${BUILD_TESTS}
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
