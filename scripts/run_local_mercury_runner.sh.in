@@ -39,7 +39,7 @@ set -euo pipefail
 
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=("na+sm" "bmi+tcp")                    # protocols to test
-n_sizes=(4 64 256 1024 2048 4096)               # RPC snd size ("-i" flag)
+n_sizes=(8 40 64 256 1024 2048 4096)            # RPC snd size ("-i" flag)
 n_limits=(1 2 4 8 16)                           # outstanding RPCs ("-l" flag)
 n_repeats=3                                     # repeat runs
 n_nrpcs=100000                                  # nrpcs in 1 run ("-c" flag)
@@ -133,7 +133,7 @@ run_one() {
     fi
 
     srvr_cmd="$cmd -m s $num $saddress"
-    clnt_cmd="$cmd -m c $num $caddress $saddress"
+    clnt_cmd="$cmd -m c $num $caddress h0"
 
     # start the server
     message "!!! NOTICE !!! starting server (Instances: $num, Address spec: $saddress)..."
