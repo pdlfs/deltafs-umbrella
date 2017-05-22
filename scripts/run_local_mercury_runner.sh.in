@@ -43,7 +43,7 @@ n_sizes=(8 64 256 1024 2048 4096)               # RPC snd size ("-i" flag)
 n_limits=(1 2 4 8 16)                           # outstanding RPCs ("-l" flag)
 n_repeats=3                                     # repeat runs
 n_nrpcs=1000000                                 # nrpcs in 1 run ("-c" flag)
-n_timeout=120                                   # timeout  ("-t" flag)
+n_timeout=300                                   # timeout  ("-t" flag)
 
 # "b" - bulk read run: RPC, vary bulk read size and limit
 b_protos=("na+sm" "bmi+tcp")                    # protocols to test
