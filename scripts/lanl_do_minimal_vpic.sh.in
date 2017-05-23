@@ -19,7 +19,7 @@ ip_subnet="11.128"  ## XXX: Trinitite
 
 test="deltafs"  ## or baseline to do a vpic-only run
 
-export JOBDIRHOME="/lustre/ttscratch1/users/$USER"  ## XXX: Trinitite
+###export JOBDIRHOME="/lustre/ttscratch1/users/$USER"  ## XXX: Trinitite
 ## export DEFAULT_MPIOPTS=""  ## applies to all mpiexec calls
 
 ## VPICOPTS="-cc cpu"
