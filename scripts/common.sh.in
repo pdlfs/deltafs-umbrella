@@ -341,9 +341,7 @@ gen_hostfile() {
     else
 
         # Generate hostfile on Emulab and store on disk
-        fqdn_suffix="`hostname | sed 's/^[^\.]*././'`"
-        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n' | \
-                    sed 's/$/'$fqdn_suffix'/g'`"
+        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n'`"
 
         echo "$exp_hosts" > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
@@ -518,7 +516,13 @@ do_mpirun() {
         fi
 
         if [ ! -z "$hosts" ]; then
-            hstr="--host $hosts"
+            if [ $ppnode -gt 1 ]; then
+                hhstr="`printf '&,%.0s' $(seq 1 $(($ppnode-1)))`"
+                hhstr="`echo $hosts | sed -e 's/\([^,]*\)/'"$hhstr&"'/g'`"
+                hstr="--host $hhstr"
+            else
+                hstr="--host $hosts"
+            fi
         fi
 
         message "[MPIEXEC]" "mpirun.openmpi -n $procs" $npstr $hstr $envstr \
