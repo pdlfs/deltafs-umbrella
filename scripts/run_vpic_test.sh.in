@@ -48,6 +48,7 @@ num_vpic_dumps=${7:-"2"}
 px_factor=${8:-"4"}
 py_factor=${9:-"2"}
 pz_factor=${10:-"1"}
+bbos_buddies=${11:-"0"}
 
 ###############
 # Core script #
@@ -55,8 +56,6 @@ pz_factor=${10:-"1"}
 
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
-### skip all bbos code ###
-bbos_buddies=0
 ### override default number of dumps ###
 vpic_epochs=$num_vpic_dumps
 
