@@ -13,18 +13,18 @@ my(%TOC, @minimal, @sc17a);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
-    #  nodes, dumps,   px,  py,  pz,   ppn,  maxtime
-    [      2,     2,    1,   4,   1,     4,       10 ],    # run 0
+    #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
+    [      2,         2,    1,   4,   1,     4,       10 ],    # run 0
     );
 
 # sc17a: for paper draft
 @sc17a = (
-    #  nodes, dumps,   px,  py,  pz,   ppn,  maxtime
-    [      1,     2,    1,   4,   1,    32,      10 ],     # run 0
-    [      1,     8,    2,  20,   2,    32,      10 ],     # run 1
-    [      4,     8,    2,  20,   2,    32,      10 ],     # run 2
-    [     16,     8,    2,  20,   2,    32,      10 ],     # run 3
-    [     64,     8,    2,  20,   2,    32,      10 ],     # run 4
+    #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
+    [      1,         2,    1,   4,   1,    32,      10 ],     # run 0
+    [      1,         8,    2,  20,   2,    32,      10 ],     # run 1
+    [      4,         8,    2,  20,   2,    32,      10 ],     # run 2
+    [     16,         8,    2,  20,   2,    32,      10 ],     # run 3
+    [     64,         8,    2,  20,   2,    32,      10 ],     # run 4
     );
 
 # table of contents (experiments available)
@@ -292,15 +292,15 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  px  py  pz   ppn  maxtime\n" if ($dryrun);
+print "#run  nodes  vpicdumps  px  py  pz   ppn  maxtime\n" if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
-    my($nodes, $dumps, $px, $py, $pz, $ppn, $maxtime) = @{$$exp[$r]};
+    my($nodes, $vpicdumps, $px, $py, $pz, $ppn, $maxtime) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dryrun) {
-        printf "%-5d %-6d %-6d %-3d %-3d %-4d %-4d %d\n", $r,
-        $nodes, $dumps, $px, $py, $pz, $ppn, $maxtime;
+        printf "%-5d %-6d %-10d %-3d %-3d %-4d %-4d %d\n", $r,
+        $nodes, $vpicdumps, $px, $py, $pz, $ppn, $maxtime;
         next;
     }
 
@@ -359,7 +359,7 @@ test=$t
 ipsubnet=$ipsubnet
 nodes=$nodes
 ppn=$ppn            
-dumps=$dumps
+vpicdumps=$vpicdumps
 px=$px
 py=$py
 pz=$pz
@@ -388,7 +388,7 @@ ENDOPTS
 # save experiment params to a file
 #
 set | egrep \\
-  '^test=|^ipsubnet=|^nodes=|^ppn=|^dumps=|^px=|^py=|^pz=|^bbosbuddies=' > \\
+'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^px=|^py=|^pz=|^bbosbuddies=' > \\
         \$jobdir/EXPPARAMS
 
 #
@@ -400,7 +400,7 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
-        \$ppn \$ppn \$ppn \$dumps \$px \$py \$pz \$bbosbuddies
+        \$ppn \$ppn \$ppn \$vpicdumps \$px \$py \$pz \$bbosbuddies
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
