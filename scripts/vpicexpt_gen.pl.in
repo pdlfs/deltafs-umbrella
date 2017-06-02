@@ -97,7 +97,7 @@ sub guess_extraopts {
                "27,59:28,60:29,61:30,62:31,63" if ($plat eq 'aprun');
 
         # slurm
-        return "--cpu-bind=cores" if ($plat eq 'srun');
+        return "--cpu_bind=cores" if ($plat eq 'srun');
     }
     return(undef);
 }
