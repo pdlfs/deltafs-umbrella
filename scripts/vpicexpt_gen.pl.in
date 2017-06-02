@@ -1,0 +1,421 @@
+#!/usr/bin/env perl
+#
+# vpiexpt_gen.pl  generate vpic experiment
+# 31-May-2017  chuck@ece.cmu.edu
+#
+
+use strict;
+
+##############################################################################
+# define experiments here
+##############################################################################
+my(%TOC, @minimal, @sc17a);
+
+# minimal: for quick tests of script infrastructure
+@minimal = (
+    #  nodes, dumps,   px,  py,  pz,   ppn,  maxtime
+    [      2,     2,    1,   4,   1,     4,       10 ],    # run 0
+    );
+
+# sc17a: for paper draft
+@sc17a = (
+    #  nodes, dumps,   px,  py,  pz,   ppn,  maxtime
+    [      1,     2,    1,   4,   1,    32,      10 ],     # run 0
+    [      1,     8,    2,  20,   2,    32,      10 ],     # run 1
+    [      4,     8,    2,  20,   2,    32,      10 ],     # run 2
+    [     16,     8,    2,  20,   2,    32,      10 ],     # run 3
+    [     64,     8,    2,  20,   2,    32,      10 ],     # run 4
+    );
+
+# table of contents (experiments available)
+%TOC = (
+    "minimal" => \@minimal,
+    "sc17a"   => \@sc17a,
+    );
+##############################################################################
+##############################################################################
+##############################################################################
+#
+# code for generating exp scripts goes below here
+#
+use Fcntl;
+use Getopt::Long;
+use Sys::Hostname;
+my($hostname) = hostname();   # put in var to allow us to override for debug
+
+#
+# helper functions
+#
+
+#
+# hms(min,scale) - convert number of minutes to hh:mm:ss using scaling factor
+#
+sub hms {
+    my($min, $sc) = @_;
+    my($h, $m);
+    $m = int($min * $sc);
+    $m = 1 if ($m < 1);
+    sprintf "%d:%02d:00", int($m / 60), $m % 60;
+}
+
+#
+# guess_subnet: based on hostname
+#
+sub guess_subnet {
+    my($hn) = $hostname;
+    return "11.128" if ($hn =~ /^tt-fey/);
+    return "10.92" if ($hn =~ /narwhal/);
+    return "10.53" if ($hn =~ /susitna/);
+    return undef;
+}
+
+#
+# guess_platform: based on what's in our path
+#
+sub guess_platform {
+    my(@paths, $try);
+    @paths = split(/:/, $ENV{'PATH'});
+    foreach $try ( "srun", "aprun") {
+        foreach ( @paths ) {
+            return($try) if (-x "$_/$try");
+        }
+    }
+    return("mpi");
+}
+
+#
+# guess_extraopts(platform): try and guess the extra MPI options we need
+#
+sub guess_extraopts {
+    my($plat) = @_;
+    my($hn) = $hostname;
+    if ($hn =~ /^tt-fey/ || $hn =~ /^tr-/) {
+        # moab
+        return "-j 2 -d 2 -cc 0,32:1,33:2,34:3,35:4,36:5,37:6,38:7,39:8,40:" .
+               "9,41:10,42:11,43:12,44:13,45:14,46:15,47:16,48:17,49:" .
+               "18,50:19,51:20,52:21,53:22,54:23,55:24,56:25,57:26,58:" .
+               "27,59:28,60:29,61:30,62:31,63" if ($plat eq 'aprun');
+
+        # slurm
+        return "--cpu-bind=cores" if ($plat eq 'srun');
+    }
+    return(undef);
+}
+
+#
+# savefile(file, content1, content2,...): save data to a file.  return
+# 1 on success, undef on error.
+#
+sub savefile {
+    my($file) = shift(@_);
+    my($hand);
+
+    # must have a filename (if already present, must be a file).
+    return(undef) if ($file eq '' || (-e $file && ! -f $file));
+
+    # return 1 if total success!
+    if (sysopen($hand, "$file.new.$$", O_RDWR|O_CREAT|O_TRUNC, 0777)  &&
+        print($hand join('', @_))           &&
+        close($hand)                        &&
+        rename("$file.new.$$", $file) ) {
+        return(1);
+    }
+
+    # failure
+    undef($hand);                               # will close, if open
+    unlink("$file.new.$$");
+    return(undef);
+}
+
+my($cmd) = join(" ", @ARGV);
+my($rv, $bbosbuddies, $constraints, $dryrun, $dw, $experiment, $extraopts,
+   $ipsubnet, $iterations, $overcommit, $platform, $prefix, $run, $scaletime,
+   $tag, $tests);
+my($defplatform);
+
+# non-undef defaults
+$bbosbuddies = 0;
+$ipsubnet = guess_subnet();
+$iterations = 1;
+$prefix = '@CMAKE_INSTALL_PREFIX@';
+$platform = $defplatform = guess_platform();   # save guess in defplatform
+$scaletime = 1.0;
+$tag = "vpic";
+$tests = "baseline,deltafs";
+
+# need platform to guess this
+$extraopts = guess_extraopts($platform);
+
+$rv = GetOptions(
+    "bbosbuddies=i"  =>  \$bbosbuddies,
+    "constraints=s"  =>  \$constraints,
+    "dryrun"         =>  \$dryrun,
+    "dw=s"           =>  \$dw,
+    "experiment=s"   =>  \$experiment,
+    "extraopts=s"    =>  \$extraopts,
+    "hostname=s"     =>  \$hostname,
+    "ipsubnet=s"     =>  \$ipsubnet,
+    "iterations=i"   =>  \$iterations,
+    "overcommit=s"   =>  \$overcommit,
+    "platform=s"     =>  \$platform,
+    "prefix=s"       =>  \$prefix,
+    "run=s"          =>  \$run,
+    "scaletime=f"    =>  \$scaletime,
+    "tag=s"          =>  \$tag,
+    "tests=s"        =>  \$tests
+    );
+
+sub usage {
+    my($msg) = @_;
+    print STDERR "ERR: $msg\n" if ($msg ne '');
+    print STDERR "usage: vpicexpt_gen [options] outputdir\n";
+    print STDERR "\ngenerate experiment batch scripts in spec'd dir\n\n";
+    print STDERR "general options:\n";
+    print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
+    print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
+    print STDERR "\t--dryrun          just print run info and exit\n";
+    print STDERR "\t--dw S            datawarp alloc size (25GiB)\n";
+    print STDERR "\t--experiment S    experiment to run\n";
+    print STDERR "\t--iterations I    #of iterations for each run\n";
+    print STDERR "\t--overcommit S    overcommit (enable/disable/default)\n";
+    print STDERR "\t--run S           limit which run to generate\n";
+    print STDERR "\t--scaletime F     run time limit scaling\n";
+    print STDERR "\t--tag S           string to tag exp logfile names with\n";
+    print STDERR "\t--tests S         baseline, deltafs, ...\n";
+    print STDERR "\n";
+    print STDERR "NOTE: --experiment must be specified.  valid options are:\n";
+    print STDERR "\t", join(' ', sort keys %TOC), "\n\n";
+    print STDERR "Options like constraints, dw, and runtimes are only\n";
+    print STDERR "used on the cray platform with slurm/moab.\n";
+    print STDERR "The 'run' and 'tests' option will take a list of options\n";
+    print STDERR "using a comma to sep (e.g. '--tests=baseline,deltafs').\n";
+    print STDERR "'overcommit' is only supported on LANL's slurm install\n";
+    print STDERR "\n";
+    print STDERR "debug/testing options:\n";
+    print STDERR "\t--extraopts S     extra platform run flags\n";
+    print STDERR "\t--hostname S      override local hostname\n";
+    print STDERR "\t--ipsubnet S      IP subnet to target\n";
+    print STDERR "\t--platform S      platform to use\n";
+    print STDERR "\t--prefix S        deltafs-umbrella install prefix\n";
+    print STDERR "\n";
+    print STDERR "these options are normally autoset by this script\n";
+    print STDERR "but can be overriden if needed...\n";
+    exit(1);
+}
+
+#
+# if we are debugging the script and have changed the platform
+# from the default, reguess the extra options (unless we explicitly 
+# set them).
+#
+if ($platform ne $defplatform && !defined($extraopts)) {
+    $extraopts = guess_extraopts($platform);
+}
+
+#
+# sanity checking
+#
+my($exp, @rns, %wantrun, @opts, @fmtbuf, $vpicgen_fmtopts, $fullextra);
+$exp = $TOC{$experiment};
+
+usage() if ($rv != 1);
+usage("missing output dir") if ($#ARGV != 0);
+usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
+usage("dw must end in 'ib' (GiB, etc.)")
+    if ($dw ne '' && !($dw =~ /\d+.ib$/i) );
+usage("need a valid --experiment value") unless (defined($exp));
+usage("bad number of interations") if ($iterations < 1);
+@rns = split(",", $run);
+foreach (@rns) {
+    usage("bad run value: $_") if (/\D/ || $_ < 0);
+    usage("run out of range $_ for $experiment") if ($_ > $#$exp);
+    $wantrun{$_} = 1;
+    
+}
+usage("bad overcommit value") if ($overcommit ne '' && 
+  $overcommit ne 'enable' && $overcommit ne 'disable' &&
+  $overcommit ne 'default');
+usage("overcommit only valid for slurm/srun")
+  if ($platform ne 'srun' && $overcommit ne '');
+usage("bad scale time") if ($scaletime <= 0.0);
+usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
+                              $tests ne "baseline,deltafs" &&
+                              $tests ne "deltafs,baseline");
+
+#
+# print back options
+#
+@opts = (
+    "bbosbuddies" => $bbosbuddies,
+    "constraints" => $constraints,
+    "dw"          => $dw,
+    "experiment"  => $experiment,
+    "iterations"  => $iterations,
+    "overcommit"  => $overcommit,
+    "run"         => $run,
+    "scaletime"   => $scaletime,
+    "tag"         => $tag,
+    "tests"       => $tests,
+    ""            => undef,
+    "hostname"    => $hostname,
+    "extraopts"   => $extraopts,
+    "ipsubnet"    => $ipsubnet,
+    "platform"    => $platform,
+    "prefix"      => $prefix,
+    "output-dir"  => $ARGV[0]);
+
+print "vpicexpt_gen settings:\n";
+for ($_ = 0 ; $_ <= $#opts ; $_ += 2) {
+    if ($opts[$_] ne '') {
+        printf "\t%-12s = %s\n", $opts[$_], $opts[$_+1];
+        push(@fmtbuf, $opts[$_] . "=" . $opts[$_+1]);
+    } else {
+        print "\n";
+    }
+}
+$vpicgen_fmtopts = join("\n", @fmtbuf);
+
+# we fold overcomit into extraopts to form "fullextra"...
+$fullextra = "--vm-overcommit=$overcommit" if ($overcommit ne '');
+if ($extraopts ne '') {
+  $fullextra = $fullextra . " " if ($fullextra ne '');
+  $fullextra = $fullextra . $extraopts;
+}
+
+#
+# create output directory if it isn't present
+#
+if (!$dryrun && ! -d $ARGV[0]) {
+    mkdir $ARGV[0] || die "mkdir of $ARGV[0] failed ($!)";
+}
+
+#
+# now start generating batch files
+#
+print "#run  nodes  dumps  px  py  pz   ppn  maxtime\n" if ($dryrun);
+for (my($r) = 0 ; $r <= $#$exp ; $r++) {
+    next if ($run ne '' && $wantrun{$r} == 0);
+    my($nodes, $dumps, $px, $py, $pz, $ppn, $maxtime) = @{$$exp[$r]};
+    # $nodes is just the vpic app, need to allocate for bbos too
+    my($totalnodes) = $nodes + $bbosbuddies;
+    if ($dryrun) {
+        printf "%-5d %-6d %-6d %-3d %-3d %-4d %-4d %d\n", $r,
+        $nodes, $dumps, $px, $py, $pz, $ppn, $maxtime;
+        next;
+    }
+
+    my($dwl, $t, $fn, @out, $rtime, $script);
+    $dwl = "#DW jobdw access_mode=striped capacity=$dw type=scratch"
+        if ($dw ne '');
+    foreach $t ("baseline", "deltafs") {
+        next unless (index($tests, $t) != -1);
+        $fn = "$ARGV[0]/$tag-$experiment-$r-$t.sh";
+        @out = ();
+        $rtime = hms($maxtime * $iterations, $scaletime);
+        push(@out, "#!/bin/bash");
+        push(@out, "# this script genereated by vpicexpt_gen");
+        push(@out, "# args=$cmd");
+        if ($platform eq 'srun') {
+            push(@out, "#SBATCH --job-name $tag-$experiment-$r-$t");
+            push(@out, "#SBATCH --time=$rtime");
+            push(@out, "#SBATCH --nodes=$totalnodes");
+            push(@out, "#SBATCH --constraint=$constraints")
+                if ($constraints ne '');
+            push(@out, "#SBATCH --output " .
+                 "/users/\%u/joblogs/$tag-$experiment-$r-$t-\%j.out");
+            push(@out, "$dwl") if ($dwl ne '');
+        } elsif ($platform eq 'aprun') {
+            push(@out, "#MSUB -N $tag-$experiment-$r-$t");
+            push(@out, "#MSUB -l walltime=$rtime");
+            if ($constraints eq '') {
+                push(@out, "#MSUB -l nodes=$totalnodes");
+            }else {
+                push(@out, "#MSUB -l nodes=$totalnodes:$constraints");
+            }
+            push(@out, "#MSUB -o /users/" .
+                 "\$USER/joblogs/$tag-$experiment-$r-$t-\$MOAB_JOBID.out");
+            push(@out, "#MSUB -j oe");
+            push(@out, "$dwl") if ($dwl ne '');
+            push(@out, "");
+        } else {
+            push(@out, "# $tag-$experiment-$r-$t - not using batch system");
+            push(@out, "export MPIJOBNAME=\"$tag-$experiment-$r-$t\"");
+            push(@out, "export MPIJOBID=\$\$");
+            if ($dwl ne '') {
+                print STDERR "WARN: can't enable data warp on this platform\n";
+                push(@out, "# WARN: can't enable data warp on this platform");
+            }
+        }
+        push(@out, "");
+        push(@out, "", "export EXTRA_MPIOPTS=\"$fullextra\"", "")
+            if ($fullextra ne '');
+        $script =<<"EOS";
+
+#######################
+# experiment params
+#######################
+test=$t
+ipsubnet=$ipsubnet
+nodes=$nodes
+ppn=$ppn            
+dumps=$dumps
+px=$px
+py=$py
+pz=$pz
+bbosbuddies=$bbosbuddies
+#######################
+
+# note: ppn currently sets core_per_node, init_procs_per_node, and
+# procs_per_node_increase_step
+
+#
+# load in common.sh so we can get the jobdir for handling iterations
+#
+. $prefix/scripts/common.sh
+
+get_jobdir      # this sets jobdir
+
+#
+# save vpicgenopts to a file
+#
+cat<<ENDOPTS > \$jobdir/VPICGENOPTS
+jobdir=\$jobdir
+$vpicgen_fmtopts
+ENDOPTS
+
+#
+# save experiment params to a file
+#
+set | egrep \\
+  '^test=|^ipsubnet=|^nodes=|^ppn=|^dumps=|^px=|^py=|^pz=|^bbosbuddies=' > \\
+        \$jobdir/EXPPARAMS
+
+#
+# loop through iterations...
+#
+it=0
+while [ \$it -lt $iterations ]
+do
+    echo running iteration \$it
+    # XXX: should reset logfile name here
+    $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
+        \$ppn \$ppn \$ppn \$dumps \$px \$py \$pz \$bbosbuddies
+
+    echo saving iteration in \$jobdir/I-\$it
+    mkdir -p \$jobdir/I-\$it
+    mv \$jobdir/[a-z]* \$jobdir/I-\$it
+
+    it=`expr \$it + 1`
+done
+
+EOS
+
+        die "savefile failed!"
+            unless (savefile($fn, join("\n", @out), $script, 
+                             "\n", "exit 0\n"));
+        print "genereated $fn\n";
+    }
+}
+
+
+exit(0);

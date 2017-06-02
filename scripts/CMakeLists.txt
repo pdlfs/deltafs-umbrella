@@ -23,7 +23,8 @@ set (install-programs-in common.sh.in
      run_local_mercury_runner.sh.in  run_mercury_runner.sh.in
      run_sndrcv_test.sh.in run_minimal.sh.in run_narwhal.sh.in
      run_vpic_test.sh.in run_bbos_test.sh.in lanl_do_mercury_runner.sh.in
-     lanl_do_minimal_vpic.sh.in lanl_do_vpic_test.sh.in)
+     lanl_do_minimal_vpic.sh.in lanl_do_vpic_test.sh.in
+     vpicexpt_gen.pl.in)
 
 #
 # expand ${install-programs-in} and build a list of output files for install
