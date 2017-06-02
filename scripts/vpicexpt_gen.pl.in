@@ -349,6 +349,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
         push(@out, "");
         push(@out, "", "export EXTRA_MPIOPTS=\"$fullextra\"", "")
             if ($fullextra ne '');
+        push(@out, "module load dws") if ($dwl ne '');
         $script =<<"EOS";
 
 #######################
