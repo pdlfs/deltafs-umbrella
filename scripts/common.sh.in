@@ -231,7 +231,7 @@ get_jobdir() {
     elif [ $JOBENV = slurm ]; then
         jobdir=${jobdirhome}/${SLURM_JOB_NAME}.${SLURM_JOBID}
     elif [ x${MPIJOBNAME-} != x ]; then
-        jobdir=${jobdirhome}/${MPIJOBNAME}.$$
+        jobdir=${jobdirhome}/${MPIJOBNAME}.${MPIJOBID-$$}
     else
         jobdir=${jobdirhome}/`basename $0`.$$  # use top-level script name $0
     fi
