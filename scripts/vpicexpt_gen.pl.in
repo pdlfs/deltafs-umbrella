@@ -324,6 +324,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             push(@out, "#SBATCH --output " .
                  "/users/\%u/joblogs/$tag-$experiment-$r-$t-\%j.out");
             push(@out, "$dwl") if ($dwl ne '');
+            # XXX: lanl docs say to do this, but we aren't using OMP
+            push(@out, "");
+            push(@out, "export OMP_NUM_THREADS=1");
         } elsif ($platform eq 'aprun') {
             push(@out, "#MSUB -N $tag-$experiment-$r-$t");
             push(@out, "#MSUB -l walltime=$rtime");
