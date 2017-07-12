@@ -45,8 +45,8 @@ init_procs_per_node=${5:-"4"}
 procs_per_node_increase_step=${6:-"4"}
 query_multiple_partices=0
 num_vpic_dumps=${7:-"2"}
-px_factor=${8:-"4"}
-py_factor=${9:-"2"}
+px_factor=${8:-"1"}
+py_factor=${9:-"4"}
 pz_factor=${10:-"1"}
 bbos_buddies=${11:-"0"}
 
