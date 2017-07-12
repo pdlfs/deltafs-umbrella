@@ -43,12 +43,13 @@ nodes=${3:-"1"}
 cores_per_node=${4:-"4"}
 init_procs_per_node=${5:-"4"}
 procs_per_node_increase_step=${6:-"4"}
-query_multiple_partices=0
 num_vpic_dumps=${7:-"2"}
 px_factor=${8:-"1"}
 py_factor=${9:-"4"}
 pz_factor=${10:-"1"}
 bbos_buddies=${11:-"0"}
+should_do_query=${12:-"1"}
+should_do_multipass_query=${13:-"0"}
 
 ###############
 # Core script #
@@ -71,8 +72,8 @@ get_bbdir
 gen_hosts
 
 ### set read path ###
-last=$query_multiple_partices
-do_querying=1
+last=$should_do_multipass_query
+do_querying=$should_do_query
 
 procs_per_node=$init_procs_per_node
 while [ $procs_per_node -le $cores_per_node ]
