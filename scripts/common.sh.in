@@ -851,9 +851,11 @@ query_particles() {
     case $runtype in
     "baseline")
         reader_bin="${dfsu_prefix}/bin/vpic-reader"
+        reader_conf=""
         ;;
     "deltafs")
         reader_bin="${dfsu_prefix}/bin/vpic-deltafs-reader"
+        reader_conf="-r 3 -v 1024 -s $cores -m ${LG_PARTS:-2}"
         ;;
     *)
         die "query_particles: unknown runtype '$runtype'"
@@ -882,9 +884,9 @@ query_particles() {
     # single-pass approach. Otherwise query 100 particles to get a dependable
     # confidence interval.
     if [ $last -eq 1 ]; then
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout $reader_conf"
     else
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout -n 100"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout $reader_conf -n 100"
     fi
 }
 
