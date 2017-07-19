@@ -15,7 +15,7 @@ my(%TOC, @minimal, @sc17a);
 @minimal = (
     #          vpic   vpic                       max  base
     #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsz
-    [      2,     2,  2500,   1,   4,   1,   4,   10,    0, "1GiB"  ], # run 0
+    [      2,     2,  2500,   1,   4,   1,   4,   10,    5, "1GiB"  ], # run 0
     );
 
 # sc17a: for paper draft
@@ -138,6 +138,7 @@ my($defplatform);
 
 # non-undef defaults
 $bbosbuddies = 0;
+$dw = 'off';
 $ipsubnet = guess_subnet();
 $iterations = 1;
 $prefix = '@CMAKE_INSTALL_PREFIX@';
@@ -180,7 +181,7 @@ sub usage {
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
-    print STDERR "\t--dw S            datawarp alloc size (25GiB)\n";
+    print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
     print STDERR "\t--env E=val       setenv 'E' to 'val' in script\n";
     print STDERR "\t--experiment S    experiment to run\n";
     print STDERR "\t--iterations I    #of iterations for each run\n";
@@ -195,6 +196,8 @@ sub usage {
     print STDERR "\t", join(' ', sort keys %TOC), "\n\n";
     print STDERR "Options like constraints, dw, and runtimes are only\n";
     print STDERR "used on the cray platform with slurm/moab.\n";
+    print STDERR "dw state: 'bw' = bandwidth, 'int' = inteference\n";
+    print STDERR "bw=spread on all dw nodes, int=avoid interference\n";
     print STDERR "The 'run' and 'tests' option will take a list of options\n";
     print STDERR "using a comma to sep (e.g. '--tests=baseline,deltafs').\n";
     print STDERR "'overcommit' is only supported on LANL's slurm install\n";
@@ -229,8 +232,8 @@ $exp = $TOC{$experiment};
 usage() if ($rv != 1);
 usage("missing output dir") if ($#ARGV != 0);
 usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
-usage("dw must end in 'ib' (GiB, etc.)")
-    if ($dw ne '' && !($dw =~ /\d+.ib$/i) );
+usage("dw must be 'off', 'bw'  or  'int'")
+    if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
 usage("need a valid --experiment value") unless (defined($exp));
 usage("bad number of interations") if ($iterations < 1);
 @rns = split(",", $run);
@@ -310,27 +313,39 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  vpicdumps  px  py  pz   ppn  maxtime\n" if ($dryrun);
+print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsz\n" 
+    if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
     my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, 
        $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
+    if ($dw ne 'off' || $dryrun) {
+        usage("dwsz in exp array r=$r must end in 'ib' (GiB, etc.)")
+            unless ($dwsize =~ /\d+.ib$/i);
+    }
     if ($dryrun) {
-        printf "%-5d %-6d %-10d %-3d %-3d %-4d %-4d %d\n", $r,
-        $nodes, $vpicdumps, $px, $py, $pz, $ppn, $maxtime;
+        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s\n", $r,
+        $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $ppn, $maxtime,
+        $basextra, $dwsize;
         next;
     }
 
     my($dwl, $t, $fn, @out, $rtime, $script);
-    $dwl = "#DW jobdw access_mode=striped capacity=$dw type=scratch"
-        if ($dw ne '');
+    if ($dw ne 'off') {
+        $dwl = "#DW jobdw access_mode=striped capacity=$dwsize type=scratch";
+        $dwl = "$dwl optimization_strategy=interference" if ($dw eq 'int');
+    }
     foreach $t ("baseline", "deltafs") {
         next unless (index($tests, $t) != -1);
         $fn = "$ARGV[0]/$tag-$experiment-$r-$t.sh";
         @out = ();
-        $rtime = hms($maxtime * $iterations, $scaletime);
+        if ($t eq "baseline") {
+            $rtime = hms(($maxtime + $basextra) * $iterations, $scaletime);
+        } else {
+            $rtime = hms($maxtime * $iterations, $scaletime);
+        }
         push(@out, "#!/bin/bash");
         push(@out, "# this script genereated by vpicexpt_gen");
         push(@out, "# args=$cmd");
