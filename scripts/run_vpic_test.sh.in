@@ -44,12 +44,13 @@ cores_per_node=${4:-"4"}
 init_procs_per_node=${5:-"4"}
 procs_per_node_increase_step=${6:-"4"}
 num_vpic_dumps=${7:-"2"}
-px_factor=${8:-"1"}
-py_factor=${9:-"4"}
-pz_factor=${10:-"1"}
-bbos_buddies=${11:-"0"}
-should_do_query=${12:-"1"}
-should_do_multipass_query=${13:-"0"}
+num_vpic_steps=${8:-"200"}
+px_factor=${9:-"1"}
+py_factor=${10:-"4"}
+pz_factor=${11:-"1"}
+bbos_buddies=${12:-"0"}
+should_do_query=${13:-"1"}
+should_do_multipass_query=${14:-"0"}
 
 ###############
 # Core script #
@@ -57,8 +58,9 @@ should_do_multipass_query=${13:-"0"}
 
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
-### override default number of dumps ###
+### override default number of dumps and steps ###
 vpic_epochs=$num_vpic_dumps
+vpic_steps=$num_vpic_steps
 
 message "Script begin..."
 # keep track of start time so we can see how long this takes

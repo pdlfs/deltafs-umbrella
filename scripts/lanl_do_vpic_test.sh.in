@@ -48,6 +48,7 @@ $ppn \
 $ppn \
 $ppn \
 $num_vpic_dumps \
+$(( num_vpic_dumps * 100 )) \
 $px_factor \
 $py_factor \
 $pz_factor

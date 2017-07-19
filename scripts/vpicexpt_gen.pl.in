@@ -216,7 +216,7 @@ sub usage {
 
 #
 # if we are debugging the script and have changed the platform
-# from the default, reguess the extra options (unless we explicitly 
+# from the default, reguess the extra options (unless we explicitly
 # set them).
 #
 if ($platform ne $defplatform && !defined($extraopts)) {
@@ -241,9 +241,9 @@ foreach (@rns) {
     usage("bad run value: $_") if (/\D/ || $_ < 0);
     usage("run out of range $_ for $experiment") if ($_ > $#$exp);
     $wantrun{$_} = 1;
-    
+
 }
-usage("bad overcommit value") if ($overcommit ne '' && 
+usage("bad overcommit value") if ($overcommit ne '' &&
   $overcommit ne 'enable' && $overcommit ne 'disable' &&
   $overcommit ne 'default');
 usage("overcommit only valid for slurm/srun")
@@ -313,11 +313,11 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsz\n" 
+print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsz\n"
     if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
-    my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, 
+    my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz,
        $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
@@ -406,7 +406,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
 test=$t
 ipsubnet=$ipsubnet
 nodes=$nodes
-ppn=$ppn            
+ppn=$ppn
 vpicdumps=$vpicdumps
 vpicsteps=$vpicsteps
 px=$px
@@ -450,7 +450,7 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
-        \$ppn \$ppn \$ppn \$vpicdumps \$px \$py \$pz \$bbosbuddies \$skipreads
+        \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \$bbosbuddies \$skipreads
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
@@ -462,7 +462,7 @@ done
 EOS
 
         die "savefile failed!"
-            unless (savefile($fn, join("\n", @out), $script, 
+            unless (savefile($fn, join("\n", @out), $script,
                              "\n", "exit 0\n"));
         print "genereated $fn\n";
     }
