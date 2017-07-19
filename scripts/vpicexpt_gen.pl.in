@@ -450,7 +450,8 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
-        \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \$bbosbuddies \$skipreads
+        \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \\
+        \$bbosbuddies \$skipreads
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
