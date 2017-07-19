@@ -408,6 +408,7 @@ ipsubnet=$ipsubnet
 nodes=$nodes
 ppn=$ppn            
 vpicdumps=$vpicdumps
+vpicsteps=$vpicsteps
 px=$px
 py=$py
 pz=$pz
@@ -437,7 +438,7 @@ ENDOPTS
 # save experiment params to a file
 #
 set | egrep \\
-'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^skipreads=|^px=|^py=|^pz=|^bbosbuddies=' > \\
+'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^vpicsteps=|^skipreads=|^px=|^py=|^pz=|^bbosbuddies=' > \\
         \$jobdir/EXPPARAMS
 
 #
