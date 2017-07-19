@@ -9,69 +9,31 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @sc17a, @tt17d, @tt17x, @tt17y);
+my(%TOC, @minimal, @sc17a);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
-    #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
-    [      2,         2,    1,   4,   1,     4,       10 ],    # run 0
+    #          vpic   vpic                       max  base
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsz
+    [      2,     2,  2500,   1,   4,   1,   4,   10,    0, "1GiB"  ], # run 0
     );
 
 # sc17a: for paper draft
 @sc17a = (
-    #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
-    [      1,         2,    1,   4,   1,    32,      10 ],     # run 0
-    [      1,         8,    2,  20,   2,    32,      10 ],     # run 1
-    [      4,         8,    2,  20,   2,    32,      10 ],     # run 2
-    [     16,         8,    2,  20,   2,    32,      10 ],     # run 3
-    [     64,         8,    2,  20,   2,    32,      10 ],     # run 4
+    #          vpic   vpic                       max  base
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsz
+    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB"],  # run 0
+    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 1
+    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 2
+    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 3
+    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 4
+
     );
-
-@tt17d = (
-   #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
-   [      1,         2,    1,   4,   1,    32,      10 ],     # run 0
-   [      1,        10,    2,  20,   2,    32,     100 ],     # run 1
-   [      2,        10,    2,  20,   2,    32,     100 ],     # run 2
-   [      4,        10,    2,  20,   2,    32,     100 ],     # run 3
-   [      8,        10,    2,  20,   2,    32,     100 ],     # run 4
-   [     16,        10,    2,  20,   2,    32,     100 ],     # run 5
-   [     32,        10,    2,  20,   2,    32,     100 ],     # run 6
-   [     64,        10,    2,  20,   2,    32,     100 ],     # run 7
-   );
-
-
-@tt17x = (
-   #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
-   [      1,         2,    1,   4,   1,    32,      10 ],     # run 0
-   [      1,        20,    2,   4,   2,    32,     100 ],     # run 1
-   [      2,        20,    2,   4,   2,    32,     100 ],     # run 2
-   [      4,        20,    2,   4,   2,    32,     100 ],     # run 3
-   [      8,        20,    2,   4,   2,    32,     100 ],     # run 4
-   [     16,        20,    2,   4,   2,    32,     100 ],     # run 5
-   [     32,        20,    2,   4,   2,    32,     100 ],     # run 6
-   [     64,        20,    2,   4,   2,    32,     100 ],     # run 7
-   [    128,        20,    2,   4,   2,    32,     100 ],     # run 8
-   );
-
-@tt17y = (
-   #  nodes, vpicdumps,   px,  py,  pz,   ppn,  maxtime
-   [      1,         2,    1,   4,   1,    32,      10 ],     # run 0
-   [      1,        20,    2,  20,   2,    32,      60 ],     # run 1
-   [      2,        20,    2,  20,   2,    32,      65 ],     # run 2
-   [      4,        20,    2,  20,   2,    32,      70 ],     # run 3
-   [      8,        20,    2,  20,   2,    32,      80 ],     # run 4
-   [     16,        20,    2,  20,   2,    32,     100 ],     # run 5
-   [     32,        20,    2,  20,   2,    32,     120 ],     # run 6
-   [     64,        20,    2,  20,   2,    32,     150 ],     # run 7
-   );
 
 # table of contents (experiments available)
 %TOC = (
     "minimal" => \@minimal,
     "sc17a"   => \@sc17a,
-    "tt17d"   => \@tt17d,
-    "tt17x"   => \@tt17x,
-    "tt17y"   => \@tt17y,
     );
 ##############################################################################
 ##############################################################################
@@ -80,7 +42,7 @@ my(%TOC, @minimal, @sc17a, @tt17d, @tt17x, @tt17y);
 # code for generating exp scripts goes below here
 #
 use Fcntl;
-use Getopt::Long;
+use Getopt::Long qw(:config require_order);
 use Sys::Hostname;
 my($hostname) = hostname();   # put in var to allow us to override for debug
 
@@ -169,9 +131,9 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $bbosbuddies, $constraints, $dryrun, $dw, $experiment, $extraopts,
-   $ipsubnet, $iterations, $overcommit, $platform, $prefix, $run, $scaletime,
-   $tag, $tests);
+my($rv, $bbosbuddies, $constraints, $dryrun, $dw, @envs, $experiment,
+   $extraopts, $ipsubnet, $iterations, $overcommit, $platform, $prefix,
+   $run, $scaletime, $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
@@ -181,6 +143,7 @@ $iterations = 1;
 $prefix = '@CMAKE_INSTALL_PREFIX@';
 $platform = $defplatform = guess_platform();   # save guess in defplatform
 $scaletime = 1.0;
+$skipreads=0;
 $tag = "vpic";
 $tests = "baseline,deltafs";
 
@@ -192,6 +155,7 @@ $rv = GetOptions(
     "constraints=s"  =>  \$constraints,
     "dryrun"         =>  \$dryrun,
     "dw=s"           =>  \$dw,
+    "env=s"          =>  \@envs,
     "experiment=s"   =>  \$experiment,
     "extraopts=s"    =>  \$extraopts,
     "hostname=s"     =>  \$hostname,
@@ -202,6 +166,7 @@ $rv = GetOptions(
     "prefix=s"       =>  \$prefix,
     "run=s"          =>  \$run,
     "scaletime=f"    =>  \$scaletime,
+    "skipreads"      =>  \$skipreads,
     "tag=s"          =>  \$tag,
     "tests=s"        =>  \$tests
     );
@@ -216,11 +181,13 @@ sub usage {
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw S            datawarp alloc size (25GiB)\n";
+    print STDERR "\t--env E=val       setenv 'E' to 'val' in script\n";
     print STDERR "\t--experiment S    experiment to run\n";
     print STDERR "\t--iterations I    #of iterations for each run\n";
     print STDERR "\t--overcommit S    overcommit (enable/disable/default)\n";
     print STDERR "\t--run S           limit which run to generate\n";
     print STDERR "\t--scaletime F     run time limit scaling\n";
+    print STDERR "\t--skipreads       skip read phase\n";
     print STDERR "\t--tag S           string to tag exp logfile names with\n";
     print STDERR "\t--tests S         baseline, deltafs, ...\n";
     print STDERR "\n";
@@ -256,7 +223,7 @@ if ($platform ne $defplatform && !defined($extraopts)) {
 #
 # sanity checking
 #
-my($exp, @rns, %wantrun, @opts, @fmtbuf, $vpicgen_fmtopts, $fullextra);
+my($exp, @rns, %wantrun, @ekeys, @opts, @fmtbuf, $vpicgen_fmtopts, $fullextra);
 $exp = $TOC{$experiment};
 
 usage() if ($rv != 1);
@@ -282,6 +249,10 @@ usage("bad scale time") if ($scaletime <= 0.0);
 usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
                               $tests ne "baseline,deltafs" &&
                               $tests ne "deltafs,baseline");
+foreach (@envs) {
+  usage("bad env var $_") unless (/^(\w+)=/);
+  push(@ekeys, $1);
+}
 
 #
 # print back options
@@ -290,11 +261,13 @@ usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
     "dw"          => $dw,
+    "env"         => join(" ", @ekeys),
     "experiment"  => $experiment,
     "iterations"  => $iterations,
     "overcommit"  => $overcommit,
     "run"         => $run,
     "scaletime"   => $scaletime,
+    "skipreads"   => $skipreads,
     "tag"         => $tag,
     "tests"       => $tests,
     ""            => undef,
@@ -313,6 +286,10 @@ for ($_ = 0 ; $_ <= $#opts ; $_ += 2) {
     } else {
         print "\n";
     }
+}
+# also push each env var as its own line for ease of parsing
+foreach (@envs) {
+  push(@fmtbuf, $_);
 }
 $vpicgen_fmtopts = join("\n", @fmtbuf);
 
@@ -336,7 +313,8 @@ if (!$dryrun && ! -d $ARGV[0]) {
 print "#run  nodes  vpicdumps  px  py  pz   ppn  maxtime\n" if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
-    my($nodes, $vpicdumps, $px, $py, $pz, $ppn, $maxtime) = @{$$exp[$r]};
+    my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, 
+       $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dryrun) {
@@ -393,7 +371,18 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
         push(@out, "");
         push(@out, "", "export EXTRA_MPIOPTS=\"$fullextra\"", "")
             if ($fullextra ne '');
-        push(@out, "module load dws") if ($dwl ne '');
+        push(@out, "# user defined env vars") if ($#envs >= 0);
+        foreach (@envs) {
+            push(@out, "export $_");
+        }
+        push(@out, "") if ($#envs >= 0);
+        if ($dwl ne '') {
+            push(@out, "module load dws");
+            push(@out, "echo DataWarp Enabled, Config is:");
+            push(@out, "dwstat sessions instances fragments");
+            push(@out, "echo ''");
+            push(@out, "");
+        }
         $script =<<"EOS";
 
 #######################
@@ -408,6 +397,7 @@ px=$px
 py=$py
 pz=$pz
 bbosbuddies=$bbosbuddies
+skipreads=$skipreads
 #######################
 
 # note: ppn currently sets core_per_node, init_procs_per_node, and
@@ -432,7 +422,7 @@ ENDOPTS
 # save experiment params to a file
 #
 set | egrep \\
-'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^px=|^py=|^pz=|^bbosbuddies=' > \\
+'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^skipreads=|^px=|^py=|^pz=|^bbosbuddies=' > \\
         \$jobdir/EXPPARAMS
 
 #
@@ -444,7 +434,7 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
-        \$ppn \$ppn \$ppn \$vpicdumps \$px \$py \$pz \$bbosbuddies
+        \$ppn \$ppn \$ppn \$vpicdumps \$px \$py \$pz \$bbosbuddies \$skipreads
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
