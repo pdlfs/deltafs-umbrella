@@ -313,7 +313,7 @@ if ($extraopts ne '') {
 # regular expression to use to build EXPPARAMS
 #
 $EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
-                   '^vpicsteps=|^px=|^py=|^pz=|^bbosbuddies=|^skipreads|' .
+                   '^vpicsteps=|^px=|^py=|^pz=|^bbosbuddies=|^skipreads=|' .
                    '^maxtime=|^basextra=|^dwsize=';
 
 #
@@ -435,7 +435,7 @@ skipreads=$skipreads
 #
 maxtime=$maxtime
 basextra=$basextra
-dwsw=$dwsize
+dwsize=$dwsize
 #######################
 
 # note: ppn currently sets core_per_node, init_procs_per_node, and
