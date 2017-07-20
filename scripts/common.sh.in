@@ -772,12 +772,12 @@ do_run() {
             "SHUFFLE_Use_worker_thread" ${RPC_WORKER:-"1"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "PLFSDIR_Skip_checksums" ${SKIP_CRC:-"1"}
-            "PLFSDIR_Compaction_buf_size" ${COMP_BUF:-"4m"}
-            "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"48m"}
-            "PLFSDIR_Data_buf_size" ${DATA_BUF:-"8m"}
-            "PLFSDIR_Data_min_write_size" ${MIN_DATA_BUF:-"6m"}
-            "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2m"}
-            "PLFSDIR_Index_min_write_size" ${MIN_INDEX_BUF:-"2m"}
+            "PLFSDIR_Compaction_buf_size" ${COMP_BUF:-"4MiB"}
+            "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"48MiB"}
+            "PLFSDIR_Data_buf_size" ${DATA_BUF:-"8MiB"}
+            "PLFSDIR_Data_min_write_size" ${MIN_DATA_BUF:-"6MiB"}
+            "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2MiB"}
+            "PLFSDIR_Index_min_write_size" ${MIN_INDEX_BUF:-"2MiB"}
             "PLFSDIR_Lg_parts" ${LG_PARTS:-"2"}
         )
 
