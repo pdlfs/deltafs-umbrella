@@ -536,7 +536,7 @@ set_property (TARGET deltafs-nexus PROPERTY EXCLUDE_FROM_ALL True)
 #
 GenDownloadConfig (vpic_download vpic vpic-6a9efff8.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/vpic.git"
-    GIT_TAG 109fb60
+    GIT_TAG d74ac54  # Jul 2017
     ### GIT_TAG master
 )
 
