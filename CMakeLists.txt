@@ -126,7 +126,7 @@ message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
 message (STATUS "  transport config: verbs=${VERBS}, GNI=${GNI}")
 message (STATUS "    gni hints: prefix=${GNI_PREFIX}, libs=${GNI_LIBDIR}")
 message (STATUS "    verbs hints: prefix=${VERBS_PREFIX}, libs=${VERBS_LIBDIR}")
-message (STATUS "  build tests: ${BUILD_TESTS} (skip running: ${SKIP_TESTS}")
+message (STATUS "  build tests: ${BUILD_TESTS} (skip running: ${SKIP_TESTS})")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
