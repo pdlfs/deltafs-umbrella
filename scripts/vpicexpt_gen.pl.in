@@ -14,14 +14,14 @@ my(%TOC, @minimal, @sc17a);
 # minimal: for quick tests of script infrastructure
 @minimal = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsz
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
     [      2,     2,  2500,   1,   4,   1,   4,   10,    5, "1GiB"  ], # run 0
     );
 
 # sc17a: for paper draft
 @sc17a = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsz
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
     [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB"],  # run 0
     [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 1
     [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 2
@@ -226,7 +226,8 @@ if ($platform ne $defplatform && !defined($extraopts)) {
 #
 # sanity checking
 #
-my($exp, @rns, %wantrun, @ekeys, @opts, @fmtbuf, $vpicgen_fmtopts, $fullextra);
+my($exp, @rns, %wantrun, @ekeys, @opts, %opts_skipgen, @fmtbuf);
+my($vpicgen_fmtopts, $fullextra, $EXPPARAMS_regex);
 $exp = $TOC{$experiment};
 
 usage() if ($rv != 1);
@@ -281,11 +282,16 @@ foreach (@envs) {
     "prefix"      => $prefix,
     "output-dir"  => $ARGV[0]);
 
+# don't put these in VPICGENOPTS, since they are in EXPPARAMS because
+# they are CLI args to run_vpic_test.sh (don't need duplicate value)
+%opts_skipgen = ( "bbosbuddies" => 1, "ipsubnet" => 1, "skipreads" => 1);
+
 print "vpicexpt_gen settings:\n";
 for ($_ = 0 ; $_ <= $#opts ; $_ += 2) {
     if ($opts[$_] ne '') {
         printf "\t%-12s = %s\n", $opts[$_], $opts[$_+1];
-        push(@fmtbuf, $opts[$_] . "=" . $opts[$_+1]);
+        push(@fmtbuf, $opts[$_] . "=" . $opts[$_+1])
+            unless($opts_skipgen{$opts[$_]});
     } else {
         print "\n";
     }
@@ -304,6 +310,13 @@ if ($extraopts ne '') {
 }
 
 #
+# regular expression to use to build EXPPARAMS
+#
+$EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
+                   '^vpicsteps=|^px=|^py=|^pz=|^bbosbuddies=|^skipreads|' .
+                   '^maxtime=|^basextra=|^dwsize=';
+
+#
 # create output directory if it isn't present
 #
 if (!$dryrun && ! -d $ARGV[0]) {
@@ -313,7 +326,7 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsz\n"
+print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize\n"
     if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
@@ -322,7 +335,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dw ne 'off' || $dryrun) {
-        usage("dwsz in exp array r=$r must end in 'ib' (GiB, etc.)")
+        usage("dwsize in exp array r=$r must end in 'ib' (GiB, etc.)")
             unless ($dwsize =~ /\d+.ib$/i);
     }
     if ($dryrun) {
@@ -403,6 +416,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
 #######################
 # experiment params
 #######################
+#
+# flags to run_vpic_test.sh
+#
 test=$t
 ipsubnet=$ipsubnet
 nodes=$nodes
@@ -414,6 +430,12 @@ py=$py
 pz=$pz
 bbosbuddies=$bbosbuddies
 skipreads=$skipreads
+#
+# other info that might be useful
+#
+maxtime=$maxtime
+basextra=$basextra
+dwsw=$dwsize
 #######################
 
 # note: ppn currently sets core_per_node, init_procs_per_node, and
@@ -433,7 +455,9 @@ unset LANG
 get_jobdir      # this sets jobdir
 
 #
-# save vpicgenopts to a file
+# save vpicgenopts to a file.  vpicgenopts contains all command line flags
+# to vpicexpt_gen.pl except for the ones that are also command line flags to
+# run_vpic_test.sh (those end up in expparams instead).
 #
 cat<<ENDOPTS > \$jobdir/VPICGENOPTS
 jobdir=\$jobdir
@@ -441,11 +465,11 @@ $vpicgen_fmtopts
 ENDOPTS
 
 #
-# save experiment params to a file
+# save experiment params to a file.  this includes all command line
+# flags for run_vpic_test.sh, plus additional values from the expt
+# table selected with --experiment
 #
-set | egrep \\
-'^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^vpicsteps=|^skipreads=|^px=|^py=|^pz=|^bbosbuddies=' > \\
-        \$jobdir/EXPPARAMS
+set | egrep '$EXPPARAMS_regex' > \$jobdir/EXPPARAMS
 
 #
 # loop through iterations...
