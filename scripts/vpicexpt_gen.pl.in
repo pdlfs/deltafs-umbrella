@@ -420,6 +420,12 @@ skipreads=$skipreads
 # procs_per_node_increase_step
 
 #
+# workaround a bash bug where "I-0" matches "[a-z]*" when LANG is set
+# (only impacts some versions of bash)
+#
+unset LANG
+
+#
 # load in common.sh so we can get the jobdir for handling iterations
 #
 . $prefix/scripts/common.sh
