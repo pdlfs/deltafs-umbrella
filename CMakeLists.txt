@@ -461,8 +461,7 @@ ExternalProject_Add (deltafs-bb
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-a30dd43.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
-    GIT_TAG 323f3c8  # Jul 2017
-    ### GIT_TAG a30dd43  # Apr 2017
+    GIT_TAG 09c2e2b  # Jul 2017
     ### GIT_TAG master
 )
 
