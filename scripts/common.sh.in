@@ -759,30 +759,32 @@ do_run() {
             "VPIC_current_working_dir" "${vpic_dir}"
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Deltafs_root" "particle"
-            "PRELOAD_Local_root" "${exp_jobdir}"
+            "PRELOAD_Local_root" "${plfs_dir}"
             "PRELOAD_Bypass_deltafs_namespace" "1"
-            "PRELOAD_Bypass_shuffle" ${BYPASS_SHUFFLE:-"0"}
-            "PRELOAD_Bypass_write" ${BYPASS_WRITE:-"0"}
-            "PRELOAD_Skip_mon" ${SKIP_MON:-"1"}
-            "PRELOAD_No_sys_probing" ${NO_SCAN:-"0"}
-            "PRELOAD_No_paranoid_checks" ${NO_CHECKS:-"1"}
-            "PRELOAD_No_paranoid_barrier" ${NO_SYNC:-"1"}
-            "PRELOAD_No_paranoid_post_barrier" ${NO_POSTSYNC:-"0"}
-            "PRELOAD_No_paranoid_pre_barrier" ${NO_PRESYNC:-"1"}
-            "PRELOAD_No_epoch_pre_flushing" ${NO_PREFLUSH:-"0"}
+            "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
+            "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
+            "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"1"}
+            "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
+            "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
+            "PRELOAD_No_paranoid_barrier" ${XX_NO_MPIBR:-"1"}
+            "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_MPIBR:-"0"}
+            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_MPIBR:-"1"}
+            "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
+            "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"0"}
             "SHUFFLE_Virtual_factor" "1024"
-            "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
-            "SHUFFLE_Buffer_per_queue" ${RPC_BUFFER:-"8192"}
-            "SHUFFLE_Use_worker_thread" ${RPC_WORKER:-"1"}
+            "SHUFFLE_Mercury_proto" ${XX_MERCURY_PROTO:-"bmi+tcp"}
+            "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"8192"}
+            "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
             "SHUFFLE_Subnet" "${ip_subnet}"
-            "PLFSDIR_Skip_checksums" ${SKIP_CRC:-"1"}
-            "PLFSDIR_Compaction_buf_size" ${COMP_BUF:-"4MiB"}
-            "PLFSDIR_Memtable_size" ${MEMTABLE_SIZE:-"48MiB"}
-            "PLFSDIR_Data_buf_size" ${DATA_BUF:-"8MiB"}
-            "PLFSDIR_Data_min_write_size" ${MIN_DATA_BUF:-"6MiB"}
-            "PLFSDIR_Index_buf_size" ${INDEX_BUF:-"2MiB"}
-            "PLFSDIR_Index_min_write_size" ${MIN_INDEX_BUF:-"2MiB"}
-            "PLFSDIR_Lg_parts" ${LG_PARTS:-"2"}
+            "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
+            "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
+            "PLFSDIR_Compaction_buf_size" ${XX_COMP_BUF:-"4MiB"}
+            "PLFSDIR_Data_min_write_size" ${XX_MIN_DATA_BUF:-"6MiB"}
+            "PLFSDIR_Data_buf_size" ${XX_MAX_DATA_BUF:-"8MiB"}
+            "PLFSDIR_Index_min_write_size" ${XX_MIN_INDEX_BUF:-"2MiB"}
+            "PLFSDIR_Index_buf_size" ${XX_MAX_INDEX_BUF:-"2MiB"}
+            "PLFSDIR_Key_size" ${XX_KEY_SIZE:-"8"}
+            "PLFSDIR_Lg_parts" ${XX_LG_PARTS:-"2"}
         )
 
         do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
