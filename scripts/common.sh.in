@@ -759,13 +759,17 @@ do_run() {
             "VPIC_current_working_dir" "${vpic_dir}"
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Deltafs_root" "particle"
-            "PRELOAD_Local_root" "${plfs_dir}"
+            "PRELOAD_Local_root" "${exp_jobdir}"
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${BYPASS_WRITE:-"0"}
             "PRELOAD_Skip_mon" ${SKIP_MON:-"1"}
+            "PRELOAD_No_sys_probing" ${NO_SCAN:-"0"}
+            "PRELOAD_No_paranoid_checks" ${NO_CHECKS:-"1"}
+            "PRELOAD_No_paranoid_barrier" ${NO_SYNC:-"1"}
+            "PRELOAD_No_paranoid_post_barrier" ${NO_POSTSYNC:-"0"}
+            "PRELOAD_No_paranoid_pre_barrier" ${NO_PRESYNC:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${NO_PREFLUSH:-"0"}
-            "PRELOAD_Enable_verbose_error" "1"
             "SHUFFLE_Virtual_factor" "1024"
             "SHUFFLE_Mercury_proto" ${MERCURY_PROTO:-"bmi+tcp"}
             "SHUFFLE_Buffer_per_queue" ${RPC_BUFFER:-"8192"}
