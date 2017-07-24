@@ -416,7 +416,6 @@ GenDownloadConfig (deltafs-common_download deltafs-common
                    deltafs-common-5b6f919.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-common.git"
     GIT_TAG d9cd019  # Jul 2017
-    ### GIT_TAG 5b6f919  # May 2017
     ### GIT_TAG master
 )
 
@@ -443,7 +442,6 @@ ExternalProject_Add (deltafs-common
 GenDownloadConfig (deltafsbb_download deltafs-bb deltafs-bb-f9040bd1.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-bb.git"
     GIT_TAG f9040bd1  # May 2017
-    ### GIT_TAG 03f7da52  # Feb 2017
     ### GIT_TAG master
 )
 
@@ -461,7 +459,7 @@ ExternalProject_Add (deltafs-bb
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-a30dd43.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
-    GIT_TAG 09c2e2b  # Jul 2017
+    GIT_TAG 320bbfd  # Jul 2017
     ### GIT_TAG master
 )
 
@@ -488,7 +486,7 @@ ExternalProject_Add (deltafs
 GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
                    deltafs-vpic-preload-v1.4b.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
-    GIT_TAG 55b3a91  # Jul 2017
+    GIT_TAG v1.4
     ### GIT_TAG master
 )
 
