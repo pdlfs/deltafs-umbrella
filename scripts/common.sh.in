@@ -771,7 +771,7 @@ do_run() {
             "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_MPIBR:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"0"}
-            "SHUFFLE_Virtual_factor" "1024"
+            "SHUFFLE_Virtual_factor" ${XX_RING_VF:-"1024"}
             "SHUFFLE_Mercury_proto" ${XX_MERCURY_PROTO:-"bmi+tcp"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"8192"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
