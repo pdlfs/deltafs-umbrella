@@ -774,6 +774,7 @@ do_run() {
             "SHUFFLE_Virtual_factor" "1024"
             "SHUFFLE_Mercury_proto" ${XX_MERCURY_PROTO:-"bmi+tcp"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"8192"}
+            "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
@@ -784,6 +785,7 @@ do_run() {
             "PLFSDIR_Index_min_write_size" ${XX_MIN_INDEX_BUF:-"2MiB"}
             "PLFSDIR_Index_buf_size" ${XX_MAX_INDEX_BUF:-"2MiB"}
             "PLFSDIR_Key_size" ${XX_KEY_SIZE:-"8"}
+            "PLFSDIR_Filter_bits_per_key" ${XX_BF_BITS:-"14"}
             "PLFSDIR_Lg_parts" ${XX_LG_PARTS:-"2"}
         )
 
