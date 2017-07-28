@@ -760,12 +760,13 @@ do_run() {
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Deltafs_root" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
+            "PRELOAD_Log_root" "${exp_jobdir}"
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
             "PRELOAD_Bypass_placement" ${XX_BYPASS_CH:-"0"}
             "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"1"}
-            "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
+            "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"1"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
             "PRELOAD_No_paranoid_barrier" ${XX_NO_MPIBR:-"1"}
             "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_MPIBR:-"0"}
