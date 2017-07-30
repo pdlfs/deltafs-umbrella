@@ -765,17 +765,19 @@ do_run() {
             "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
             "PRELOAD_Bypass_placement" ${XX_BYPASS_CH:-"0"}
-            "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"1"}
-            "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"1"}
+            "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"0"}
+            "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
-            "PRELOAD_No_paranoid_barrier" ${XX_NO_MPIBR:-"1"}
-            "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_MPIBR:-"0"}
-            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_MPIBR:-"1"}
+            "PRELOAD_No_paranoid_barrier" ${XX_NO_BR:-"1"}
+            "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_BR:-"0"}
+            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BR:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
-            "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"0"}
+            "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
+            "SHUFFLE_Mercury_progress_timeout" ${XX_HG_TIMEOUT:-"100"}
+            "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"200"}
             "SHUFFLE_Virtual_factor" ${XX_RING_VF:-"1024"}
             "SHUFFLE_Mercury_proto" ${XX_MERCURY_PROTO:-"bmi+tcp"}
-            "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"8192"}
+            "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
             "SHUFFLE_Subnet" "${ip_subnet}"
