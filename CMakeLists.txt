@@ -415,7 +415,7 @@ ExternalProject_Add_Step (ssg prepare
 GenDownloadConfig (deltafs-common_download deltafs-common
                    deltafs-common-5b6f919.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-common.git"
-    GIT_TAG d9cd019  # Jul 2017
+    GIT_TAG v17.1
     ### GIT_TAG master
 )
 
@@ -459,7 +459,7 @@ ExternalProject_Add (deltafs-bb
 #
 GenDownloadConfig (deltafs_download deltafs deltafs-a30dd43.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs.git"
-    GIT_TAG 320bbfd  # Jul 2017
+    GIT_TAG v2017.7.1
     ### GIT_TAG master
 )
 
@@ -486,7 +486,7 @@ ExternalProject_Add (deltafs
 GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
                    deltafs-vpic-preload-v1.4b.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
-    GIT_TAG v1.4
+    GIT_TAG v1.6
     ### GIT_TAG master
 )
 
@@ -510,7 +510,7 @@ ExternalProject_Add (deltafs-vpic-preload
 GenDownloadConfig (deltafs-nexus_download deltafs-nexus
                    deltafs-nexus.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-nexus.git"
-    GIT_TAG master
+    GIT_TAG 862e701 ### master
 )
 
 MaybeRunTests (deltafs-nexus_test
