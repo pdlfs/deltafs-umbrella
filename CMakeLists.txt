@@ -474,6 +474,8 @@ ExternalProject_Add (deltafs
                -DBUILD_SHARED_LIBS=ON
                -DBUILD_TESTS=${BUILD_TESTS}
                -DDELTAFS_COMMON_INTREE=OFF
+               -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
+               -DMPI_C_COMPILER=${MPI_C_COMPILER}
                -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
