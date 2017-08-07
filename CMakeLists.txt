@@ -483,30 +483,6 @@ ExternalProject_Add (deltafs
 )
 
 #
-# deltafs-vpic-preload
-#
-GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
-                   deltafs-vpic-preload-v1.4b.tar.gz
-    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
-    GIT_TAG v1.6
-    ### GIT_TAG master
-)
-
-MaybeRunTests (deltafs-vpic-preload_test
-    TEST_COMMAND ctest -R preload -V
-)
-
-ExternalProject_Add (deltafs-vpic-preload
-    DEPENDS deltafs ch-placement ssg
-    ${deltafs-vpic-preload_download}
-    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
-    CMAKE_CACHE_ARGS ${init_cm_cache}
-
-    UPDATE_COMMAND ""
-    ${deltafs-vpic-preload_test}
-)
-
-#
 # deltafs-nexus
 #
 GenDownloadConfig (deltafs-nexus_download deltafs-nexus
@@ -528,7 +504,30 @@ ExternalProject_Add (deltafs-nexus
     UPDATE_COMMAND ""
     ${deltafs-nexus_test}
 )
-set_property (TARGET deltafs-nexus PROPERTY EXCLUDE_FROM_ALL True)
+
+#
+# deltafs-vpic-preload
+#
+GenDownloadConfig (deltafs-vpic-preload_download deltafs-vpic-preload
+                   deltafs-vpic-preload-v1.4b.tar.gz
+    GIT_REPOSITORY "https://github.com/pdlfs/deltafs-vpic-preload.git"
+    GIT_TAG v1.6
+    ### GIT_TAG master
+)
+
+MaybeRunTests (deltafs-vpic-preload_test
+    TEST_COMMAND ctest -R preload -V
+)
+
+ExternalProject_Add (deltafs-vpic-preload
+    DEPENDS deltafs deltafs-nexus ch-placement ssg
+    ${deltafs-vpic-preload_download}
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
+    CMAKE_CACHE_ARGS ${init_cm_cache}
+
+    UPDATE_COMMAND ""
+    ${deltafs-vpic-preload_test}
+)
 
 #
 # vpic
