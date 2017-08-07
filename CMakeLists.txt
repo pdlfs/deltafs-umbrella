@@ -492,7 +492,8 @@ GenDownloadConfig (deltafs-nexus_download deltafs-nexus
 )
 
 MaybeRunTests (deltafs-nexus_test
-    TEST_COMMAND ctest -R nexus -V
+    ### TEST_COMMAND ctest -R nexus -V
+    TEST_COMMAND ""
 )
 
 ExternalProject_Add (deltafs-nexus
