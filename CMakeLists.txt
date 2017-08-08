@@ -415,7 +415,7 @@ ExternalProject_Add_Step (ssg prepare
 GenDownloadConfig (deltafs-common_download deltafs-common
                    deltafs-common-5b6f919.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/pdlfs-common.git"
-    GIT_TAG v17.1
+    GIT_TAG v17.2
     ### GIT_TAG master
 )
 
