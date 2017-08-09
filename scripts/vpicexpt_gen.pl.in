@@ -131,9 +131,9 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $bbosbuddies, $constraints, $dryrun, $dw, @envs, $experiment,
-   $extraopts, $ipsubnet, $iterations, $overcommit, $platform, $prefix,
-   $run, $scaletime, $skipreads, $tag, $tests);
+my($rv, $addrunopts, $bbosbuddies, $constraints, $dryrun, $dw, @envs,
+   $experiment, $extraopts, $ipsubnet, $iterations, $overcommit,
+   $platform, $prefix, $run, $scaletime, $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
@@ -152,6 +152,7 @@ $tests = "baseline,deltafs";
 $extraopts = guess_extraopts($platform);
 
 $rv = GetOptions(
+    "addrunopts=s"   =>  \$addrunopts,
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
     "dryrun"         =>  \$dryrun,
@@ -178,6 +179,7 @@ sub usage {
     print STDERR "usage: vpicexpt_gen [options] outputdir\n";
     print STDERR "\ngenerate experiment batch scripts in spec'd dir\n\n";
     print STDERR "general options:\n";
+    print STDERR "\t--addrunopts S    additional mpirun opts (beyond extra)\n";
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
@@ -255,6 +257,8 @@ usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
                               $tests ne "deltafs,baseline");
 foreach (@envs) {
   usage("bad env var $_") unless (/^(\w+)=/);
+  usage("use --addrunopts and --extraopts to set EXTRA_MPIOPTS")
+    if ($1 eq 'EXTRA_MPIOPTS');
   push(@ekeys, $1);
 }
 
@@ -262,6 +266,7 @@ foreach (@envs) {
 # print back options
 #
 @opts = (
+    "adddrunopts" => $addrunopts,
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
     "dw"          => $dw,
@@ -307,6 +312,10 @@ $fullextra = "--vm-overcommit=$overcommit" if ($overcommit ne '');
 if ($extraopts ne '') {
   $fullextra = $fullextra . " " if ($fullextra ne '');
   $fullextra = $fullextra . $extraopts;
+}
+if ($addrunopts ne '') {
+  $fullextra = $fullextra . " " if ($fullextra ne '');
+  $fullextra = $fullextra . $addrunopts;
 }
 
 #
