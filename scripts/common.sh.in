@@ -779,6 +779,8 @@ do_run() {
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
+            "SHUFFLE_Force_rpc" ${XX_RPC_FORCE_REMOTE:-"0"}
+            "SHUFFLE_Force_sync_rpc" ${XX_RPC_FORCE_SYNC:-"0"}
             "SHUFFLE_Virtual_factor" ${XX_RING_VF:-"1024"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
