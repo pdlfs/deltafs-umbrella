@@ -776,10 +776,11 @@ do_run() {
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
             "SHUFFLE_Mercury_progress_timeout" ${XX_HG_TIMEOUT:-"100"}
             "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"200"}
+            "SHUFFLE_Mercury_cache_handles" ${XX_HG_CACHE_HDL:-"0"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
-            "SHUFFLE_Force_rpc" ${XX_RPC_FORCE_REMOTE:-"0"}
+            "SHUFFLE_Force_rpc" ${XX_RPC_SELF_FORWARD:-"0"}
             "SHUFFLE_Force_sync_rpc" ${XX_RPC_FORCE_SYNC:-"0"}
             "SHUFFLE_Virtual_factor" ${XX_RING_VF:-"1024"}
             "SHUFFLE_Subnet" "${ip_subnet}"
