@@ -131,8 +131,8 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $addrunopts, $bbosbuddies, $constraints, $dryrun, $dw, @envs,
-   $experiment, $extraopts, $ipsubnet, $iterations, $overcommit,
+my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $dryrun,
+   $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations, $overcommit,
    $platform, $prefix, $run, $scaletime, $skipreads, $tag, $tests);
 my($defplatform);
 
@@ -155,6 +155,7 @@ $rv = GetOptions(
     "addrunopts=s"   =>  \$addrunopts,
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
+    "core-spec=i"    =>  \$core_spec,
     "dryrun"         =>  \$dryrun,
     "dw=s"           =>  \$dw,
     "env=s"          =>  \@envs,
@@ -182,6 +183,7 @@ sub usage {
     print STDERR "\t--addrunopts S    additional mpirun opts (beyond extra)\n";
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
+    print STDERR "\t--core-spec I     specialized core cnt (srun only)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
     print STDERR "\t--env E=val       setenv 'E' to 'val' in script\n";
@@ -235,6 +237,8 @@ $exp = $TOC{$experiment};
 usage() if ($rv != 1);
 usage("missing output dir") if ($#ARGV != 0);
 usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
+usage("--core-spec only on srun platform")
+    if ($platform ne 'srun' && defined($core_spec));
 usage("dw must be 'off', 'bw'  or  'int'")
     if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
 usage("need a valid --experiment value") unless (defined($exp));
@@ -269,6 +273,7 @@ foreach (@envs) {
     "adddrunopts" => $addrunopts,
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
+    "core-spec"   => $core_spec,
     "dw"          => $dw,
     "env"         => join(" ", @ekeys),
     "experiment"  => $experiment,
@@ -377,6 +382,8 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             push(@out, "#SBATCH --nodes=$totalnodes");
             push(@out, "#SBATCH --constraint=$constraints")
                 if ($constraints ne '');
+            push(@out, "#SBATCH --core-spec=$core_spec")
+                if ($core_spec > 0);
             push(@out, "#SBATCH --output " .
                  "/users/\%u/joblogs/$tag-$experiment-$r-$t-\%j.out");
             push(@out, "$dwl") if ($dwl ne '');
