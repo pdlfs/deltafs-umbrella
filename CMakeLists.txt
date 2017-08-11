@@ -92,6 +92,7 @@ set (BUILD_TESTS "ON" CACHE BOOL "if go build unit tests")
 set (DELTAFS_VERBOSE "0" CACHE STRING "deltafs verbose level")
 set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
               "1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
+set (SELF_FORWARD "OFF" CACHE BOOL "enable mercury to forward rpc to itself")
 set (GNI "OFF" CACHE BOOL "build with GNI")
 set (GNI_PREFIX "" CACHE PATH "GNI prefix path (optional)")
 set (GNI_LIBDIR "" CACHE PATH "GNI lib directory override (optional)")
@@ -127,6 +128,7 @@ message (STATUS "  transport config: verbs=${VERBS}, GNI=${GNI}")
 message (STATUS "    gni hints: prefix=${GNI_PREFIX}, libs=${GNI_LIBDIR}")
 message (STATUS "    verbs hints: prefix=${VERBS_PREFIX}, libs=${VERBS_LIBDIR}")
 message (STATUS "  build tests: ${BUILD_TESTS} (skip running: ${SKIP_TESTS})")
+message (STATUS "  self-forward rpc: ${SELF_FORWARD}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -337,6 +339,7 @@ ExternalProject_Add (mercury
     CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=ON
                -DNA_USE_SM=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${BUILD_TESTS}
+               -DMERCURY_USE_SELF_FORWARD:BOOL=${SELF_FORWARD}
                -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
