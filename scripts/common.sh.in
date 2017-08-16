@@ -766,6 +766,8 @@ do_run() {
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
             "PRELOAD_Bypass_placement" ${XX_BYPASS_CH:-"0"}
             "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"0"}
+            "PRELOAD_Skip_sampling" ${XX_SKIP_SMP:-"1"}
+            "PRELOAD_Sample_threshold" ${XX_SMP_TH:-"64"}
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
             "PRELOAD_No_paranoid_barrier" ${XX_NO_BR:-"1"}
@@ -782,7 +784,8 @@ do_run() {
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
             "SHUFFLE_Force_rpc" ${XX_RPC_SELF_FORWARD:-"0"}
             "SHUFFLE_Force_sync_rpc" ${XX_RPC_FORCE_SYNC:-"0"}
-            "SHUFFLE_Virtual_factor" ${XX_RING_VF:-"1024"}
+            "SHUFFLE_Placement_protocol" ${XX_CH_PROTO:-"ring"}
+            "SHUFFLE_Virtual_factor" ${XX_CH_VF:-"1024"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
             "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
