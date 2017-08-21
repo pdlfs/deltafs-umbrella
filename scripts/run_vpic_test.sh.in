@@ -79,6 +79,8 @@ last=$should_do_multipass_query
 if [ $should_skip_query -ne 0 ]
 then
 do_querying=0
+else
+do_querying=1
 fi
 
 procs_per_node=$init_procs_per_node
