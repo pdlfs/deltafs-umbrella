@@ -758,10 +758,10 @@ do_run() {
         env_vars=(
             "VPIC_current_working_dir" "${vpic_dir}"
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
-            "PRELOAD_Ignore_root" ${XX_IGNORE_DIR:-""}
+            "PRELOAD_Ignore_dirs" ${XX_IGNORE_DIRS:-""}
             "PRELOAD_Deltafs_root" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
-            "PRELOAD_Log_root" "${exp_jobdir}"
+            "PRELOAD_Log_home" "${exp_jobdir}"
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
