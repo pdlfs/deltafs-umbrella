@@ -327,9 +327,9 @@ ExternalProject_Add_Step(bmi prepare
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury-f71d8ac.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-4fc4473c.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
-    GIT_TAG f71d8ac    # Aug 2017
+    GIT_TAG 4fc4473c  # Aug 2017
     ### GIT_TAG master
 )
 
@@ -491,7 +491,7 @@ ExternalProject_Add (deltafs
 GenDownloadConfig (deltafs-nexus_download deltafs-nexus
                    deltafs-nexus.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-nexus.git"
-    GIT_TAG 862e701 ### master
+    GIT_TAG 518cfa26 ### master
 )
 
 MaybeRunTests (deltafs-nexus_test
