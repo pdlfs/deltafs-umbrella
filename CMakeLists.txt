@@ -491,7 +491,7 @@ ExternalProject_Add (deltafs
 GenDownloadConfig (deltafs-nexus_download deltafs-nexus
                    deltafs-nexus.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/deltafs-nexus.git"
-    GIT_TAG 518cfa26 ### master
+    GIT_TAG 8a5bf544 ### master
 )
 
 MaybeRunTests (deltafs-nexus_test
