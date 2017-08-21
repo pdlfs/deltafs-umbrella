@@ -761,7 +761,7 @@ do_run() {
             "PRELOAD_Ignore_dirs" ${XX_IGNORE_DIRS:-""}
             "PRELOAD_Deltafs_root" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
-            "PRELOAD_Log_home" "${exp_jobdir}"
+            "PRELOAD_Log_home" "${exp_jobdir}/exp-info"
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
@@ -870,17 +870,18 @@ query_particles() {
     case $runtype in
     "baseline")
         reader_bin="${dfsu_prefix}/bin/vpic-reader"
-        reader_conf=""
+        reader_conf="-r 1 -n 1 -i $vpicout"
+        nnum=$cores
         ;;
     "deltafs")
-        reader_bin="${dfsu_prefix}/bin/vpic-deltafs-reader"
-        reader_conf="-r 3 -v 1024 -s $cores -m ${LG_PARTS:-2}"
+        reader_bin="${dfsu_prefix}/bin/simple-vpic-deltafs-reader"
+        reader_conf="-r ${XX_RR_RANKS:-30} -d ${XX_RR_DEPTH:-1} -j ${XX_RR_BG:-4} -v $vpicout $exp_jobdir/exp-info"
+        nnum=1
         ;;
     *)
         die "query_particles: unknown runtype '$runtype'"
     esac
 
-    nnum=$cores
     if [ $nnum -le $nodes ]; then
         qppn=1
     else
@@ -903,9 +904,9 @@ query_particles() {
     # single-pass approach. Otherwise query 100 particles to get a dependable
     # confidence interval.
     if [ $last -eq 1 ]; then
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout $reader_conf"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin $reader_conf"
     else
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin -i $vpicout $reader_conf -n 100"
+        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin $reader_conf"
     fi
 }
 
