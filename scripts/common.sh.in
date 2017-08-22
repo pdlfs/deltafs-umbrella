@@ -875,7 +875,7 @@ query_particles() {
         ;;
     "deltafs")
         reader_bin="${dfsu_prefix}/bin/simple-vpic-deltafs-reader"
-        reader_conf="-r ${XX_RR_RANKS:-30} -d ${XX_RR_DEPTH:-1} -j ${XX_RR_BG:-4} -v $vpicout/plfs/particle $exp_jobdir/exp-info"
+        reader_conf="-r ${XX_RR_RANKS:-100} -d ${XX_RR_DEPTH:-1} -j ${XX_RR_BG:-4} -v $vpicout/plfs/particle $exp_jobdir/exp-info"
         nnum=1
         ;;
     *)
