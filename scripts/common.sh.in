@@ -658,6 +658,7 @@ do_run() {
     cd $jobdir || die "cd to $jobdir failed"
     exp_jobdir="$jobdir/$exp_tag"   ### NOTE !! still on Lustre !! ###
     mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
+    mkdir -p $exp_jobdir/exp-info || die "mkdir $exp_jobdir/exp-info failed"
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
     ### log file for this exp ###
     exp_logfile="$exp_jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
