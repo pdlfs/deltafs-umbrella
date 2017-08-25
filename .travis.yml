@@ -53,7 +53,7 @@ before_script:
 script:
   - date
   - mkdir -p /tmp/deltafs
-  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs .
+  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DFORCE_OPA=TRUE .
   - make
   - date
 
