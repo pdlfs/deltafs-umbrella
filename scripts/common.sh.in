@@ -797,12 +797,13 @@ do_run() {
             "SHUFFLE_Placement_protocol" ${XX_CH_PROTO:-"ring"}
             "SHUFFLE_Virtual_factor" ${XX_CH_VF:-"1024"}
             "SHUFFLE_Subnet" "${ip_subnet}"
-            "SHUFFLE_Buf_localq" ${XX_SH_LBUFTGT:-"4096"}
-            "SHUFFLE_Max_locals" ${XX_SH_LMAXRPC:-"8"}
-            "SHUFFLE_Buf_remoteq" ${XX_SH_RBUFTGT:-"32768"}
-            "SHUFFLE_Max_remotes" ${XX_SH_RMAXRPC:-"16"}
+            "SHUFFLE_Force_global_barrier" ${XX_SH_FORCE_GLOBAL:-"0"}
+            "SHUFFLE_Local_buftarget" ${XX_SH_LBUFTGT:-"4096"}
+            "SHUFFLE_Local_maxrpc" ${XX_SH_LMAXRPC:-"8"}
+            "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
+            "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Max_deliverq" ${XX_SH_DMAX:-"256"}
-            "SHUFFLE_Use_xn" ${XX_SH_THREE_HOP:-"1"}
+            "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"1"}
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
             "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
             "PLFSDIR_Compaction_buf_size" ${XX_COMP_BUF:-"4MiB"}
