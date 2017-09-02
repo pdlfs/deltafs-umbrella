@@ -20,12 +20,13 @@
 # -DDELTAFS_VERBOSE=0                 # how verbose deltafs will be
 #     (set to zero to disable verbose prints)
 #
-# -DVERBS=OFF                         # build with verbs
-# -DVERBS_PREFIX=dir                  # prefix path (optional)
-# -DVERBS_LIBDIR=dir                  # lib directory override (optional)
 # -DGNI=OFF                           # build with GNI
 # -DGNI_PREFIX=dir                    # prefix path (optional)
 # -DGNI_LIBDIR=dir                    # lib directory override (optional)
+# -DOFI=ON                            # build OFI libfabrics
+# -DVERBS=OFF                         # build with verbs
+# -DVERBS_PREFIX=dir                  # prefix path (optional)
+# -DVERBS_LIBDIR=dir                  # lib directory override (optional)
 #
 # finding dependencies:
 #
@@ -98,6 +99,7 @@ set (FORCE_OPA "OFF" CACHE BOOL "force mercury to use OPA atomic primitives")
 set (GNI "OFF" CACHE BOOL "build with GNI")
 set (GNI_PREFIX "" CACHE PATH "GNI prefix path (optional)")
 set (GNI_LIBDIR "" CACHE PATH "GNI lib directory override (optional)")
+set (OFI "ON" CACHE BOOL "build with OFI/libfabrics")
 set (VERBS "OFF" CACHE BOOL "build with verbs")
 set (VERBS_PREFIX "" CACHE PATH "VERBS prefix path (optional)")
 set (VERBS_LIBDIR "" CACHE PATH "VERBS lib directory override (optional)")
@@ -133,6 +135,7 @@ message (STATUS "  build tests: ${BUILD_TESTS} (skip running: ${SKIP_TESTS})")
 message (STATUS "  HG self-forward rpc: ${SELF_FORWARD}")
 message (STATUS "  HG post limit: ${POST_LIMIT}")
 message (STATUS "  HG force OPA: ${FORCE_OPA}")
+message (STATUS "  OFI/libfabrics: ${OFI}")
 
 #
 # GenDownloadConfig (result target local-file remote-args ...)
@@ -324,6 +327,37 @@ ExternalProject_Add_Step(bmi prepare
     DEPENDERS configure
     WORKING_DIRECTORY <SOURCE_DIR>
 )
+
+if (OFI)
+    #
+    # ofi/libfabrics
+    #
+    GenDownloadConfig (ofi_download ofi ofi.tar.gz
+                       GIT_REPOSITORY "https://github.com/ofiwg/libfabric.git"
+                       GIT_TAG v1.5.0
+                       ### GIT_TAG master
+    )
+
+    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CrayLinuxEnvironment")
+      set (ofixtra --enable-gni --enable-ugni-static)
+    endif ()
+
+    ExternalProject_Add (ofi
+                         ${ofi_download}
+                         CONFIGURE_COMMAND <SOURCE_DIR>/configure ${ac_comp}
+                          --prefix=${CMAKE_INSTALL_PREFIX} ${ofixtra}
+        UPDATE_COMMAND ""
+    )
+
+    ExternalProject_Add_Step(ofi prepare
+        COMMAND ${CMAKE_SOURCE_DIR}/scripts/ensure-autogen
+                                                <SOURCE_DIR>/autogen.sh
+        COMMENT "preparing source for configure"
+        DEPENDEES update
+        DEPENDERS configure
+        WORKING_DIRECTORY <SOURCE_DIR>
+    )
+endif (OFI)
 
 #
 # mercury
