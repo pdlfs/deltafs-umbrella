@@ -62,6 +62,11 @@ Also make sure the desired compiler bundle (`PrgEnv-*` such as Intel, GNU, or Cr
 ```bash
 module load PrgEnv-intel  # Or module load PrgEnv-gnu
 ```
+If you are attempting to compile OFI (libfabrics) on the Cray, you
+cannot use the Intel compiler (PrgEnv-intel) because it lacks support
+for atomics that ofi requires.  To resolve this, use the GNU compiler
+(you may need to "module swap PrgEnv-intel PrgEnv-gnu").
+
 Now, load a few addition modules needed by deltafs umbrella.
 ```bash
 module load boost  # needed by mercury rpc
