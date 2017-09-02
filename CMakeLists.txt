@@ -357,6 +357,9 @@ if (OFI)
         DEPENDERS configure
         WORKING_DIRECTORY <SOURCE_DIR>
     )
+
+    set (ofidep ofi)
+    set (ofina -DNA_USE_OFI=ON)
 endif (OFI)
 
 #
@@ -372,7 +375,7 @@ GenDownloadConfig (mercury_download mercury mercury-4fc4473c.tar.gz
 )
 
 ExternalProject_Add (mercury
-    DEPENDS cci bmi
+    DEPENDS cci bmi ${ofidep}
     ${mercury_download}
     CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_BMI=ON -DNA_USE_CCI=ON -DNA_USE_SM=ON
                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${BUILD_TESTS}
@@ -385,6 +388,7 @@ ExternalProject_Add (mercury
                -DNA_CCI_USE_POLL:BOOL=ON
                -DCCI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DCCI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libcci${suf}
+               ${ofina}
     CMAKE_CACHE_ARGS ${init_cm_cache}
     UPDATE_COMMAND ""
 
