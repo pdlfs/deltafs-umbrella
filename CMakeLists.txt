@@ -641,16 +641,16 @@ set_property (TARGET sndrcv-test PROPERTY EXCLUDE_FROM_ALL True)
 #
 # mercury-runner
 #
-GenDownloadConfig (mrun_download mercury-runner mercury-runner-2624612c.tar.gz
+GenDownloadConfig (mrun_download mercury-runner mercury-runner-773e6cc5.tar.gz
     GIT_REPOSITORY "https://github.com/pdlfs/mercury-runner.git"
-    GIT_TAG 2624612c
+    GIT_TAG 773e6cc5  # Sep 2017
     ### GIT_TAG master
 )
 
 ExternalProject_Add (mercury-runner
     DEPENDS mercury
     ${mrun_download}
-    ### CMAKE_ARGS -Dsomething=value
+    CMAKE_ARGS -DMPI=ON
     CMAKE_CACHE_ARGS ${init_cm_cache}
 
     UPDATE_COMMAND ""

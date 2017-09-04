@@ -151,7 +151,8 @@ run_one() {
     fi
 
     # build command line
-    cmd="$runner -c ${nrpcs} -l $limit -q -r $iter -t ${timeo}"
+    # use slogfile for log; we'll move .0/.1 at the end
+    cmd="$runner -c ${nrpcs} -l $limit -M -q -r $iter -s $slogfile -t ${timeo}"
     if [ x$bulksz != x ]; then
         cmd="$cmd -S $bulksz -L $bulksz"
     fi
@@ -159,48 +160,38 @@ run_one() {
         cmd="$cmd -i $reqsz"
     fi
 
-    srvr_cmd="$cmd -m s $num $saddress"
-    clnt_cmd="$cmd -m c $num $caddress $saddress"
+    the_cmd="$cmd -m s $num $saddress $caddress"
 
-    # start the server
-    message "!!! NOTICE !!! starting server (Instances: $num, Address spec: $saddress)..."
+    # start the run
+    message "!!! NOTICE !!! starting run (Instances: $num, Address spec: $saddress/$caddress)..."
     if [ $dryrun = 1 ]; then
-        message "DRY RUN SERVER @ $host1 -> $srvr_cmd"
+        message "DRY RUN CMD @ $host1,$host2 -> $the_cmd"
     else
-        do_mpirun 1 1 "" $host1 "$srvr_cmd" "" "$logfile" "$slogfile" &
-        server_pid=$!
+        do_mpirun 2 1 "" "$host1,$host2" "$the_cmd" "" "$logfile" || \
+          message "!!! NOTICE !!! app exited with error code"
     fi
 
     sleep 0.1
 
-    # Start the client
-    message "!!! NOTICE !!! starting client (Instances: $num, Address spec: $caddress)..."
-    message "Please be patient while the test is in progress..."
-    if [ $dryrun = 1 ]; then
-        message "DRY RUN CLIENT @ $host2 -> $clnt_cmd"
-    else
-        do_mpirun 1 1 "" $host2 "$clnt_cmd" "" "$logfile" "$clogfile"
-    fi
-
     # Collect return codes
     if [ x$dryrun != x ]; then
-        client_ret=0      # fake return values
-        server_ret=0
+        the_ret=0      # fake return values
     else
-        client_ret=$?
-        wait $server_pid
-        server_ret=$?
+        the_ret=$?
     fi
 
-    if [[ $client_ret != 0 || $server_ret != 0 ]]; then
-        if [ $client_ret != 0 ]; then
-            message "!!! ERROR !!! client returned $client_ret."
-        fi
-        if [ $server_ret != 0 ]; then
-            message "!!! ERROR !!! server returned $server_ret."
-        fi
+    if [[ $the_ret != 0 ]]; then
+        message "!!! ERROR !!! program returned $the_ret."
     else
         message "Test completed successfully."
+    fi
+
+    # now put logs in correct place
+    if [ -f ${slogfile}.0 ]; then
+        mv ${slogfile}.0 $slogfile
+    fi
+    if [ -f ${slogfile}.1 ]; then
+       mv ${slogfile}.1 $clogfile
     fi
 
     now=`date`
