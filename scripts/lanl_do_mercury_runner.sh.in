@@ -1,5 +1,13 @@
 #!/bin/bash -eu
 #
+#SBATCH --job-name mercury-runner
+#SBATCH --time=2:00:00
+#SBATCH --nodes=2
+#SBATCH --constraint=haswell
+#SBATCH --output=/users/%u/joblogs/mercury-runner-%j.out
+
+
+#
 #MSUB -N mercury-runner
 #MSUB -l walltime=2:00:00
 #MSUB -l nodes=2:haswell
