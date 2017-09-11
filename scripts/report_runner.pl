@@ -49,7 +49,7 @@ use strict;
 my(@res) = @ARGV;
 my($lcv, $base);
 my(%n_nas, %b_nas, %n_sizes, %b_sizes, %n_prpcs, %b_prpcs);
-my(%results);
+my(%results, %lines);
 
 # figure out what we've got from the filenames
 foreach $lcv (@res) {
@@ -91,6 +91,7 @@ foreach $lcv (@res) {
             $b_prpcs{$data[1]} = 1;
         }
         $results{$type, $na, $size, $data[1]} = $data[2];
+        $lines{$type, $na, $size} = $lines{$type, $na, $size} . "$_\n";
     }
     close(IN);
 }
@@ -138,5 +139,22 @@ sub report {
     
 }
 
+sub report2 {
+    my($name, $nar, $nszr, $nprpcr) = @_;
+    my($n, $s);
+
+    foreach $n (@$nar) {
+        print "full results: $name $n\n";
+        foreach $s (@$nszr) {
+            print "size = $s\n";
+            print $lines{$name, $n, $s};
+        }
+        print "\n";
+    }
+}
+
 report("normal", \@nnas, \@nsizes, \@nprpcs);
 report("bulk", \@bnas, \@bsizes, \@bprpcs);
+print "";
+report2("normal", \@nnas, \@nsizes, \@nprpcs);
+report2("bulk", \@bnas, \@bsizes, \@bprpcs);
