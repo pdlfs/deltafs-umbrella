@@ -785,14 +785,14 @@ do_run() {
             "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BR:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
+            "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
             "SHUFFLE_Mercury_progress_timeout" ${XX_HG_TIMEOUT:-"100"}
-            "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"200"}
+            "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"1000"}
             "SHUFFLE_Mercury_cache_handles" ${XX_HG_CACHE_HDL:-"0"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
-            "SHUFFLE_Force_rpc" ${XX_RPC_SELF_FORWARD:-"0"}
             "SHUFFLE_Force_sync_rpc" ${XX_RPC_FORCE_SYNC:-"0"}
             "SHUFFLE_Placement_protocol" ${XX_CH_PROTO:-"ring"}
             "SHUFFLE_Virtual_factor" ${XX_CH_VF:-"1024"}
@@ -803,7 +803,9 @@ do_run() {
             "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
             "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Max_deliverq" ${XX_SH_DMAX:-"256"}
-            "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"1"}
+            "SHUFFLE_Force_rpc" ${XX_NO_DIRECT_WRITE:-"0"}
+            "SHUFFLE_Recv_radix" ${XX_RECV_RADIX:-"0"}
+            "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"0"}
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
             "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
             "PLFSDIR_Compaction_buf_size" ${XX_COMP_BUF:-"4MiB"}
