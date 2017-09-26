@@ -16,8 +16,9 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
   * ssg (https://xgitlab.cels.anl.gov/sds/ssg.git)
   * mercury-rpc (https://github.com/mercury-hpc/mercury.git)
-  * cci (https://github.com/CCI/cci.git)
   * bmi (http://git.mcs.anl.gov/bmi.git)
+  * libfabric (https://github.com/ofiwg/libfabric.git)
+  * cci (https://github.com/CCI/cci.git)
 * deltafs
   * deltafs (https://github.com/pdlfs/deltafs.git)
   * deltafs-nexus (https://github.com/pdlfs/deltafs-nexus.git)
