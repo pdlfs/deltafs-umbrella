@@ -339,7 +339,7 @@ if (OFI)
     )
 
     if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CrayLinuxEnvironment")
-      set (ofixtra --enable-gni --enable-ugni-static)
+      set (ofixtra --enable-gni --enable-ugni-static --disable-verbs)
     endif ()
 
     ExternalProject_Add (ofi
