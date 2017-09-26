@@ -20,6 +20,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
   * bmi (http://git.mcs.anl.gov/bmi.git)
 * deltafs
   * deltafs (https://github.com/pdlfs/deltafs.git)
+  * deltafs-nexus (https://github.com/pdlfs/deltafs-nexus.git)
   * deltafs-bb (https://github.com/pdlfs/deltafs-bb.git)
 * vpic
   * deltafs-vpic-preload (https://github.com/pdlfs/deltafs-vpic-preload.git)
@@ -96,7 +97,7 @@ Second, start vpic app:
 mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_RunDir=$HOME/deltafs/var/run" \
        -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
        -x "PDLFS_Root=particle" \
-       $HOME/deltafs/bin/turbulence-part.op 
+       $HOME/deltafs/bin/turbulence-part.op
 ```
 
 Note: it is assumed that $HOME is backed by a shared file system that can be accessed by all mpi nodes.
