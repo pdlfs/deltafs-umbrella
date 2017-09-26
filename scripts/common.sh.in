@@ -786,6 +786,7 @@ do_run() {
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
+            "PRELOAD_Enable_bg_sngcomp" ${XX_BG_SNGCOMP:-"0"}
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
             "SHUFFLE_Mercury_progress_timeout" ${XX_HG_TIMEOUT:-"100"}
             "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"1000"}
