@@ -133,7 +133,8 @@ sub savefile {
 my($cmd) = join(" ", @ARGV);
 my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $dryrun,
    $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations, $overcommit,
-   $platform, $prefix, $run, $scaletime, $skipreads, $tag, $tests);
+   $partition, $platform, $prefix, $run, $scaletime, $skipreads,
+   $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
@@ -165,6 +166,7 @@ $rv = GetOptions(
     "ipsubnet=s"     =>  \$ipsubnet,
     "iterations=i"   =>  \$iterations,
     "overcommit=s"   =>  \$overcommit,
+    "partition=s"    =>  \$partition,
     "platform=s"     =>  \$platform,
     "prefix=s"       =>  \$prefix,
     "run=s"          =>  \$run,
@@ -190,6 +192,7 @@ sub usage {
     print STDERR "\t--experiment S    experiment to run\n";
     print STDERR "\t--iterations I    #of iterations for each run\n";
     print STDERR "\t--overcommit S    overcommit (enable/disable/default)\n";
+    print STDERR "\t--partition S     slurm partition (srun only)\n";
     print STDERR "\t--run S           limit which run to generate\n";
     print STDERR "\t--scaletime F     run time limit scaling\n";
     print STDERR "\t--skipreads       skip read phase\n";
@@ -239,6 +242,8 @@ usage("missing output dir") if ($#ARGV != 0);
 usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
 usage("--core-spec only on srun platform")
     if ($platform ne 'srun' && defined($core_spec));
+usage("--partition only on srun platform")
+    if ($platform ne 'srun' && defined($partition));
 usage("dw must be 'off', 'bw'  or  'int'")
     if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
 usage("need a valid --experiment value") unless (defined($exp));
@@ -279,6 +284,7 @@ foreach (@envs) {
     "experiment"  => $experiment,
     "iterations"  => $iterations,
     "overcommit"  => $overcommit,
+    "partition"   => $partition,
     "run"         => $run,
     "scaletime"   => $scaletime,
     "skipreads"   => $skipreads,
@@ -386,6 +392,8 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
                 if ($core_spec > 0);
             push(@out, "#SBATCH --output " .
                  "/users/\%u/joblogs/$tag-$experiment-$r-$t-\%j.out");
+            push(@out, "#SBATCH --partition=$partition")
+                if ($partition ne "");
             push(@out, "$dwl") if ($dwl ne '');
             # XXX: lanl docs say to do this, but we aren't using OMP
             push(@out, "");
