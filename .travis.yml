@@ -11,6 +11,7 @@ os:
 addons:
   apt:
     sources:
+      - sourceline: 'ppa:git-core/ppa'
       - sourceline: 'ppa:george-edison55/cmake-3.x'
       - ubuntu-toolchain-r-test
     packages:
@@ -20,6 +21,7 @@ addons:
       - librdmacm-dev
       - libopenmpi-dev
       - openmpi-bin
+      - git
       - cmake-data
       - cmake
       - g++-4.4
@@ -49,6 +51,7 @@ before_script:
   - ${CC} --version
   - automake --version
   - cmake --version
+  - git --version
 
 script:
   - date
