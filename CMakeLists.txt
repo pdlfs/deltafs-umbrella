@@ -93,6 +93,7 @@ set (BUILD_TESTS "ON" CACHE BOOL "if go build unit tests")
 set (DELTAFS_VERBOSE "0" CACHE STRING "deltafs verbose level")
 set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
               "1" "2" "3" "4" "5" "6" "7" "8" "9" "10")
+set (CHECKSUM "OFF" CACHE BOOL "configure mercury to do checksums on rpc data")
 set (SELF_FORWARD "OFF" CACHE BOOL "enable mercury to forward rpc to itself")
 set (POST_LIMIT "ON" CACHE BOOL "allow mercury to limit incoming rpcs")
 set (FORCE_OPA "OFF" CACHE BOOL "force mercury to use OPA atomic primitives")
@@ -384,7 +385,7 @@ ExternalProject_Add (mercury
                -DMERCURY_USE_OPA:BOOL=${FORCE_OPA}
                -DMERCURY_USE_SELF_FORWARD:BOOL=${SELF_FORWARD}
                -DMERCURY_ENABLE_POST_LIMIT:BOOL=${POST_LIMIT}
-               -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
+               -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=${CHECKSUM}
                -DBMI_INCLUDE_DIR=${CMAKE_INSTALL_PREFIX}/include
                -DBMI_LIBRARY=${CMAKE_INSTALL_PREFIX}/lib/libbmi.so
                -DNA_CCI_USE_POLL:BOOL=ON
