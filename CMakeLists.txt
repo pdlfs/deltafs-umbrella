@@ -339,7 +339,9 @@ if (OFI)
     )
 
     if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CrayLinuxEnvironment")
-      set (ofixtra --enable-gni --enable-ugni-static --disable-verbs)
+      set (ofixtra --enable-gni --enable-ugni-static --enable-sockets
+           --disable-rxd --disable-rxm --disable-udp --disable-usnic
+           --disable-verbs --with-kdreg=no)
     endif ()
 
     ExternalProject_Add (ofi
@@ -368,9 +370,9 @@ endif (OFI)
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
 set (suf "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" ".dylib"
 
-GenDownloadConfig (mercury_download mercury mercury-4fc4473c.tar.gz
+GenDownloadConfig (mercury_download mercury mercury-0e810a91.tar.gz
     GIT_REPOSITORY "https://github.com/mercury-hpc/mercury.git"
-    GIT_TAG 4fc4473c  # Aug 2017
+    GIT_TAG 0e810a91  # Sep 2017
     ### GIT_TAG master
 )
 
