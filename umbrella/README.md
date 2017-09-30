@@ -45,3 +45,17 @@ Your branch is ahead of 'origin/master' by 2 commits.
 nothing to commit, working directory clean
 % git push
 ```
+
+Or, if you want to make a change to umbrella in your repository and
+then push it to the umbrella repository you can use "git subrepo push"
+like this:
+
+```
+% cd deltafs-umbrella
+% vi umbrella/README.md
+...
+% git add umbrella/README.md
+% git commit
+% git push
+% git subrepo push umbrella
+```
