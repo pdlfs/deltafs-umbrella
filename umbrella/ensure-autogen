@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# ensure-autogen  ensure autotool-based packages have a configure file
+# 26-Sep-2016  chuck@ece.cmu.edu
+#
+
+if [ -f ./configure ]; then
+    echo configure already present, no action required
+    exit 0
+fi
+
+echo ensure-autogen: running $*
+exec $*
