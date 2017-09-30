@@ -69,6 +69,9 @@ message (STATUS "  deltafs_verbose: ${DELTAFS_VERBOSE}")
 #
 # set configs before we start pulling in the pieces...
 #
+set (CH_PLACEMENT_REPO "https://github.com/chuckcranor/ch-placement.git"
+     CACHE STRING "temp copy of ch-placement GIT repository")
+
 set (MERCURY_NALIST bmi cci ofi sm)
 set (PDLFS_OPTIONS -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                    -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
