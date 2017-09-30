@@ -29,5 +29,19 @@ Subrepo 'git@dev.pdl.cmu.edu:pdlfs/umbrella' (master) cloned into 'umbrella'.
 ```
 
 If you are an umbrella developer you can push and pull changes
-between the repositories.
+from your repository to the umbrella repository.  For example,
+to pull in the latest changes from the umbrella repository into
+your repository you can use "git subrepo pull" like this:
 
+```
+% cd deltafs-umbrella
+% git subrepo pull umbrella
+Subrepo 'umbrella' pulled from 'git@dev.pdl.cmu.edu:pdlfs/umbrella' (master).
+chuck@h0:/proj/TableFS/data/chuck/src/deltafs-umbrella % git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working directory clean
+% git push
+```
