@@ -112,15 +112,15 @@ cd ..
 ```
 Now, kick-off the cmake auto-building process:
 
-**NOTE**: set `-DVERBS=ON` if **cci-ibverbs** is to be enabled.
+**NOTE**: set `-DCCI_VERBS=ON` if **cci-ibverbs** is to be enabled.
 ```bash
 mkdir build
 cd build
 #
 # a. tell cmake that we are doing cross-compiling
 # b. skip unit tests, and
-# c. set -DVERBS=ON if we are to use cci+ibverbs
-CC=cc CXX=CC cmake -DSKIP_TESTS=ON -DVERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/deltafs \
+# c. set -DCCI_VERBS=ON if we are to use cci+ibverbs
+CC=cc CXX=CC cmake -DUMBRELLA_SKIP_TESTS=ON -DCCI_VERBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL/deltafs \
       -DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
