@@ -254,3 +254,42 @@ function (umbrella_testcommand result)
     endif ()
 endfunction ()
 
+#
+# umbrella option variables are built on top of cmake CACHE
+# and normal variables.  we put the basic definition of the
+# option variable in the umbrella/*.cmake file, but we allow
+# the user to override the variable's default value by loading
+# it into a normal variable and using that to define the
+# cache variable.   users can also directly set a normal
+# variable to override all the defaults (including -D from
+# the cmake command line).
+#
+
+#
+# umbrella_defineopt: define an umbrella option variable in
+# the cmake cache.  this has no effect on the option variable
+# if it has already been defined (first define wins).  when
+# defining options, we use the given default value unless one
+# was previously defined (e.g. with umbrella_opt_default), in
+# which case we use that.
+#
+function (umbrella_defineopt var val type docstring)
+    if (DEFINED ${var})   # user provided their own default value
+        set (${var} ${${var}} CACHE ${type} ${docstring})
+    else ()
+        set (${var} ${val} CACHE ${type} ${docstring})
+    endif ()
+endfunction()
+
+#
+# umbrella_opt_default: set a user-provided default value for an
+# umbrella option variable.  we convey this to umbrella_defineopt
+# using a normal (non-cache) cmake variable.  but we don't change
+# anything if the variable is already defined (it could be a "-D"
+# from the command line, that should override this function).
+#
+function (umbrella_opt_default var newdefault)
+    if (NOT DEFINED ${var})
+        set (${var} ${newdefault} PARENT_SCOPE)
+    endif ()
+endfunction ()
