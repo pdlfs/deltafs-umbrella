@@ -13,13 +13,15 @@
 if (NOT TARGET deltafs-nexus)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (DELTAFS_NEXUS_REPO "https://github.com/pdlfs/deltafs-nexus.git"
-     CACHE STRING "deltafs-nexus GIT repository")
-set (DELTAFS_NEXUS_TAG "v1.3" CACHE STRING "deltafs-nexus GIT tag")
-set (DELTAFS_NEXUS_TAR "deltafs-nexus-${DELTAFS_NEXUS_TAG}.tar.gz"
-     CACHE STRING "deltafs-nexus cache tar file")
+umbrella_defineopt (DELTAFS_NEXUS_REPO
+    "https://github.com/pdlfs/deltafs-nexus.git"
+     STRING "deltafs-nexus GIT repository")
+umbrella_defineopt (DELTAFS_NEXUS_TAG "master" STRING "deltafs-nexus GIT tag")
+umbrella_defineopt (DELTAFS_NEXUS_TAR
+     "deltafs-nexus-${DELTAFS_NEXUS_TAG}.tar.gz"
+     STRING "deltafs-nexus cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

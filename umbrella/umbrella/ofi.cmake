@@ -13,12 +13,12 @@
 if (NOT TARGET ofi)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (OFI_REPO "https://github.com/ofiwg/libfabric.git" CACHE
+umbrella_defineopt (OFI_REPO "https://github.com/ofiwg/libfabric.git"
      STRING "OFI (libfabric) GIT repository")
-set (OFI_TAG "v1.5.0" CACHE STRING "OFI GIT tag")
-set (OFI_TAR "ofi-${OFI_TAG}.tar.gz" CACHE STRING "OFI cache tar file")
+umbrella_defineopt (OFI_TAG "master" STRING "OFI GIT tag")
+umbrella_defineopt (OFI_TAR "ofi-${OFI_TAG}.tar.gz" STRING "OFI cache tar file")
 
 #
 # XXX: we are currently hardwiring extra stuff on the cray

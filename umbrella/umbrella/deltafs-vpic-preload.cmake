@@ -13,16 +13,16 @@
 if (NOT TARGET deltafs-vpic-preload)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (DELTAFS_VPIC_PRELOAD_REPO
+umbrella_defineopt (DELTAFS_VPIC_PRELOAD_REPO
      "https://github.com/pdlfs/deltafs-vpic-preload.git"
-     CACHE STRING "deltafs-vpic-preload GIT repository")
-set (DELTAFS_VPIC_PRELOAD_TAG "v1.21"
-     CACHE STRING "deltafs-vpic-preload GIT tag")
-set (DELTAFS_VPIC_PRELOAD_TAR
+     STRING "deltafs-vpic-preload GIT repository")
+umbrella_defineopt (DELTAFS_VPIC_PRELOAD_TAG "master"
+     STRING "deltafs-vpic-preload GIT tag")
+umbrella_defineopt (DELTAFS_VPIC_PRELOAD_TAR
      "deltafs-vpic-preload-${DELTAFS_VPIC_PRELOAD_TAG}.tar.gz"
-     CACHE STRING "deltafs-vpic-preload cache tar file")
+     STRING "deltafs-vpic-preload cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

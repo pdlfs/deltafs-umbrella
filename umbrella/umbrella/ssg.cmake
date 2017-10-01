@@ -13,12 +13,12 @@
 if (NOT TARGET ssg)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (SSG_REPO "https://github.com/pdlfs/ssg.git" CACHE
+umbrella_defineopt (SSG_REPO "https://github.com/pdlfs/ssg.git"
      STRING "SSG GIT repository")
-set (SSG_TAG "0164e690" CACHE STRING "SSG GIT tag")
-set (SSG_TAR "ssg-${SSG_TAG}.tar.gz" CACHE STRING "SSG cache tar file")
+umbrella_defineopt (SSG_TAG "master" STRING "SSG GIT tag")
+umbrella_defineopt (SSG_TAR "ssg-${SSG_TAG}.tar.gz" STRING "SSG cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

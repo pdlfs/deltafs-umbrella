@@ -13,14 +13,14 @@
 if (NOT TARGET ch-placement)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (CH_PLACEMENT_REPO "http://xgitlab.cels.anl.gov/codes/ch-placement.git"
-     CACHE STRING "ch-placement GIT repository")
-set (CH_PLACEMENT_TAG "0b706ca06"
-     CACHE STRING "ch-placement GIT tag") # Dec 2016
-set (CH_PLACEMENT_TAR "ch-placement-${CH_PLACEMENT_TAG}.tar.gz"
-     CACHE STRING "ch-placement cache tar file")
+umbrella_defineopt (CH_PLACEMENT_REPO
+     "http://xgitlab.cels.anl.gov/codes/ch-placement.git"
+     STRING "ch-placement GIT repository")
+umbrella_defineopt (CH_PLACEMENT_TAG "master" STRING "ch-placement GIT tag")
+umbrella_defineopt (CH_PLACEMENT_TAR "ch-placement-${CH_PLACEMENT_TAG}.tar.gz"
+     STRING "ch-placement cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

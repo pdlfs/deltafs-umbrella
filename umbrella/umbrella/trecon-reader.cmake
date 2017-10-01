@@ -11,10 +11,11 @@
 if (NOT TARGET trecon-reader)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (TRECON_READER_VPICSRC "${CMAKE_BINARY_DIR}/vpic-prefix/src/vpic"
-     CACHE STRING "vpic source directory")
+umbrella_defineopt (TRECON_READER_VPICSRC
+     "${CMAKE_BINARY_DIR}/vpic-prefix/src/vpic"
+     STRING "vpic source directory")
 
 #
 # generate parts of the ExternalProject_Add args...

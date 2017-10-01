@@ -25,28 +25,29 @@
 if (NOT TARGET cci)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (CCI_REPO "https://github.com/CCI/cci" CACHE
-     STRING "CCI GIT repository")
-set (CCI_TAG "3ab663e0" CACHE STRING "CCI GIT tag")
+umbrella_defineopt (CCI_REPO "https://github.com/CCI/cci"
+                    STRING "CCI GIT repository")
+umbrella_defineopt (CCI_TAG "master" STRING "CCI GIT tag")
 
-set (CCI_URL "http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz"
-     CACHE STRING "CCI release download URL")
-set (CCI_URL_MD5 "070b2ba4eca92a846c093f2cd000d3b2"
-     CACHE STRING "CCI download URL md5")
+umbrella_defineopt (CCI_URL
+     "http://cci-forum.com/wp-content/uploads/2016/06/cci-2.0.tar.gz"
+     STRING "CCI release download URL")
+umbrella_defineopt (CCI_URL_MD5 "070b2ba4eca92a846c093f2cd000d3b2"
+     STRING "CCI download URL md5")
 
-set (CCI_USEURL "OFF" CACHE BOOLEAN "Use URL to download CCI")
+umbrella_defineopt (CCI_USEURL "OFF" BOOLEAN "Use URL to download CCI")
 
-set (CCI_TAR "cci-${CCI_TAG}.tar.gz" CACHE STRING "CCI cache tar file")
+umbrella_defineopt (CCI_TAR "cci-${CCI_TAG}.tar.gz" STRING "CCI cache tar file")
 
-set (CCI_GNI "OFF" CACHE BOOLEAN "Enable GNI backend in CCI")
-set (CCI_GNI_PREFIX "" CACHE STRING "GNI prefix for CCI")
-set (CCI_GNI_LIBDIR "" CACHE STRING "GNI libdir flag for CCI")
+umbrella_defineopt (CCI_GNI "OFF" BOOLEAN "Enable GNI backend in CCI")
+umbrella_defineopt (CCI_GNI_PREFIX "" STRING "GNI prefix for CCI")
+umbrella_defineopt (CCI_GNI_LIBDIR "" STRING "GNI libdir flag for CCI")
 
-set (CCI_VERBS "OFF" CACHE BOOLEAN "Enable verbs backend in CCI")
-set (CCI_VERBS_PREFIX "" CACHE STRING "verbs prefix for CCI")
-set (CCI_VERBS_LIBDIR "" CACHE STRING "verbs libdir flag for CCI")
+umbrella_defineopt (CCI_VERBS "OFF" BOOLEAN "Enable verbs backend in CCI")
+umbrella_defineopt (CCI_VERBS_PREFIX "" STRING "verbs prefix for CCI")
+umbrella_defineopt (CCI_VERBS_LIBDIR "" STRING "verbs libdir flag for CCI")
 
 #
 # build extra autoconfig flags

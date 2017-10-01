@@ -13,12 +13,13 @@
 if (NOT TARGET vpic)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (VPIC_REPO "https://github.com/pdlfs/vpic.git"
-     CACHE STRING "VPIC GIT repository")
-set (VPIC_TAG "d74ac54" CACHE STRING "VPIC GIT tag")  # Jul 2017
-set (VPIC_TAR "vpic-${VPIC_TAG}.tar.gz" CACHE STRING "VPIC cache tar file")
+umbrella_defineopt (VPIC_REPO "https://github.com/pdlfs/vpic.git"
+     STRING "VPIC GIT repository")
+umbrella_defineopt (VPIC_TAG "master" STRING "VPIC GIT tag")
+umbrella_defineopt (VPIC_TAR "vpic-${VPIC_TAG}.tar.gz"
+     STRING "VPIC cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

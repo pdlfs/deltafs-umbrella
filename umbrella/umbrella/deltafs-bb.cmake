@@ -13,13 +13,13 @@
 if (NOT TARGET deltafs-bb)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (DELTAFS_BB_REPO "https://github.com/pdlfs/deltafs-bb.git"
-     CACHE STRING "deltafs-bb GIT repository")
-set (DELTAFS_BB_TAG "f9040bd1" CACHE STRING "deltafs-bb GIT tag") # May 17
-set (DELTAFS_BB_TAR "deltafs-bb-${DELTAFS_BB_TAG}.tar.gz"
-     CACHE STRING "deltafs-bb cache tar file")
+umbrella_defineopt (DELTAFS_BB_REPO "https://github.com/pdlfs/deltafs-bb.git"
+     STRING "deltafs-bb GIT repository")
+umbrella_defineopt (DELTAFS_BB_TAG "master" STRING "deltafs-bb GIT tag")
+umbrella_defineopt (DELTAFS_BB_TAR "deltafs-bb-${DELTAFS_BB_TAG}.tar.gz"
+     STRING "deltafs-bb cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

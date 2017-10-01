@@ -13,14 +13,15 @@
 if (NOT TARGET mercury-runner)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (MERCURY_RUNNER_REPO "https://github.com/pdlfs/mercury-runner.git"
-     CACHE STRING "mercury-runner GIT repository")
-set (MERCURY_RUNNER_TAG "773e6cc5"
-     CACHE STRING "mercury-runner GIT tag") # Sep 2017
-set (MERCURY_RUNNER_TAR "mercury-runner-${MERCURY_RUNNER_TAG}.tar.gz"
-     CACHE STRING "mercury-runner cache tar file")
+umbrella_defineopt (MERCURY_RUNNER_REPO
+     "https://github.com/pdlfs/mercury-runner.git"
+     STRING "mercury-runner GIT repository")
+umbrella_defineopt (MERCURY_RUNNER_TAG "master" STRING "mercury-runner GIT tag")
+umbrella_defineopt (MERCURY_RUNNER_TAR 
+     "mercury-runner-${MERCURY_RUNNER_TAG}.tar.gz"
+     STRING "mercury-runner cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

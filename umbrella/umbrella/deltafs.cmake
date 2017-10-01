@@ -14,13 +14,13 @@
 if (NOT TARGET deltafs)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (DELTAFS_REPO "https://github.com/pdlfs/deltafs.git"
-     CACHE STRING "deltafs GIT repository")
-set (DELTAFS_TAG "v2017.9" CACHE STRING "deltafs GIT tag")
-set (DELTAFS_TAR "deltafs-${DELTAFS_TAG}.tar.gz"
-     CACHE STRING "deltafs cache tar file")
+umbrella_defineopt (DELTAFS_REPO "https://github.com/pdlfs/deltafs.git"
+     STRING "deltafs GIT repository")
+umbrella_defineopt (DELTAFS_TAG "master" STRING "deltafs GIT tag")
+umbrella_defineopt (DELTAFS_TAR "deltafs-${DELTAFS_TAG}.tar.gz"
+     STRING "deltafs cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...

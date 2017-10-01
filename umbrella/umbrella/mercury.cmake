@@ -13,20 +13,20 @@
 if (NOT TARGET mercury)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (MERCURY_REPO "https://github.com/mercury-hpc/mercury.git" CACHE
+umbrella_defineopt (MERCURY_REPO "https://github.com/mercury-hpc/mercury.git"
      STRING "MERCURY GIT repository")
-set (MERCURY_TAG "0e810a91" CACHE STRING "BMI GIT tag")  # Sep 2017
-set (MERCURY_TAR "mercury-${MERCURY_TAG}.tar.gz"
-     CACHE STRING "MERCURY cache tar file")
+umbrella_defineopt (MERCURY_TAG "master" STRING "mercury GIT tag")
+umbrella_defineopt (MERCURY_TAR "mercury-${MERCURY_TAG}.tar.gz"
+     STRING "MERCURY cache tar file")
 
 #
 # non-na options
 #
-set (MERCURY_OPA "OFF" CACHE BOOL "Force use of OPA atomic lib")
-set (MERCURY_POST_LIMIT "ON" CACHE BOOL "Enable post limit")
-set (MERCURY_SELF_FORWARD "OFF" CACHE BOOL "Enable self forward thread")
+umbrella_defineopt (MERCURY_OPA "OFF" BOOL "Force use of OPA atomic lib")
+umbrella_defineopt (MERCURY_POST_LIMIT "ON" BOOL "Enable post limit")
+umbrella_defineopt (MERCURY_SELF_FORWARD "OFF" BOOL "Enable self forward thread")
 
 #
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
@@ -39,10 +39,10 @@ umbrella_onlist (MERCURY_NALIST cci MERCURY_DEFCCI)
 umbrella_onlist (MERCURY_NALIST ofi MERCURY_DEFOFI)
 umbrella_onlist (MERCURY_NALIST sm  MERCURY_DEFSM)
 
-set (MERCURY_BMI ${MERCURY_DEFBMI} CACHE BOOL "Enable Mercury bmi na")
-set (MERCURY_CCI ${MERCURY_DEFCCI} CACHE BOOL "Enable Mercury cci na")
-set (MERCURY_OFI ${MERCURY_DEFOFI} CACHE BOOL "Enable Mercury ofi na")
-set (MERCURY_SM  ${MERCURY_DEFSM}  CACHE BOOL "Enable Mercury sm na")
+umbrella_defineopt (MERCURY_BMI ${MERCURY_DEFBMI} BOOL "Enable Mercury bmi na")
+umbrella_defineopt (MERCURY_CCI ${MERCURY_DEFCCI} BOOL "Enable Mercury cci na")
+umbrella_defineopt (MERCURY_OFI ${MERCURY_DEFOFI} BOOL "Enable Mercury ofi na")
+umbrella_defineopt (MERCURY_SM  ${MERCURY_DEFSM}  BOOL "Enable Mercury sm na")
 
 # generic mercury cmake options
 set (MERCURY_CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_SM=${MERCURY_SM}

@@ -58,6 +58,23 @@ set (UMBRELLA_MPI 1)
 include (umbrella-main)
 
 #
+# set git tags to the versions we want to stick to by default...
+#
+umbrella_opt_default (BMI_TAG "cb70e870")             # Dec 2016
+umbrella_opt_default (CCI_TAG "3ab663e0")
+umbrella_opt_default (CH_PLACEMENT_TAG "0b706ca06")   # Dec 2016
+umbrella_opt_default (DELTAFS_BB_TAG "f9040bd1")      # May 2017
+umbrella_opt_default (DELTAFS_COMMON_TAG "v17.4")
+umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.3")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.21")
+umbrella_opt_default (DELTAFS_TAG "v2017.9")
+umbrella_opt_default (MERCURY_RUNNER_TAG "773e6cc5")  # Sep 2017
+umbrella_opt_default (MERCURY_TAG "0e810a91")         # Sep 2017
+umbrella_opt_default (OFI_TAG "v1.5.0")
+umbrella_opt_default (SSG_TAG "0164e690")
+umbrella_opt_default (VPIC_TAG "d74ac54")             # Jul 2017
+
+#
 # any additional cache variables we want to add that are not already
 # part of the umbrella?
 #
@@ -67,8 +84,9 @@ set_property (CACHE DELTAFS_VERBOSE PROPERTY STRINGS "0"
 message (STATUS "  deltafs_verbose: ${DELTAFS_VERBOSE}")
 
 #
-# set configs before we start pulling in the pieces...
+# set other configs before we start pulling in the pieces...
 #
+
 set (CH_PLACEMENT_REPO "https://github.com/chuckcranor/ch-placement.git"
      CACHE STRING "temp copy of ch-placement GIT repository")
 

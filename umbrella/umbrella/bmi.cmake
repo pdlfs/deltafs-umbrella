@@ -13,12 +13,12 @@
 if (NOT TARGET bmi)
 
 #
-# variables that users can set
+# umbrella option variables
 #
-set (BMI_REPO "http://git.mcs.anl.gov/bmi.git" CACHE
-     STRING "BMI GIT repository")
-set (BMI_TAG "cb70e870" CACHE STRING "BMI GIT tag")  # Dec 2016
-set (BMI_TAR "bmi-${BMI_TAG}.tar.gz" CACHE STRING "BMI cache tar file")
+umbrella_defineopt (BMI_REPO "http://git.mcs.anl.gov/bmi.git"
+                    STRING "BMI GIT repository")
+umbrella_defineopt (BMI_TAG "master" STRING "BMI GIT tag")
+umbrella_defineopt (BMI_TAR "bmi-${BMI_TAG}.tar.gz" STRING "BMI cache tar file")
 
 #
 # generate parts of the ExternalProject_Add args...
