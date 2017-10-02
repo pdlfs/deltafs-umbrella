@@ -804,7 +804,9 @@ do_run() {
             "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
             "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Max_deliverq" ${XX_SH_DMAX:-"256"}
-            "SHUFFLE_Force_rpc" ${XX_NO_DIRECT_WRITE:-"0"}
+            "SHUFFLE_Force_rpc" ${XX_ALWAYS_SHUFFLE:-"0"}
+            "SHUFFLE_Hash_sig" ${XX_RPC_HASHSIG:-"0"}
+            "SHUFFLE_Paranoid_checks" ${XX_RPC_CHECKS:-"0"}
             "SHUFFLE_Recv_radix" ${XX_RECV_RADIX:-"0"}
             "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"0"}
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
