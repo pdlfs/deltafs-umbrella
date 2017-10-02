@@ -9,6 +9,15 @@
 #  MERCURY_TAG  - tag to checkout of git
 #  MERCURY_TAR  - cache tar file name (default should be ok)
 #
+#  MERCURY_OPA - force use of OPA atomic lib
+#  MERCURY_POST_LIMIT - enable post limit
+#  MERCURY_SELF_FORWARD - enable self forward thread
+#
+#  MERCURY_NA_INITIALLY_ON - cmake list of NAs that are initally enabled
+#                            the first time cmake is run
+#  MERCURY_BMI, MERCURY_CCI, MERCURY_OFI, MERCURY_SM - settings for each NA
+#     (they will override MERCURY_NA_INITIALLY_ON)
+#
 
 if (NOT TARGET mercury)
 
@@ -33,11 +42,17 @@ umbrella_defineopt (MERCURY_SELF_FORWARD "OFF" BOOL "Enable self forward thread"
 #
 set (MERCURY_SUFF "${CMAKE_SHARED_LIBRARY_SUFFIX}")  # ".so" / ".dylib"
 
-# NA's -- this allows us to select initial defaults with MERCURY_NALIST
-umbrella_onlist (MERCURY_NALIST bmi MERCURY_DEFBMI)
-umbrella_onlist (MERCURY_NALIST cci MERCURY_DEFCCI)
-umbrella_onlist (MERCURY_NALIST ofi MERCURY_DEFOFI)
-umbrella_onlist (MERCURY_NALIST sm  MERCURY_DEFSM)
+#
+# na options
+#
+umbrella_defineopt (MERCURY_NA_INITIALLY_ON "bmi;cci;ofi;sm" STRING
+     "List of default-enabled NAs")
+
+# use MERCURY_NA_INITIALLY_ON to select initial defaults for each NA
+umbrella_onlist (MERCURY_NA_INITIALLY_ON bmi MERCURY_DEFBMI)
+umbrella_onlist (MERCURY_NA_INITIALLY_ON cci MERCURY_DEFCCI)
+umbrella_onlist (MERCURY_NA_INITIALLY_ON ofi MERCURY_DEFOFI)
+umbrella_onlist (MERCURY_NA_INITIALLY_ON sm  MERCURY_DEFSM)
 
 umbrella_defineopt (MERCURY_BMI ${MERCURY_DEFBMI} BOOL "Enable Mercury bmi na")
 umbrella_defineopt (MERCURY_CCI ${MERCURY_DEFCCI} BOOL "Enable Mercury cci na")

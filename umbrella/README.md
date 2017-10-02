@@ -121,12 +121,12 @@ include (umbrella-main)
 ```
 
 Now you can set up the configuration by setting variables.  For example,
-the umbrella/mercury script takes a list of requested network backends
-in the MERCURY_NALIST variable.  Once you have setup the config, then
-you can include all the desired umbrella scripts:
+the umbrella/mercury script takes the initial default list of enabled network
+backends in the MERCURY_NA_INITIALLY_ON variable.  Once you have setup
+the config, then you can include all the desired umbrella scripts:
 
 ```
-set (MERCURY_NALIST bmi cci ofi sm)
+umbrella_opt_default (MERCURY_NA_INITIALLY_ON "bmi;cci;ofi;sm")
 include (umbrella/mercury)
 include (umbrella/mercury-runner)
 ```
