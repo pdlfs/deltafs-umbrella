@@ -62,7 +62,7 @@ include (umbrella-main)
 #
 umbrella_opt_default (BMI_TAG "cb70e870")             # Dec 2016
 umbrella_opt_default (CCI_TAG "3ab663e0")
-umbrella_opt_default (CH_PLACEMENT_TAG "0b706ca06")   # Dec 2016
+umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
 umbrella_opt_default (DELTAFS_BB_TAG "f9040bd1")      # May 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v17.4")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.3")
