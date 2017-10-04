@@ -87,9 +87,6 @@ message (STATUS "  deltafs_verbose: ${DELTAFS_VERBOSE}")
 # set other configs before we start pulling in the pieces...
 #
 
-set (CH_PLACEMENT_REPO "https://github.com/chuckcranor/ch-placement.git"
-     CACHE STRING "temp copy of ch-placement GIT repository")
-
 # note: NA_INITIALLY_ON is only applied as the defaults the first time
 # you run cmake.  if you want to reconfigure, change MERCURY_BMI, et al.
 umbrella_opt_default (MERCURY_NA_INITIALLY_ON "bmi;cci;ofi;sm")
