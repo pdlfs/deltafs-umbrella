@@ -49,6 +49,7 @@ ExternalProject_Add (deltafs DEPENDS mercury deltafs-common deltafs-bb
         -DDELTAFS_COMMON_INTREE=OFF
         -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
         -DMPI_C_COMPILER=${MPI_C_COMPILER}
+        -DDELTAFS_BBOS=ON
         -DDELTAFS_MPI=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
