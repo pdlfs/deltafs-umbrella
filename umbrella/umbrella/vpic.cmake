@@ -53,7 +53,8 @@ ExternalProject_Add (vpic DEPENDS deltafs
 
     BUILD_COMMAND make
         COMMAND cd <SOURCE_DIR> &&
-        <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx
+        <BINARY_DIR>/build.op decks/trecon-part/turbulence.cxx &&
+        <BINARY_DIR>/build.op decks/fan-run/turbulence-sheet-tracer2spec.cxx
 
     INSTALL_COMMAND make install
         COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/decks
