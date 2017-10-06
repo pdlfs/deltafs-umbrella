@@ -148,7 +148,12 @@ if (UMBRELLA_MPI)
 endif ()
 message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
 message (STATUS "  build tests: ${UMBRELLA_BUILD_TESTS}")
-message (STATUS "  skip running tests: ${UMBRELLA_SKIP_TESTS}")
+if (UMBRELLA_BUILD_TESTS)
+    message (STATUS "  skip running tests: ${UMBRELLA_SKIP_TESTS}")
+else ()
+    message (STATUS "  skip running tests: <off, build disabled>")
+endif ()
+
 
 #
 # various helper function
@@ -247,7 +252,8 @@ endfunction ()
 # binaries on the host), and 2) skip_tests are not set.
 #
 function (umbrella_testcommand result)
-    if (NOT ${CMAKE_CROSSCOMPILING} AND NOT ${UMBRELLA_SKIP_TESTS})
+    if (NOT CMAKE_CROSSCOMPILING AND UMBRELLA_BUILD_TESTS
+                                 AND NOT UMBRELLA_SKIP_TESTS)
         set (${result} ${ARGN} PARENT_SCOPE)
     else ()
         set (${result} "" PARENT_SCOPE)
