@@ -40,7 +40,10 @@ endif ()
 # create libconfig target
 #
 ExternalProject_Add (libconfig ${LIBCONFIG_DOWNLOAD} ${LIBCONFIG_PATCHCMD}
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
+    # XXX: the 1.6 scanner.c is bad and needs to be regen'd by flex
+    # XXX: old one has wrong# args to scanctx_push_include()
+    CONFIGURE_COMMAND touch <SOURCE_DIR>/lib/scanner.l
+        COMMAND       <SOURCE_DIR>/configure ${UMBRELLA_COMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
                       ${LIBCONFIG_INFOINFO}
                       --prefix=${CMAKE_INSTALL_PREFIX}

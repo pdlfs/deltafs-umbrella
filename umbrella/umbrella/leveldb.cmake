@@ -36,7 +36,8 @@ ExternalProject_Add (leveldb ${LEVELDB_DOWNLOAD} ${LEVELDB_PATCHCMD}
     CONFIGURE_COMMAND ""
     BUILD_IN_SOURCE 1      # old school makefiles
     BUILD_COMMAND make
-    INSTALL_COMMAND cd <SOURCE_DIR>/out-shared && 
+    INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib
+      COMMAND cd <SOURCE_DIR>/out-shared && 
       sh -c "cp libleveldb.* ${CMAKE_INSTALL_PREFIX}/lib"
       COMMAND cp -r <SOURCE_DIR>/include/leveldb ${CMAKE_INSTALL_PREFIX}/include
     UPDATE_COMMAND "")
