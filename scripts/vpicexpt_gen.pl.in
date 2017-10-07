@@ -139,8 +139,8 @@ my($defplatform);
 
 # non-undef defaults
 $bbosbuddies = 0;
-$deck_path = 'trecon-part'
-$deck_name = 'turbulence'
+$deck_path = 'trecon-part';
+$deck_name = 'turbulence';
 $dw = 'off';
 $ipsubnet = guess_subnet();
 $iterations = 1;
