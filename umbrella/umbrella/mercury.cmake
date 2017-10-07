@@ -12,6 +12,7 @@
 #  MERCURY_OPA - force use of OPA atomic lib
 #  MERCURY_POST_LIMIT - enable post limit
 #  MERCURY_SELF_FORWARD - enable self forward thread
+#  MERCURY_CHECKSUM - enable checksuming
 #
 #  MERCURY_NA_INITIALLY_ON - cmake list of NAs that are initally enabled
 #                            the first time cmake is run
@@ -36,6 +37,7 @@ umbrella_defineopt (MERCURY_TAR "mercury-${MERCURY_TAG}.tar.gz"
 umbrella_defineopt (MERCURY_OPA "OFF" BOOL "Force use of OPA atomic lib")
 umbrella_defineopt (MERCURY_POST_LIMIT "ON" BOOL "Enable post limit")
 umbrella_defineopt (MERCURY_SELF_FORWARD "OFF" BOOL "Enable self forward thread")
+umbrella_defineopt (MERCURY_CHECKSUM "OFF" BOOL "Enable checksuming")
 
 #
 # XXXCDC: bmi always installs under .so, cci uses ${suf} (below)
@@ -65,7 +67,7 @@ set (MERCURY_CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_SM=${MERCURY_SM}
      -DMERCURY_USE_OPA:BOOL=${MERCURY_OPA}
      -DMERCURY_USE_SELF_FORWARD:BOOL=${MERCURY_SELF_FORWARD}
      -DMERCURY_ENABLE_POST_LIMIT:BOOL=${MERCURY_POST_LIMIT}
-     -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=OFF
+     -DMERCURY_USE_BOOST_PP=ON -DMERCURY_USE_CHECKSUMS:BOOL=${MERCURY_CHECKSUM}
      -DNA_USE_BMI=${MERCURY_BMI} -DNA_USE_CCI=${MERCURY_CCI}
      -DNA_USE_OFI=${MERCURY_OFI})
 
