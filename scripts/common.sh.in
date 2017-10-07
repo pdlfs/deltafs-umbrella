@@ -563,7 +563,7 @@ build_deck() {
     ddir=${jobdir}/tmpdeck.$$     # tmp staging area for stacking the deck
     rm -rf ${ddir}
     cp -r ${dfsu_prefix}/decks ${ddir}
-    mv ${ddir}/trecon-part/config.h ${ddir}/trecon-part/config.bkp || \
+    mv ${ddir}/${deck_path}/config.h ${ddir}/${deck_path}/config.bkp || \
         die "mv failed"
 
     message "--------------- [INPUT-DECK] --------------"
@@ -572,7 +572,7 @@ build_deck() {
 
     case $1 in
     "file-per-process")
-        cat ${ddir}/trecon-part/config.bkp | \
+        cat ${ddir}/${deck_path}/config.bkp | \
             sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
@@ -582,11 +582,11 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/trecon-part/config.h || \
+                   ${ddir}/${deck_path}/config.h || \
             die "config.h editing failed"
         ;;
     "file-per-particle")
-        cat ${ddir}/trecon-part/config.bkp | \
+        cat ${ddir}/${deck_path}/config.bkp | \
             sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
@@ -596,7 +596,7 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/trecon-part/config.h || \
+                   ${ddir}/${deck_path}/config.h || \
             die "config.h editing failed"
         ;;
     *)
@@ -605,11 +605,11 @@ build_deck() {
     esac
 
     # Compile input deck
-    (cd ${ddir}/trecon-part && ${dfsu_prefix}/bin/vpic-build.op ./turbulence.cxx \
+    (cd ${ddir}/${deck_path} && ${dfsu_prefix}/bin/vpic-build.op ./${deck_name}.cxx \
        2>&1 | tee -a $exp_logfile | tee -a $logfile) || \
            die "compilation failed"
 
-    mv ${ddir}/trecon-part/turbulence.op ${jobdir}/current-deck.op || \
+    mv ${ddir}/${deck_path}/${deck_name}.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
 
     message ""

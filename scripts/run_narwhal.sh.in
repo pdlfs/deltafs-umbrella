@@ -46,6 +46,10 @@ set -euo pipefail
 # communication. Should be set to the same number of nodes as the burst buffer
 # nodes.
 
+# VPIC input deck
+deck_path="trecon-part"
+deck_name="turbulence"
+
 # Node topology
 cores_per_node=4
 nodes=16

@@ -131,14 +131,16 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $dryrun,
-   $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations, $overcommit,
-   $partition, $platform, $prefix, $run, $scaletime, $skipreads,
-   $tag, $tests);
+my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $deck_path, 
+   $deck_name, $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet,
+   $iterations, $overcommit, $partition, $platform, $prefix, $run, $scaletime,
+   $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
 $bbosbuddies = 0;
+$deck_path = 'trecon-part'
+$deck_name = 'turbulence'
 $dw = 'off';
 $ipsubnet = guess_subnet();
 $iterations = 1;
@@ -157,6 +159,8 @@ $rv = GetOptions(
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
     "core-spec=i"    =>  \$core_spec,
+    "deck_path=s"    =>  \$deck_path,
+    "deck_name=s"    =>  \$deck_name,
     "dryrun"         =>  \$dryrun,
     "dw=s"           =>  \$dw,
     "env=s"          =>  \@envs,
@@ -186,6 +190,8 @@ sub usage {
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--core-spec I     specialized core cnt (srun only)\n";
+    print STDERR "\t--deck-path S     name of VPIC input deck dir (under decks/)\n";
+    print STDERR "\t--deck-name S     name of VPIC input deck file (under deck-path/)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
     print STDERR "\t--env E=val       setenv 'E' to 'val' in script\n";
@@ -279,6 +285,8 @@ foreach (@envs) {
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
     "core-spec"   => $core_spec,
+    "deck_path"   => $deck_path,
+    "deck_name"   => $deck_name,
     "dw"          => $dw,
     "env"         => join(" ", @ekeys),
     "experiment"  => $experiment,
@@ -333,8 +341,8 @@ if ($addrunopts ne '') {
 # regular expression to use to build EXPPARAMS
 #
 $EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
-                   '^vpicsteps=|^px=|^py=|^pz=|^bbosbuddies=|^skipreads=|' .
-                   '^maxtime=|^basextra=|^dwsize=';
+                   '^vpicsteps=|^px=|^py=|^pz=|^deck_path=|^deck_name=|' .
+                   '^bbosbuddies=|^skipreads=|^maxtime=|^basextra=|^dwsize=';
 
 #
 # create output directory if it isn't present
@@ -452,6 +460,8 @@ vpicsteps=$vpicsteps
 px=$px
 py=$py
 pz=$pz
+deck_path=$deck_path
+deck_name=$deck_name
 bbosbuddies=$bbosbuddies
 skipreads=$skipreads
 #
@@ -505,7 +515,7 @@ do
     # XXX: should reset logfile name here
     $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
         \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \\
-        \$bbosbuddies \$skipreads
+        \$deck_path \$deck_name \$bbosbuddies \$skipreads
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
@@ -519,7 +529,7 @@ EOS
         die "savefile failed!"
             unless (savefile($fn, join("\n", @out), $script,
                              "\n", "exit 0\n"));
-        print "genereated $fn\n";
+        print "generated $fn\n";
     }
 }
 

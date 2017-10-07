@@ -48,9 +48,11 @@ num_vpic_steps=${8:-"200"}
 px_factor=${9:-"1"}
 py_factor=${10:-"4"}
 pz_factor=${11:-"1"}
-bbos_buddies=${12:-"0"}
-should_skip_query=${13:-"0"}
-should_do_multipass_query=${14:-"0"}
+deck_path=${12:-"trecon-part"}
+deck_name=${13:-"turbulence"}
+bbos_buddies=${14:-"0"}
+should_skip_query=${15:-"0"}
+should_do_multipass_query=${16:-"0"}
 
 ###############
 # Core script #

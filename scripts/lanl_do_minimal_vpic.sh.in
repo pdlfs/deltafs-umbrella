@@ -50,6 +50,8 @@ px_factor=1   ## see table above
 py_factor=4   ## see table above
 pz_factor=1   ## see table above
 ppn=16 ## aprun -N $ppn
+deck_path="trecon-part"
+deck_name="turbulence"
 ## DOIT
 @CMAKE_INSTALL_PREFIX@/scripts/run_vpic_test.sh \
 $test      \
@@ -61,6 +63,8 @@ $ppn \
 $num_vpic_dumps \
 $px_factor \
 $py_factor \
-$pz_factor
+$pz_factor \
+$deck_path \
+$deck_name
 
 exit 0
