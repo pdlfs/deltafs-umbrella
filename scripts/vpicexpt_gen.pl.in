@@ -9,24 +9,31 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @sc17a);
+my(%TOC, @minimal, @fanrun, @sc17a);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
-    [      2,     2,  2500,   1,   4,   1,   4,   10,    5, "1GiB"  ], # run 0
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize,             script
+    [      2,     2,  2500,   1,   4,   1,   4,   10,    5,  "1GiB", "run_vpic_test.sh"], # run 0
+    );
+
+# Fan run: for the run that Fan requested
+@fanrun = (
+    #          vpic   vpic                       max  base
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize,            script
+    [    512,     0,     0,2048,   1,1536,  32,   10,    5,  "1GiB", "run_vpic_fan.sh"], # run 0
     );
 
 # sc17a: for paper draft
 @sc17a = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
-    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB"],  # run 0
-    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 1
-    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 2
-    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 3
-    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 4
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,   dwsize,             script
+    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 0
+    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 1
+    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 2
+    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 3
+    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 4
 
     );
 
@@ -34,6 +41,7 @@ my(%TOC, @minimal, @sc17a);
 %TOC = (
     "minimal" => \@minimal,
     "sc17a"   => \@sc17a,
+    "fanrun"  => \@fanrun,
     );
 ##############################################################################
 ##############################################################################
@@ -307,7 +315,7 @@ foreach (@envs) {
     "output-dir"  => $ARGV[0]);
 
 # don't put these in VPICGENOPTS, since they are in EXPPARAMS because
-# they are CLI args to run_vpic_test.sh (don't need duplicate value)
+# they are CLI args to the vscript (don't need duplicate value)
 %opts_skipgen = ( "bbosbuddies" => 1, "ipsubnet" => 1, "skipreads" => 1);
 
 print "vpicexpt_gen settings:\n";
@@ -354,12 +362,12 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize\n"
+print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize  script\n"
     if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
     my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz,
-       $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
+       $ppn, $maxtime, $basextra, $dwsize, $vscript) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dw ne 'off' || $dryrun) {
@@ -367,9 +375,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             unless ($dwsize =~ /\d+.ib$/i);
     }
     if ($dryrun) {
-        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s\n", $r,
+        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s %s\n", $r,
         $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $ppn, $maxtime,
-        $basextra, $dwsize;
+        $basextra, $dwsize, $vscript;
         next;
     }
 
@@ -449,7 +457,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
 # experiment params
 #######################
 #
-# flags to run_vpic_test.sh
+# flags to $vscript
 #
 test=$t
 ipsubnet=$ipsubnet
@@ -491,7 +499,7 @@ get_jobdir      # this sets jobdir
 #
 # save vpicgenopts to a file.  vpicgenopts contains all command line flags
 # to vpicexpt_gen.pl except for the ones that are also command line flags to
-# run_vpic_test.sh (those end up in expparams instead).
+# $vscript (those end up in expparams instead).
 #
 cat<<ENDOPTS > \$jobdir/VPICGENOPTS
 jobdir=\$jobdir
@@ -500,7 +508,7 @@ ENDOPTS
 
 #
 # save experiment params to a file.  this includes all command line
-# flags for run_vpic_test.sh, plus additional values from the expt
+# flags for $vscript, plus additional values from the expt
 # table selected with --experiment
 #
 set | egrep '$EXPPARAMS_regex' > \$jobdir/EXPPARAMS
@@ -513,7 +521,7 @@ while [ \$it -lt $iterations ]
 do
     echo running iteration \$it
     # XXX: should reset logfile name here
-    $prefix/scripts/run_vpic_test.sh \$test "\$ipsubnet" \$nodes \\
+    $prefix/scripts/$vscript \$test "\$ipsubnet" \$nodes \\
         \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \\
         \$deck_path \$deck_name \$bbosbuddies \$skipreads
 

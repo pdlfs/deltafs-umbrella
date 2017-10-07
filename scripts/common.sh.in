@@ -599,6 +599,30 @@ build_deck() {
                    ${ddir}/${deck_path}/config.h || \
             die "config.h editing failed"
         ;;
+    "fan-per-process")
+        cat ${ddir}/${deck_path}/config.bkp | \
+            sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
+            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
+            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
+            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 2/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
+                   ${ddir}/${deck_path}/config.h || \
+            die "config.h editing failed"
+        ;;
+    "fan-per-particle")
+        cat ${ddir}/${deck_path}/config.bkp | \
+            sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
+            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
+            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
+            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 2/' | \
+            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
+            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
+            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
+                   ${ddir}/${deck_path}/config.h || \
+            die "config.h editing failed"
+        ;;
     *)
         die "build_deck: VPIC mode not supported"
         ;;
