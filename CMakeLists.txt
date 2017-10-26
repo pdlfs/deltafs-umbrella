@@ -70,7 +70,7 @@ umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.24")
 umbrella_opt_default (DELTAFS_TAG "v2017.10.1")
 umbrella_opt_default (MERCURY_RUNNER_TAG "773e6cc5")  # Sep 2017
 umbrella_opt_default (MERCURY_TAG "cc980f90")         # Oct 2017
-umbrella_opt_default (OFI_TAG "v1.5.0")
+umbrella_opt_default (OFI_TAG "v1.5.1")
 umbrella_opt_default (SSG_TAG "0164e690")
 umbrella_opt_default (VPIC_TAG "f49925f")             # Oct 2017
 
