@@ -50,4 +50,15 @@ ExternalProject_Add (libconfig ${LIBCONFIG_DOWNLOAD} ${LIBCONFIG_PATCHCMD}
                       ${LIBCONFIG_FPFLAGS}
     UPDATE_COMMAND "")
 
+#
+# add extra autogen prepare step
+#
+ExternalProject_Add_Step (libconfig prepare
+    COMMAND aclocal && autoheader && autoconf
+    COMMENT "preparing source for configure"
+    DEPENDEES update
+    DEPENDERS configure
+    WORKING_DIRECTORY <SOURCE_DIR>)
+
+
 endif (NOT TARGET libconfig)

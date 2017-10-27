@@ -61,9 +61,12 @@ list (REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 foreach (prefix ${CMAKE_PREFIX_PATH})
     list (APPEND CMAKE_INCLUDE_PATH "${prefix}/include")
     list (APPEND CMAKE_LIBRARY_PATH "${prefix}/lib")
+    set (UMBRELLA_PKGCFGPATH "${UMBRELLA_PKGCFGPATH}:${prefix}/lib/pkgconfig")
 endforeach ()
 list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
 list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
+# remove leading ":"
+string (SUBSTRING "${UMBRELLA_PKGCFGPATH}" 1 -1 UMBRELLA_PKGCFGPATH)
 
 #
 # build command-line variable settings for autotools configure scripts:
@@ -99,10 +102,7 @@ endif ()
 
 # some systems have PKG_CONFIG_PATH already set, so we need to add to it
 if (DEFINED ENV{PKG_CONFIG_PATH})
-  set (UMBRELLA_PKGCFGPATH
-    "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-else ()
-  set (UMBRELLA_PKGCFGPATH "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+  set (UMBRELLA_PKGCFGPATH "${UMBRELLA_PKGCFGPATH}:$ENV{PKG_CONFIG_PATH}")
 endif ()
 set (UMBRELLA_PKGCFGPATH "PKG_CONFIG_PATH=${UMBRELLA_PKGCFGPATH}")
 
@@ -111,6 +111,7 @@ set (UMBRELLA_PKGCFGPATH "PKG_CONFIG_PATH=${UMBRELLA_PKGCFGPATH}")
 # these values to propagate from the umbrella on down...
 #
 set (UMBRELLA_CMAKECACHE
+                -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
                 -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                 -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
                 -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
@@ -153,6 +154,7 @@ if (UMBRELLA_BUILD_TESTS)
 else ()
     message (STATUS "  skip running tests: <off, build disabled>")
 endif ()
+message (STATUS "  ${UMBRELLA_PKGCFGPATH}")
 
 
 #

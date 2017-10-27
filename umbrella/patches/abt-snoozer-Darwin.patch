@@ -1,0 +1,11 @@
+--- abt-snoozer/configure.orig	2017-10-11 09:25:53.000000000 -0400
++++ abt-snoozer/configure	2017-10-11 09:26:01.000000000 -0400
+@@ -16422,7 +16422,7 @@
+                 CPPFLAGS="$CPPFLAGS -I${with_libev}/include"
+                 # note: add rpath too because stock libev install uses
+                 # shared libs
+-                LDFLAGS="$LDFLAGS -Wl,-rpath=${with_libev}/lib -L${with_libev}/lib"
++                LDFLAGS="$LDFLAGS -L${with_libev}/lib"
+                 SNOOZER_PKGCONFIG_LIBS="${SNOOZER_PKGCONFIG_LIBS} -L${with_libev}/lib -lev -lm"
+ 
+ else
