@@ -63,13 +63,13 @@ include (umbrella-main)
 umbrella_opt_default (BMI_TAG "cb70e870")             # Dec 2016
 umbrella_opt_default (CCI_TAG "3ab663e0")
 umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
-umbrella_opt_default (DELTAFS_BB_TAG "f9040bd1")      # May 2017
-umbrella_opt_default (DELTAFS_COMMON_TAG "v17.6")
-umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.3")
-umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.24")
-umbrella_opt_default (DELTAFS_TAG "v2017.10.1")
-umbrella_opt_default (MERCURY_RUNNER_TAG "773e6cc5")  # Sep 2017
-umbrella_opt_default (MERCURY_TAG "cc980f90")         # Oct 2017
+umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
+umbrella_opt_default (DELTAFS_COMMON_TAG "v17.7")
+umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.4")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.26")
+umbrella_opt_default (DELTAFS_TAG "v2017.10.2")
+umbrella_opt_default (MERCURY_RUNNER_TAG "dda49a0a")  # Oct 2017
+umbrella_opt_default (MERCURY_TAG "1c98035c")         # Oct 2017
 umbrella_opt_default (OFI_TAG "v1.5.1")
 umbrella_opt_default (SSG_TAG "0164e690")
 umbrella_opt_default (VPIC_TAG "f49925f")             # Oct 2017
