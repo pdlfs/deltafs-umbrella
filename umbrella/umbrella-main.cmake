@@ -110,8 +110,12 @@ set (UMBRELLA_PKGCFGPATH "PKG_CONFIG_PATH=${UMBRELLA_PKGCFGPATH}")
 # provide ${UMBRELLA_CMAKECACHE} for cmake-based projects.  we want
 # these values to propagate from the umbrella on down...
 #
+# XXX: tried passing through CMAKE_SYSTEM_NAME here, but that causes
+# cmakes under us to think we are crosscompiling even if the passed
+# in system name matches the host (see Modules/CMakeDetermineSystem.cmake).
+#                -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+#
 set (UMBRELLA_CMAKECACHE
-                -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
                 -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                 -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
                 -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
