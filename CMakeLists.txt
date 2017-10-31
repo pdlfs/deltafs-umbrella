@@ -72,7 +72,7 @@ umbrella_opt_default (MERCURY_RUNNER_TAG "dda49a0a")  # Oct 2017
 umbrella_opt_default (MERCURY_TAG "afd70055")         # Oct 2017
 umbrella_opt_default (OFI_TAG "v1.5.1")
 umbrella_opt_default (SSG_TAG "0164e690")
-umbrella_opt_default (VPIC_TAG "f49925f")             # Oct 2017
+umbrella_opt_default (VPIC_TAG "5886321a")            # Oct 2017
 
 #
 # any additional cache variables we want to add that are not already
