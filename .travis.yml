@@ -19,8 +19,8 @@ addons:
       - libboost-dev
       - libibverbs-dev
       - librdmacm-dev
-      - libopenmpi-dev
-      - openmpi-bin
+      - libmpich-dev
+      - mpich
       - git
       - cmake-data
       - cmake
