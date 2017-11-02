@@ -212,6 +212,24 @@ message () { echo "$@" | tee -a $exp_logfile | tee -a $logfile; }
 die () { message "!!! ERROR !!! $@"; exit 1; }
 
 #
+# loadargs(): parse a bunch of key value pairs into "arg_*" variables
+#
+loadargs() {
+  for loadargs_arg; do
+    loadargs_key=`echo $loadargs_arg | sed -n 's/=.*//p'`
+    # make sure key is alphanumeric or _
+    loadargs_check=`echo $loadargs_key | sed -e 's/[A-Za-z0-9_]//g'`
+    loadargs_val=`echo $loadargs_arg | sed -n 's/^[A-Za-z0-9_]*=//p'`
+    if [ "$loadargs_check" != "" -o "$loadargs_key" = "" -o \
+         "$loadargs_val" = "" ] ; then
+      echo "loadargs: bad keyval arg: $loadargs_arg"
+      exit 1
+    fi
+    eval "arg_${loadargs_key}=\"${loadargs_val}\""
+  done
+}
+
+#
 # jobdir  ## Lustre
 #
 # get_jobdir: setup $jobdir var and makes sure $jobdir is present
@@ -563,7 +581,9 @@ build_deck() {
     ddir=${jobdir}/tmpdeck.$$     # tmp staging area for stacking the deck
     rm -rf ${ddir}
     cp -r ${dfsu_prefix}/decks ${ddir}
-    mv ${ddir}/${deck_path}/config.h ${ddir}/${deck_path}/config.bkp || \
+    deckpath=`dirname $deckid`
+    deckfile=`basename $deckid`
+    mv ${ddir}/${deckpath}/config.h ${ddir}/${deckpath}/config.bkp || \
         die "mv failed"
 
     message "--------------- [INPUT-DECK] --------------"
@@ -572,7 +592,7 @@ build_deck() {
 
     case $1 in
     "file-per-process")
-        cat ${ddir}/${deck_path}/config.bkp | \
+        cat ${ddir}/${deckpath}/config.bkp | \
             sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
@@ -582,11 +602,11 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/${deck_path}/config.h || \
+                   ${ddir}/${deckpath}/config.h || \
             die "config.h editing failed"
         ;;
     "file-per-particle")
-        cat ${ddir}/${deck_path}/config.bkp | \
+        cat ${ddir}/${deckpath}/config.bkp | \
             sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
             sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
@@ -596,11 +616,11 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/${deck_path}/config.h || \
+                   ${ddir}/${deckpath}/config.h || \
             die "config.h editing failed"
         ;;
     "fan-per-process")
-        cat ${ddir}/${deck_path}/config.bkp | \
+        cat ${ddir}/${deckpath}/config.bkp | \
             sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
@@ -608,11 +628,11 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
-                   ${ddir}/${deck_path}/config.h || \
+                   ${ddir}/${deckpath}/config.h || \
             die "config.h editing failed"
         ;;
     "fan-per-particle")
-        cat ${ddir}/${deck_path}/config.bkp | \
+        cat ${ddir}/${deckpath}/config.bkp | \
             sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
             sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
             sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
@@ -620,7 +640,7 @@ build_deck() {
             sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
             sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
             sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
-                   ${ddir}/${deck_path}/config.h || \
+                   ${ddir}/${deckpath}/config.h || \
             die "config.h editing failed"
         ;;
     *)
@@ -629,11 +649,12 @@ build_deck() {
     esac
 
     # Compile input deck
-    (cd ${ddir}/${deck_path} && ${dfsu_prefix}/bin/vpic-build.op ./${deck_name}.cxx \
-       2>&1 | tee -a $exp_logfile | tee -a $logfile) || \
+    (cd ${ddir}/${deckpath} && \
+       ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.cxx 2>&1 | \
+       tee -a $exp_logfile | tee -a $logfile) || \
            die "compilation failed"
 
-    mv ${ddir}/${deck_path}/${deck_name}.op ${jobdir}/current-deck.op || \
+    mv ${ddir}/${deckpath}/${deckfile}.op ${jobdir}/current-deck.op || \
         die "install new current deck failed"
 
     message ""

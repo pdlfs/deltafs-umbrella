@@ -33,26 +33,25 @@
 ### instant death on misc errors ###
 set -euo pipefail
 
-######################
-# Tunable parameters #
-######################
+#########################################
+# default values for tunable parameters #
+#########################################
 
-test_type=${1:-"baseline"}  ## or deltafs, shuffle_test, ...
-ip_subnet=${2:-"10.92"}
-nodes=${3:-"1"}
-cores_per_node=${4:-"4"}
-init_procs_per_node=${5:-"4"}
-procs_per_node_increase_step=${6:-"4"}
-num_vpic_dumps=${7:-"2"}
-num_vpic_steps=${8:-"200"}
-px_factor=${9:-"1"}
-py_factor=${10:-"4"}
-pz_factor=${11:-"1"}
-deck_path=${12:-"trecon-part"}
-deck_name=${13:-"turbulence"}
-bbos_buddies=${14:-"0"}
-should_skip_query=${15:-"0"}
-should_do_multipass_query=${16:-"0"}
+arg_test_type="baseline"  ## or deltafs, shuffle_test, ...
+arg_ip_subnet="10.92"
+arg_nodes="1"
+arg_cores_per_node="4"
+arg_init_procs_per_node="4"
+arg_procs_per_node_increase_step="4"
+arg_num_vpic_dumps="2"
+arg_num_vpic_steps="200"
+arg_px_factor="1"
+arg_py_factor="4"
+arg_pz_factor="1"
+arg_deckid="trecon-part/turbulence"
+arg_bbos_buddies="0"
+arg_should_skip_query="0"
+arg_should_do_multipass_query="0"
 
 ###############
 # Core script #
@@ -60,10 +59,16 @@ should_do_multipass_query=${16:-"0"}
 
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
-### override default number of vpic timsteps ###
-vpic_steps=$num_vpic_steps
-### override default number of dumps ###
-vpic_epochs=$num_vpic_dumps
+# load command line args into $arg_* vars (overwrites default values)
+loadargs "$@"
+
+# XXX: jam args back into global variables shared with common.sh
+ip_subnet="$arg_ip_subnet"
+nodes="$arg_nodes"
+vpic_epochs="$arg_num_vpic_dumps"
+vpic_steps="$arg_num_vpic_steps"
+deckid="$arg_deckid"
+bbos_buddies="$arg_bbos_buddies"
 
 message "Script begin..."
 # keep track of start time so we can see how long this takes
@@ -77,25 +82,25 @@ get_bbdir
 gen_hosts
 
 ### set read path ###
-last=$should_do_multipass_query
-if [ $should_skip_query -ne 0 ]
+last=$arg_should_do_multipass_query
+if [ $arg_should_skip_query -ne 0 ]
 then
 do_querying=0
 else
 do_querying=1
 fi
 
-procs_per_node=$init_procs_per_node
-while [ $procs_per_node -le $cores_per_node ]
+procs_per_node=$arg_init_procs_per_node
+while [ $procs_per_node -le $arg_cores_per_node ]
 do
     cores=$((procs_per_node * nodes))
-    py=$((cores * py_factor))
-    px=$((10**px_factor))
-    pz=$((10**pz_factor))
+    py=$((cores * arg_py_factor))
+    px=$((10**arg_px_factor))
+    pz=$((10**arg_pz_factor))
     parts=$((px * py * pz * 100))
 
     ### determine vpic input deck ###
-    case $test_type in
+    case $arg_test_type in
     "baseline")
         deck="file-per-process"
         ;;
@@ -107,7 +112,7 @@ do
     esac
 
     ### other options ###
-    case $test_type in
+    case $arg_test_type in
     "shuffle_test")
         export BYPASS_WRITE=1
         ;;
@@ -121,12 +126,12 @@ do
     message ""
     message ""
 
-    do_run $test_type $parts $procs_per_node
+    do_run $arg_test_type $parts $procs_per_node
 
     if [ $procs_per_node -eq 1 ]; then
-        procs_per_node=$procs_per_node_increase_step
+        procs_per_node=$arg_procs_per_node_increase_step
     else
-        procs_per_node=$(( procs_per_node + procs_per_node_increase_step ))
+        procs_per_node=$(( procs_per_node + arg_procs_per_node_increase_step ))
     fi
 done
 

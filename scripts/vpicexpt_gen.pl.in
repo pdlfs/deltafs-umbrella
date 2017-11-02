@@ -14,26 +14,26 @@ my(%TOC, @minimal, @fanrun, @sc17a);
 # minimal: for quick tests of script infrastructure
 @minimal = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize,             script
-    [      2,     2,  2500,   1,   4,   1,   4,   10,    5,  "1GiB", "run_vpic_test.sh"], # run 0
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
+    [      2,     2,  2500,   1,   4,   1,   4,   10,    5,  "1GiB"], # run 0
     );
 
 # Fan run: for the run that Fan requested
 @fanrun = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize,            script
-    [    512,     0,     0,2048,   1,1536,  32,   10,    5,  "1GiB", "run_vpic_fan.sh"], # run 0
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
+    [    512,     0,     0,2048,   1,1536,  32,   10,    5,  "1GiB"], # run 0
     );
 
 # sc17a: for paper draft
 @sc17a = (
     #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,   dwsize,             script
-    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 0
-    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 1
-    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 2
-    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 3
-    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB", "run_vpic_test.sh"],  # run 4
+    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,   dwsize
+    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB"],  # run 0
+    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 1
+    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 2
+    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 3
+    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 4
 
     );
 
@@ -139,23 +139,23 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $deck_path, 
-   $deck_name, $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet,
-   $iterations, $overcommit, $partition, $platform, $prefix, $run, $scaletime,
-   $skipreads, $tag, $tests);
+my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $deckid,
+   $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations,
+   $overcommit, $partition, $platform, $prefix, $run, $scaletime,
+   $script, $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
 $bbosbuddies = 0;
-$deck_path = 'trecon-part';
-$deck_name = 'turbulence';
+$deckid = 'trecon-part/turbulence';
 $dw = 'off';
 $ipsubnet = guess_subnet();
 $iterations = 1;
 $prefix = '@CMAKE_INSTALL_PREFIX@';
 $platform = $defplatform = guess_platform();   # save guess in defplatform
 $scaletime = 1.0;
-$skipreads=0;
+$script = "run_vpic_test.sh";
+$skipreads = 0;
 $tag = "vpic";
 $tests = "baseline,deltafs";
 
@@ -167,8 +167,7 @@ $rv = GetOptions(
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
     "core-spec=i"    =>  \$core_spec,
-    "deck-path=s"    =>  \$deck_path,
-    "deck-name=s"    =>  \$deck_name,
+    "deckid=s"      =>  \$deckid,
     "dryrun"         =>  \$dryrun,
     "dw=s"           =>  \$dw,
     "env=s"          =>  \@envs,
@@ -183,6 +182,7 @@ $rv = GetOptions(
     "prefix=s"       =>  \$prefix,
     "run=s"          =>  \$run,
     "scaletime=f"    =>  \$scaletime,
+    "script=s"       =>  \$script,
     "skipreads"      =>  \$skipreads,
     "tag=s"          =>  \$tag,
     "tests=s"        =>  \$tests
@@ -198,8 +198,7 @@ sub usage {
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--core-spec I     specialized core cnt (srun only)\n";
-    print STDERR "\t--deck-path S     name of VPIC input deck dir (under decks/)\n";
-    print STDERR "\t--deck-name S     name of VPIC input deck file (under deck-path/)\n";
+    print STDERR "\t--deckid S        vpic deck id (in decks directory)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
     print STDERR "\t--env E=val       setenv 'E' to 'val' in script\n";
@@ -209,6 +208,7 @@ sub usage {
     print STDERR "\t--partition S     slurm partition (srun only)\n";
     print STDERR "\t--run S           limit which run to generate\n";
     print STDERR "\t--scaletime F     run time limit scaling\n";
+    print STDERR "\t--script S        vpic run script (run_vpic_test.sh)\n";
     print STDERR "\t--skipreads       skip read phase\n";
     print STDERR "\t--tag S           string to tag exp logfile names with\n";
     print STDERR "\t--tests S         baseline, deltafs, ...\n";
@@ -260,6 +260,8 @@ usage("--partition only on srun platform")
     if ($platform ne 'srun' && defined($partition));
 usage("dw must be 'off', 'bw'  or  'int'")
     if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
+usage("bad deck id, must be in format deckdir/namename")
+    unless ($deckid =~ /([^\/]*)\/([^\/]*)/ && $1 ne '' && $2 ne '');
 usage("need a valid --experiment value") unless (defined($exp));
 usage("bad number of interations") if ($iterations < 1);
 @rns = split(",", $run);
@@ -293,8 +295,7 @@ foreach (@envs) {
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
     "core-spec"   => $core_spec,
-    "deck-path"   => $deck_path,
-    "deck-name"   => $deck_name,
+    "deckid"      => $deckid,
     "dw"          => $dw,
     "env"         => join(" ", @ekeys),
     "experiment"  => $experiment,
@@ -303,6 +304,7 @@ foreach (@envs) {
     "partition"   => $partition,
     "run"         => $run,
     "scaletime"   => $scaletime,
+    "script"      => $script,
     "skipreads"   => $skipreads,
     "tag"         => $tag,
     "tests"       => $tests,
@@ -315,8 +317,9 @@ foreach (@envs) {
     "output-dir"  => $ARGV[0]);
 
 # don't put these in VPICGENOPTS, since they are in EXPPARAMS because
-# they are CLI args to the vscript (don't need duplicate value)
-%opts_skipgen = ( "bbosbuddies" => 1, "ipsubnet" => 1, "skipreads" => 1);
+# they are CLI args to the script (don't need duplicate value)
+%opts_skipgen = ( "bbosbuddies" => 1, "deckid" => 1,
+                  "ipsubnet" => 1, "skipreads" => 1);
 
 print "vpicexpt_gen settings:\n";
 for ($_ = 0 ; $_ <= $#opts ; $_ += 2) {
@@ -349,7 +352,7 @@ if ($addrunopts ne '') {
 # regular expression to use to build EXPPARAMS
 #
 $EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
-                   '^vpicsteps=|^px=|^py=|^pz=|^deck_path=|^deck_name=|' .
+                   '^vpicsteps=|^px=|^py=|^pz=|^deckid=|' .
                    '^bbosbuddies=|^skipreads=|^maxtime=|^basextra=|^dwsize=';
 
 #
@@ -362,12 +365,12 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize  script\n"
+print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize\n"
     if ($dryrun);
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
     my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz,
-       $ppn, $maxtime, $basextra, $dwsize, $vscript) = @{$$exp[$r]};
+       $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dw ne 'off' || $dryrun) {
@@ -375,13 +378,13 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             unless ($dwsize =~ /\d+.ib$/i);
     }
     if ($dryrun) {
-        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s %s\n", $r,
+        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s\n", $r,
         $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $ppn, $maxtime,
-        $basextra, $dwsize, $vscript;
+        $basextra, $dwsize;
         next;
     }
 
-    my($dwl, $t, $fn, @out, $rtime, $script);
+    my($dwl, $t, $fn, @out, $rtime, $batchfile);
     if ($dw ne 'off') {
         $dwl = "#DW jobdw access_mode=striped capacity=$dwsize type=scratch";
         $dwl = "$dwl optimization_strategy=interference" if ($dw eq 'int');
@@ -451,13 +454,13 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             push(@out, "echo ''");
             push(@out, "");
         }
-        $script =<<"EOS";
+        $batchfile =<<"EOS";
 
 #######################
 # experiment params
 #######################
 #
-# flags to $vscript
+# flags to $script
 #
 test=$t
 ipsubnet=$ipsubnet
@@ -468,8 +471,7 @@ vpicsteps=$vpicsteps
 px=$px
 py=$py
 pz=$pz
-deck_path=$deck_path
-deck_name=$deck_name
+deckid=$deckid
 bbosbuddies=$bbosbuddies
 skipreads=$skipreads
 #
@@ -499,7 +501,7 @@ get_jobdir      # this sets jobdir
 #
 # save vpicgenopts to a file.  vpicgenopts contains all command line flags
 # to vpicexpt_gen.pl except for the ones that are also command line flags to
-# $vscript (those end up in expparams instead).
+# $script (those end up in expparams instead).
 #
 cat<<ENDOPTS > \$jobdir/VPICGENOPTS
 jobdir=\$jobdir
@@ -508,7 +510,7 @@ ENDOPTS
 
 #
 # save experiment params to a file.  this includes all command line
-# flags for $vscript, plus additional values from the expt
+# flags for the script, plus additional values from the expt
 # table selected with --experiment
 #
 set | egrep '$EXPPARAMS_regex' > \$jobdir/EXPPARAMS
@@ -521,9 +523,13 @@ while [ \$it -lt $iterations ]
 do
     echo running iteration \$it
     # XXX: should reset logfile name here
-    $prefix/scripts/$vscript \$test "\$ipsubnet" \$nodes \\
-        \$ppn \$ppn \$ppn \$vpicdumps \$vpicsteps \$px \$py \$pz \\
-        \$deck_path \$deck_name \$bbosbuddies \$skipreads
+    $prefix/scripts/$script test_type=\$test \\
+        ip_subnet="\$ipsubnet" \\
+        nodes=\$nodes cores_per_node=\$ppn init_procs_per_node=\$ppn \\
+        procs_per_node_increase_step=\$ppn num_vpic_dumps=\$vpicdumps \\
+        num_vpic_steps=\$vpicsteps px_factor=\$px py_factor=\$py \\
+        pz_factor=\$pz deckid=\$deckid bbos_buddies=\$bbosbuddies \\
+        should_skip_query=\$skipreads
 
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
@@ -535,7 +541,7 @@ done
 EOS
 
         die "savefile failed!"
-            unless (savefile($fn, join("\n", @out), $script,
+            unless (savefile($fn, join("\n", @out), $batchfile,
                              "\n", "exit 0\n"));
         print "generated $fn\n";
     }

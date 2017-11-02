@@ -47,8 +47,7 @@ set -euo pipefail
 # nodes.
 
 # VPIC input deck
-deck_path="trecon-part"
-deck_name="turbulence"
+deckid="trecon-part/turbulence"
 
 # Node topology
 cores_per_node=4
