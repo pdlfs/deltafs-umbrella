@@ -482,9 +482,6 @@ basextra=$basextra
 dwsize=$dwsize
 #######################
 
-# note: ppn currently sets core_per_node, init_procs_per_node, and
-# procs_per_node_increase_step
-
 #
 # workaround a bash bug where "I-0" matches "[a-z]*" when LANG is set
 # (only impacts some versions of bash)
@@ -524,9 +521,8 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/$script test_type=\$test \\
-        ip_subnet="\$ipsubnet" \\
-        nodes=\$nodes cores_per_node=\$ppn init_procs_per_node=\$ppn \\
-        procs_per_node_increase_step=\$ppn num_vpic_dumps=\$vpicdumps \\
+        ip_subnet="\$ipsubnet" nodes=\$nodes \\
+        procs_per_node=\$ppn num_vpic_dumps=\$vpicdumps \\
         num_vpic_steps=\$vpicsteps px_factor=\$px py_factor=\$py \\
         pz_factor=\$pz deckid=\$deckid bbos_buddies=\$bbosbuddies \\
         should_skip_query=\$skipreads

@@ -40,9 +40,7 @@ set -euo pipefail
 arg_test_type="baseline"  ## or deltafs, shuffle_test, ...
 arg_ip_subnet="10.92"
 arg_nodes="1"
-arg_cores_per_node="4"
-arg_init_procs_per_node="4"
-arg_procs_per_node_increase_step="4"
+arg_procs_per_node="4"
 arg_num_vpic_dumps="2"
 arg_num_vpic_steps="200"
 arg_px_factor="1"
@@ -90,50 +88,40 @@ else
 do_querying=1
 fi
 
-procs_per_node=$arg_init_procs_per_node
-while [ $procs_per_node -le $arg_cores_per_node ]
-do
-    cores=$((procs_per_node * nodes))
-    py=$((cores * arg_py_factor))
-    px=$((10**arg_px_factor))
-    pz=$((10**arg_pz_factor))
-    parts=$((px * py * pz * 100))
+cores=$((arg_procs_per_node * nodes))
+py=$((cores * arg_py_factor))
+px=$((10**arg_px_factor))
+pz=$((10**arg_pz_factor))
+parts=$((px * py * pz * 100))
 
-    ### determine vpic input deck ###
-    case $arg_test_type in
-    "baseline")
-        deck="file-per-process"
-        ;;
+### determine vpic input deck ###
+case $arg_test_type in
+"baseline")
+    deck="file-per-process"
+    ;;
 
-    *)
-        deck="file-per-particle"
-        ;;
+*)
+    deck="file-per-particle"
+    ;;
 
-    esac
+esac
 
-    ### other options ###
-    case $arg_test_type in
-    "shuffle_test")
-        export BYPASS_WRITE=1
-        ;;
+### other options ###
+case $arg_test_type in
+"shuffle_test")
+    export BYPASS_WRITE=1
+    ;;
 
-    esac
+esac
 
-    if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
-        do_querying=0
-    fi
-    build_deck $deck $px $py $pz
-    message ""
-    message ""
+if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
+    do_querying=0
+fi
+build_deck $deck $px $py $pz
+message ""
+message ""
 
-    do_run $arg_test_type $parts $procs_per_node
-
-    if [ $procs_per_node -eq 1 ]; then
-        procs_per_node=$arg_procs_per_node_increase_step
-    else
-        procs_per_node=$(( procs_per_node + arg_procs_per_node_increase_step ))
-    fi
-done
+do_run $arg_test_type $parts $arg_procs_per_node
 
 # overall time
 timeout=`date`
