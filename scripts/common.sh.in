@@ -564,90 +564,63 @@ do_mpirun() {
 # the result is placed in $jobdir/current-deck.op (XXX: assume you are only
 # going to have one compiled deck at a time).
 #
-# uses: $dfsu_prefix, $jobdir, $cores
+# uses: $jobdir, $dfsu_prefix
 # creates: $jobdir/current-deck.op
 #
-# Arguments:
-# @1 in {"file-per-process", "file-per-particle"}
-# @2 particles on x dimension
-# @3 particles on y dimension
-# @4 particles on z dimension
-#
 build_deck() {
-    px=$2
-    py=$3
-    pz=$4
+    bd_type=${1}    # in {"file-per-process", "file-per-particle"}
+    bd_id=${2}      # deckid
+    bd_px=${3}      # particles on x dimension
+    bd_py=${4}      # particles on y dimension
+    bd_pz=${5}      # particles on z dimension
+    bd_tx=${6}      # topology on x dimension
+    bd_ty=${7}      # topology on y dimension
+    bd_tz=${8}      # topology on z dimension
+    bd_dmps=${9}    # number of vpic dumps
+    bd_steps=${10}  # number of vpic steps
 
-    ddir=${jobdir}/tmpdeck.$$     # tmp staging area for stacking the deck
+    ddir=${jobdir}/tmpdeck.$$            # staging area for stacking the deck
     rm -rf ${ddir}
-    cp -r ${dfsu_prefix}/decks ${ddir}
-    deckpath=`dirname $deckid`
-    deckfile=`basename $deckid`
+    cp -r ${dfsu_prefix}/decks ${ddir}   # copy in deck templates
+    deckpath=`dirname $bd_id`
+    deckfile=`basename $bd_id`
+
+    # must generate a new config.h
     mv ${ddir}/${deckpath}/config.h ${ddir}/${deckpath}/config.bkp || \
         die "mv failed"
-
     message "--------------- [INPUT-DECK] --------------"
-    message "!!! NOTICE !!! building vpic deck >> $1 >> cores = ${cores}, px = ${px}, py = ${py}, pz = ${pz}"
+
+    message "!!! NOTICE !!! building vpic deck $bd_type $bd_id"
+    message "!!! NOTICE !!! p=$bd_px $bd_py $bd_pz, t=$bd_tx $bd_ty $bd_tz"
+    message "!!! NOTICE !!! dumps=$bd_dmps, steps=$bd_steps"
     message ""
 
-    case $1 in
+    case $bd_type in
     "file-per-process")
-        cat ${ddir}/${deckpath}/config.bkp | \
-            sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
-            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
-            sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
-            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 1/' | \
-            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y '$cores'/' | \
-            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/${deckpath}/config.h || \
-            die "config.h editing failed"
-        ;;
+        bd_fpp=0
+    ;;
     "file-per-particle")
-        cat ${ddir}/${deckpath}/config.bkp | \
-            sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$vpic_steps'/' | \
-            sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$vpic_epochs'/' | \
-            sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
-            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 1/' | \
-            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y '$cores'/' | \
-            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 1/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$px'/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$py'/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$pz'/' >  \
-                   ${ddir}/${deckpath}/config.h || \
-            die "config.h editing failed"
-        ;;
-    "fan-per-process")
-        cat ${ddir}/${deckpath}/config.bkp | \
-            sed 's/^#define VPIC_FILE_PER_PARTICLE/\/\/#define VPIC_FILE_PER_PARTICLE/' | \
-            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
-            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
-            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 2/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
-                   ${ddir}/${deckpath}/config.h || \
-            die "config.h editing failed"
-        ;;
-    "fan-per-particle")
-        cat ${ddir}/${deckpath}/config.bkp | \
-            sed 's/^\/\/#define VPIC_FILE_PER_PARTICLE/#define VPIC_FILE_PER_PARTICLE/' | \
-            sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X 256/' | \
-            sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y 1/' | \
-            sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z 2/' | \
-            sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X 2048/' | \
-            sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y 1/' | \
-            sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z 1536/' >  \
-                   ${ddir}/${deckpath}/config.h || \
-            die "config.h editing failed"
-        ;;
+        bd_fpp=1
+    ;;
     *)
         die "build_deck: VPIC mode not supported"
-        ;;
+    ;;
     esac
 
+    cat ${ddir}/${deckpath}/config.bkp | \
+      sed 's/VPIC_FILE_PER_PARTICLE.*/VPIC_FILE_PER_PARTICLE '$bd_fpp'/' |  \
+      sed 's/#define VPIC_DUMPS.*/#define VPIC_DUMPS '$bd_dmps'/' | \
+      sed 's/#define VPIC_TIMESTEPS.*/#define VPIC_TIMESTEPS '$bd_steps'/' | \
+      sed 's/VPIC_TOPOLOGY_X.*/VPIC_TOPOLOGY_X '$bd_tx'/' | \
+      sed 's/VPIC_TOPOLOGY_Y.*/VPIC_TOPOLOGY_Y '$bd_ty'/' | \
+      sed 's/VPIC_TOPOLOGY_Z.*/VPIC_TOPOLOGY_Z '$bd_tz'/' | \
+      sed 's/VPIC_PARTICLE_X.*/VPIC_PARTICLE_X '$bd_px'/' | \
+      sed 's/VPIC_PARTICLE_Y.*/VPIC_PARTICLE_Y '$bd_py'/' | \
+      sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$bd_pz'/' > \
+         ${ddir}/${deckpath}/config.h || die "config.h editing failed"
+
+cat ${ddir}/${deckpath}/config.h
+      
     # Compile input deck
     (cd ${ddir}/${deckpath} && \
        ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.cxx 2>&1 | \

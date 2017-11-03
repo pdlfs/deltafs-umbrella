@@ -13,36 +13,63 @@ my(%TOC, @minimal, @fanrun, @sc17a);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
-    #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
-    [      2,     2,  2500,   1,   4,   1,   4,   10,    5,  "1GiB"], # run 0
-    );
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+[     2,     2,  2500,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
+);
 
 # Fan run: for the run that Fan requested
 @fanrun = (
-    #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,  dwsize
-    [    512,     0,     0,2048,   1,1536,  32,   10,    5,  "1GiB"], # run 0
-    );
+#         vpic   vpic                       max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+[    512,     0,    0,2048,   1,1536, 256,   1,   2,  32,   10,    5, "1GiB"],
+);
 
 # sc17a: for paper draft
 @sc17a = (
-    #          vpic   vpic                       max  base
-    #  nodes, dumps, steps,  px,  py,  pz, ppn, time, xtra,   dwsize
-    [      1,     2,  2500,   1,   4,   1,  32,   10,    0,  "25GiB"],  # run 0
-    [      1,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 1
-    [      4,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 2
-    [     16,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 3
-    [     64,     8,  2500,   2,  20,   2,  32,   10,    0,  "25GiB"],  # run 4
-
-    );
+#         vpic   vpic                       max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+[     1,     2,  2500,   1,   4,   1,   1,   0,   1,  32,   10,    0, "25GiB"],
+[     1,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
+[     4,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
+[    16,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
+[    64,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
+);
 
 # table of contents (experiments available)
 %TOC = (
-    "minimal" => \@minimal,
-    "sc17a"   => \@sc17a,
-    "fanrun"  => \@fanrun,
+    "minimal" => [ \@minimal, \&stdpost ],
+    "sc17a"   => [ \@sc17a,   \&stdpost ],
+    "fanrun"  => [ \@fanrun ],
     );
+
+#
+# define any post-processing functions here, this allows us to specify
+# scaled values in the arrays above if we wish.  in that case, we use
+# a post-processing function to expand the p{x,y,z}, t{x,y,z} values
+# to their true values.   should return (px,py,pz,tx,ty,tz) array.
+#
+
+#
+# stdpost(): standard post processor.  converts factor values in a row
+# of the array to their real values...
+#
+sub stdpost {
+    my($rowref) = @_;
+    die "stdpost: bad arg" unless (ref($rowref) eq 'ARRAY');
+    my($ncores);
+    my($nodes, $dumps, $steps,
+       $px, $py, $pz, $tx, $ty, $tz, $ppn) = @$rowref;
+
+    $ncores = $nodes * $ppn;
+    $ty = $ncores;     # override the zero from the array
+    $px = 10**$px;
+    $py = $ncores * $py;
+    $pz = 10**$pz;
+
+    return($px,$py,$pz,$tx,$ty,$tz);
+}
+
 ##############################################################################
 ##############################################################################
 ##############################################################################
@@ -247,9 +274,9 @@ if ($platform ne $defplatform && !defined($extraopts)) {
 #
 # sanity checking
 #
-my($exp, @rns, %wantrun, @ekeys, @opts, %opts_skipgen, @fmtbuf);
-my($vpicgen_fmtopts, $fullextra, $EXPPARAMS_regex);
-$exp = $TOC{$experiment};
+my($exprow, $exp, $postfun, @rns, %wantrun, @ekeys, @opts, %opts_skipgen);
+my(@fmtbuf, $vpicgen_fmtopts, $fullextra, $EXPPARAMS_regex);
+$exprow = $TOC{$experiment};
 
 usage() if ($rv != 1);
 usage("missing output dir") if ($#ARGV != 0);
@@ -262,8 +289,11 @@ usage("dw must be 'off', 'bw'  or  'int'")
     if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
 usage("bad deck id, must be in format deckdir/namename")
     unless ($deckid =~ /([^\/]*)\/([^\/]*)/ && $1 ne '' && $2 ne '');
-usage("need a valid --experiment value") unless (defined($exp));
+usage("need a valid --experiment value") unless (defined($exprow));
+usage("invalid experiment array?!?") if (ref($exprow) ne 'ARRAY');
 usage("bad number of interations") if ($iterations < 1);
+
+($exp, $postfun) = @$exprow;
 @rns = split(",", $run);
 foreach (@rns) {
     usage("bad run value: $_") if (/\D/ || $_ < 0);
@@ -352,7 +382,7 @@ if ($addrunopts ne '') {
 # regular expression to use to build EXPPARAMS
 #
 $EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
-                   '^vpicsteps=|^px=|^py=|^pz=|^deckid=|' .
+                   '^vpicsteps=|^px=|^py=|^pz=|^tx=|^ty=|^tz=|^deckid=|' .
                    '^bbosbuddies=|^skipreads=|^maxtime=|^basextra=|^dwsize=';
 
 #
@@ -365,12 +395,26 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-print "#run  nodes  dumps  steps px  py  pz   ppn  maxtime  basextra  dwsize\n"
-    if ($dryrun);
+#         vpic   vpic                       max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+if ($dryrun) {
+    print "r# nodes dumps steps    px    py    pz " .
+          "   tx    ty    tz ppn time xtra dwsize\n";
+}
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
-    my($nodes, $vpicdumps, $vpicsteps, $px, $py, $pz,
+    my($nodes, $vpicdumps, $vpicsteps, $fpx, $fpy, $fpz, $ftx, $fty, $ftz,
        $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
+    my($px, $py, $pz, $tx, $ty, $tz);
+
+    # allow user function to post process a row...
+    if (ref($postfun) eq 'CODE') {
+        ($px, $py, $pz, $tx, $ty, $tz) = &$postfun($$exp[$r]);
+    } else {
+        # no function, pass the values directly thru!!
+        ($px, $py, $pz, $tx, $ty, $tz) = ($fpx, $fpy, $fpz, $ftx, $fty, $ftz);
+    }
+
     # $nodes is just the vpic app, need to allocate for bbos too
     my($totalnodes) = $nodes + $bbosbuddies;
     if ($dw ne 'off' || $dryrun) {
@@ -378,9 +422,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             unless ($dwsize =~ /\d+.ib$/i);
     }
     if ($dryrun) {
-        printf "%-5d %-6d %-6d %-5d %-3d %-3d %-4d %-4d %-8d %-9d %s\n", $r,
-        $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $ppn, $maxtime,
-        $basextra, $dwsize;
+        printf "%2d %5d %5d %5d %5d %5d %5d %5d %5d %5d %3d %4d %4d %s\n",
+        $r, $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $tx, $ty, $tz,
+        $ppn, $maxtime, $basextra, $dwsize;
         next;
     }
 
@@ -471,6 +515,9 @@ vpicsteps=$vpicsteps
 px=$px
 py=$py
 pz=$pz
+tx=$tx
+ty=$ty
+tz=$tz
 deckid=$deckid
 bbosbuddies=$bbosbuddies
 skipreads=$skipreads
@@ -523,8 +570,9 @@ do
     $prefix/scripts/$script test_type=\$test \\
         ip_subnet="\$ipsubnet" nodes=\$nodes \\
         procs_per_node=\$ppn num_vpic_dumps=\$vpicdumps \\
-        num_vpic_steps=\$vpicsteps px_factor=\$px py_factor=\$py \\
-        pz_factor=\$pz deckid=\$deckid bbos_buddies=\$bbosbuddies \\
+        num_vpic_steps=\$vpicsteps px=\$px py=\$py pz=\$pz \\
+        tx=\$tx ty=\$ty tz=\$tz deckid=\$deckid \\
+        bbos_buddies=\$bbosbuddies \\
         should_skip_query=\$skipreads
 
     echo saving iteration in \$jobdir/I-\$it

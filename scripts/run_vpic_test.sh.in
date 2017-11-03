@@ -43,9 +43,12 @@ arg_nodes="1"
 arg_procs_per_node="4"
 arg_num_vpic_dumps="2"
 arg_num_vpic_steps="200"
-arg_px_factor="1"
-arg_py_factor="4"
-arg_pz_factor="1"
+arg_px="10"
+arg_py="32"
+arg_pz="10"
+arg_tx="1"
+arg_ty="8"
+arg_tz="1"
 arg_deckid="trecon-part/turbulence"
 arg_bbos_buddies="0"
 arg_should_skip_query="0"
@@ -89,10 +92,7 @@ do_querying=1
 fi
 
 cores=$((arg_procs_per_node * nodes))
-py=$((cores * arg_py_factor))
-px=$((10**arg_px_factor))
-pz=$((10**arg_pz_factor))
-parts=$((px * py * pz * 100))
+parts=$((arg_px * arg_py * arg_pz * 100))
 
 ### determine vpic input deck ###
 case $arg_test_type in
@@ -117,7 +117,8 @@ esac
 if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
     do_querying=0
 fi
-build_deck $deck $px $py $pz
+build_deck $deck $arg_deckid $arg_px $arg_py $arg_pz \
+        $arg_tx $arg_ty $arg_tz $arg_num_vpic_dumps $arg_num_vpic_steps
 message ""
 message ""
 
