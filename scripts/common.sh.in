@@ -744,7 +744,7 @@ do_run() {
         message "-INFO- done"
 
         ### STAGE DATA OUT ###
-        if [ x$jobdir != x$bbdir ]; then
+        if [ $do_querying -ne 0 -a x$jobdir != x$bbdir ]; then
             message "-INFO- staging data out... "
             mkdir -p $exp_jobdir/bb || die "mkdir $exp_jobdir/bb failed"
             message ""
@@ -768,6 +768,10 @@ do_run() {
         ### READ PATH ###
         if [ $do_querying -ne 0 ]; then
             query_particles $runtype $vpic_dir $pp
+        else
+            message ""
+            message "!!! WARNING !!! write only - skipping read phase..."
+            message ""
         fi
         ;;
 
@@ -852,7 +856,7 @@ do_run() {
         message "-INFO- done"
 
         ### STAGE DATA OUT ###
-        if [ x$jobdir != x$bbdir ]; then
+        if [ $do_querying -ne 0 -a x$jobdir != x$bbdir ]; then
             message "-INFO- staging data out... "
             mkdir -p $exp_jobdir/bb || die "mkdir $exp_jobdir/bb failed"
             message ""
@@ -875,12 +879,12 @@ do_run() {
         fi
 
         ### READ PATH ###
-        if [ $do_querying -eq 0 ]; then
+        if [ $do_querying -ne 0 ]; then
+            query_particles $runtype $exp_dir $pp
+        else
             message ""
             message "!!! WARNING !!! write only - skipping read phase..."
             message ""
-        else
-            query_particles $runtype $exp_dir $pp
         fi
         ;;
 
