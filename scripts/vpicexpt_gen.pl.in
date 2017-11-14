@@ -25,21 +25,46 @@ my(%TOC, @minimal, @fanrun, @sc17a);
 [    512,     0,    0,2048,   1,1536, 256,   1,   2,  32,   10,    5, "1GiB"],
 );
 
-# sc17a: for paper draft
+# sc17a: for the early exps performed for sc17, deprecated!
 @sc17a = (
-#         vpic   vpic                       max  base
-# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
-[     1,     2,  2500,   1,   4,   1,   1,   0,   1,  32,   10,    0, "25GiB"],
-[     1,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
-[     4,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
-[    16,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
-[    64,     8,  2500,   2,  20,   2,   1,   0,   1,  32,   10,    0, "25GiB"],
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,   250,   4,   2,   0,   0,   1,   1,   8,   10,    0,    "25GiB"],
+[     1,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
+[     4,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
+[    16,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
+[    64,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
+);
+
+# sc17b: for testing the shuffle layer and the network stack
+@sc17b = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,   250,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,    1,    "96GiB"],
+[     2,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,    2,   "192GiB"],
+[     4,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,    3,   "384GiB"],
+[     8,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,    4,   "768GiB"],
+[    16,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,    5,  "1536GiB"],
+[    32,     3,   375,  16,   4,   0,   0,   1,   1,  32,   80,   10,  "3072GiB"],
+);
+
+# sc17c: for benchamrking the entire pipeline
+@sc17b = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,   250,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[    32,     4,   500,  16,   4,   0,   0,   1,   1,  32,   90,   10,  "5120GiB"],
+[    64,     4,   500,  16,   4,   0,   0,   1,   1,  32,   95,   20, "10240GiB"],
+[    96,     4,   500,  16,   4,   0,   0,   1,   1,  32,  100,   40, "15360GiB"],
 );
 
 # table of contents (experiments available)
 %TOC = (
     "minimal" => [ \@minimal, \&stdpost ],
-    "sc17a"   => [ \@sc17a,   \&stdpost ],
+    "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
+    "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
+    "sc17c"   => [ \@sc17c,   \&stdpost_2d ],
     "fanrun"  => [ \@fanrun ],
     );
 
@@ -66,6 +91,25 @@ sub stdpost {
     $px = 10**$px;
     $py = $ncores * $py;
     $pz = 10**$pz;
+
+    return($px,$py,$pz,$tx,$ty,$tz);
+}
+
+#
+# stdpost_2d(): the 2d-version of the stdpost() defined above.
+#
+sub stdpost_2d {
+   my($rowref) = @_;
+    die "stdpost: bad arg" unless (ref($rowref) eq 'ARRAY');
+    my($ncores);
+    my($nodes, $dumps, $steps,
+       $px, $py, $pz, $tx, $ty, $tz, $ppn) = @$rowref;
+
+    $ncores = $nodes * $ppn;
+    $tx = $ncores;     # override the zero from the array
+    $px = $ncores * $px;
+    $py = 10**$py;
+    $pz = 0;
 
     return($px,$py,$pz,$tx,$ty,$tz);
 }
