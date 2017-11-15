@@ -620,7 +620,7 @@ build_deck() {
          ${ddir}/${deckpath}/config.h || die "config.h editing failed"
 
 cat ${ddir}/${deckpath}/config.h
-      
+
     # Compile input deck
     (cd ${ddir}/${deckpath} && \
        ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.cxx 2>&1 | \
@@ -821,11 +821,12 @@ do_run() {
             "SHUFFLE_Virtual_factor" ${XX_CH_VF:-"1024"}
             "SHUFFLE_Subnet" "${ip_subnet}"
             "SHUFFLE_Force_global_barrier" ${XX_SH_FORCE_GLOBAL:-"0"}
-            "SHUFFLE_Local_buftarget" ${XX_SH_LBUFTGT:-"4096"}
-            "SHUFFLE_Local_maxrpc" ${XX_SH_LMAXRPC:-"8"}
+            "SHUFFLE_Local_buftarget" ${XX_SH_LBUFTGT:-"131072"}
+            "SHUFFLE_Local_maxrpc" ${XX_SH_LMAXRPC:-"16"}
             "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
             "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
-            "SHUFFLE_Max_deliverq" ${XX_SH_DMAX:-"256"}
+            "SHUFFLE_Dq_min" ${XX_SH_DMIN:-"1024"}
+            "SHUFFLE_Dq_max" ${XX_SH_DMAX:-"4096"}
             "SHUFFLE_Force_rpc" ${XX_ALWAYS_SHUFFLE:-"0"}
             "SHUFFLE_Hash_sig" ${XX_RPC_HASHSIG:-"0"}
             "SHUFFLE_Paranoid_checks" ${XX_RPC_CHECKS:-"0"}
