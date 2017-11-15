@@ -358,12 +358,19 @@ gen_hostfile() {
             die "failed to create hosts.txt file"
         rm -f $tmp_nodefile
 
-    else
+    elif [ -f "/share/testbed/bin/emulab-listall" ]; then
 
         # Generate hostfile on Emulab and store on disk
         exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n'`"
 
         echo "$exp_hosts" > $jobdir/hosts.txt || \
+            die "failed to create hosts.txt file"
+    else
+
+        # For simple tests using a single-node
+        message "!!! WARNING !!! CRAY or Emulab not available, using localhost"
+
+        echo "localhost" > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
     fi
 
