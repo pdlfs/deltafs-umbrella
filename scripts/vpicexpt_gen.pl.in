@@ -109,7 +109,7 @@ sub stdpost_2d {
     $tx = $ncores;     # override the zero from the array
     $px = $ncores * $px;
     $py = 10**$py;
-    $pz = 0;
+    $pz = 1;
 
     return($px,$py,$pz,$tx,$ty,$tz);
 }
