@@ -50,7 +50,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17c);
 );
 
 # sc17c: for benchamrking the entire pipeline
-@sc17b = (
+@sc17c = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
 [     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
