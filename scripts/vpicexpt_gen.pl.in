@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17c);
+my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
