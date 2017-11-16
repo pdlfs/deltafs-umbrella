@@ -809,9 +809,9 @@ do_run() {
             "PRELOAD_Sample_threshold" ${XX_SAMP_TH:-"64"}
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
-            "PRELOAD_No_paranoid_barrier" ${XX_NO_BR:-"1"}
-            "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_BR:-"0"}
-            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BR:-"1"}
+            "PRELOAD_No_paranoid_barrier" ${XX_NO_BAR:-"1"}
+            "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_BAR:-"0"}
+            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BAR:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
