@@ -805,8 +805,8 @@ do_run() {
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
             "PRELOAD_Bypass_placement" ${XX_BYPASS_CH:-"0"}
             "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"0"}
-            "PRELOAD_Skip_sampling" ${XX_SKIP_SMP:-"0"}
-            "PRELOAD_Sample_threshold" ${XX_SMP_TH:-"64"}
+            "PRELOAD_Skip_sampling" ${XX_SKIP_SAMP:-"0"}
+            "PRELOAD_Sample_threshold" ${XX_SAMP_TH:-"64"}
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
             "PRELOAD_No_paranoid_barrier" ${XX_NO_BR:-"1"}
