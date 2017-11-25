@@ -793,6 +793,12 @@ do_run() {
         message "-INFO- done"
 
         ### WRITE PATH ###
+        if [ x${XX_SH_LOG_FILE-0} != x0 ]; then
+            shuflogfile="$exp_jobdir/shuflog"
+        else
+            shuflogfile="/"    # preload treats '/' as disabled
+        fi
+
         env_vars=(
             "VPIC_current_working_dir" "${vpic_dir}"
             "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
@@ -834,6 +840,7 @@ do_run() {
             "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Dq_min" ${XX_SH_DMIN:-"1024"}
             "SHUFFLE_Dq_max" ${XX_SH_DMAX:-"4096"}
+            "SHUFFLE_Log_file" "${shuflogfile}"
             "SHUFFLE_Force_rpc" ${XX_ALWAYS_SHUFFLE:-"0"}
             "SHUFFLE_Hash_sig" ${XX_RPC_HASHSIG:-"0"}
             "SHUFFLE_Paranoid_checks" ${XX_RPC_CHECKS:-"0"}
