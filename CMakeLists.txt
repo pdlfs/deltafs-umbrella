@@ -70,6 +70,7 @@ umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.33")
 umbrella_opt_default (DELTAFS_TAG "v2017.10.2")
 umbrella_opt_default (MERCURY_RUNNER_TAG "1f3ee683")  # Oct 2017
 umbrella_opt_default (MERCURY_TAG "afd70055")         # Oct 2017
+umbrella_opt_default (NEXUS_RUNNER_TAG "master")
 umbrella_opt_default (OFI_TAG "v1.5.1")
 umbrella_opt_default (SSG_TAG "0164e690")
 umbrella_opt_default (VPIC_TAG "b2578261")            # Nov 2017
@@ -104,6 +105,7 @@ include (umbrella/deltafs-nexus)
 include (umbrella/deltafs-vpic-preload)
 include (umbrella/mercury)
 include (umbrella/mercury-runner)
+include (umbrella/nexus-runner)
 include (umbrella/ssg)
 include (umbrella/trecon-reader)
 include (umbrella/vpic)
