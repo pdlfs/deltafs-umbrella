@@ -71,7 +71,7 @@ umbrella_opt_default (DELTAFS_TAG "v2017.10.2")
 umbrella_opt_default (MERCURY_RUNNER_TAG "1f3ee683")  # Oct 2017
 umbrella_opt_default (MERCURY_TAG "9edb9232")         # Dec 2017
 umbrella_opt_default (NEXUS_RUNNER_TAG "master")
-umbrella_opt_default (OFI_TAG "04533b71")             # Dec 2017, alomst 1.5.3
+umbrella_opt_default (OFI_TAG "4392f477")             # Dec 2017, master
 umbrella_opt_default (SSG_TAG "0164e690")
 umbrella_opt_default (VPIC_TAG "b2578261")            # Nov 2017
 
@@ -96,6 +96,12 @@ set (PDLFS_OPTIONS -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                    -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                    -DPDLFS_VERBOSE=${DELTAFS_VERBOSE})
 
+# overwrite default flags, we want to allow it to build verbs
+if (DEFINED ENV{CRAYPE_VERSION})
+    set (OFI_CRAY_EXTRA --enable-gni --enable-ugni-static --enable-sockets
+         --disable-rxd --disable-rxm --disable-udp --disable-usnic
+         --with-kdreg=no)
+endif ()
 
 include (umbrella/ch-placement)
 include (umbrella/deltafs)

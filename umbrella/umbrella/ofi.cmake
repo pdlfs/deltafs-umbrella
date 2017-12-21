@@ -23,7 +23,7 @@ umbrella_defineopt (OFI_TAR "ofi-${OFI_TAG}.tar.gz" STRING "OFI cache tar file")
 #
 # XXX: we are currently hardwiring extra stuff on the cray
 #
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CrayLinuxEnvironment")
+if (DEFINED ENV{CRAYPE_VERSION} AND NOT DEFINED OFI_CRAY_EXTRA)
     set (OFI_CRAY_EXTRA --enable-gni --enable-ugni-static --enable-sockets
          --disable-rxd --disable-rxm --disable-udp --disable-usnic
          --disable-verbs --with-kdreg=no)
