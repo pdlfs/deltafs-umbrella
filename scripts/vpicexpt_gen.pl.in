@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17bx, @sc17c, @sc17cx);
+my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17br, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
@@ -62,6 +62,19 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17bx, @sc17c, @sc17cx);
 [    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   30,   10,  "3072GiB"],
 );
 
+# sc17br: similar to sc17b but with reduced ppn
+@sc17br = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    1,    "32GiB"],
+[     2,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    2,    "32GiB"],
+[     4,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    3,    "32GiB"],
+[     8,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    4,    "32GiB"],
+[    16,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    5,    "64GiB"],
+[    32,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,   10,    "96GiB"],
+);
+
 # sc17bx: similar to sc17b but with a dedicated core per node for nic irq
 @sc17bx = (
 #         vpic   vpic                                      max  base
@@ -101,6 +114,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17bx, @sc17c, @sc17cx);
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
     "sc17bi"  => [ \@sc17bi,  \&stdpost_2d ],
+    "sc17br"  => [ \@sc17br,  \&stdpost_2d ],
     "sc17bx"  => [ \@sc17bx,  \&stdpost_2d ],
     "sc17c"   => [ \@sc17c,   \&stdpost_2d ],
     "sc17cx"  => [ \@sc17cx,  \&stdpost_2d ],
