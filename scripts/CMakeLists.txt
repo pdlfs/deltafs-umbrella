@@ -21,8 +21,9 @@ set (install-programs basic-bb.sh ethq.pl process_logs.sh
 
 # executable scripts to @-expand and then install
 set (install-programs-in common.sh.in run_local_mercury_runner.sh.in
-     run_mercury_runner.sh.in run_sndrcv_test.sh.in run_vpic_test.sh.in
-     run_bbos_test.sh.in lanl_do_mercury_runner.sh.in vpicexpt_gen.pl.in)
+     run_mercury_runner.sh.in run_combo_mercury_runner.sh.in
+     run_sndrcv_test.sh.in run_vpic_test.sh.in run_bbos_test.sh.in
+     lanl_do_mercury_runner.sh.in vpicexpt_gen.pl.in)
 
 #
 # expand ${install-programs-in} and build a list of output files for install
