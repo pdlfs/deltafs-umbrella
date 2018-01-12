@@ -43,7 +43,7 @@ use strict;
 
 my($type, $ninst, $count, $mode, $limit, $run, $time);
 my($key, $max, $lcv);
-my(%kcount, %ktot, %stcount, %sttot);
+my(%modes, %kcount, %ktot, %stcount, %sttot, $bi);
 
 while (<STDIN>) {
     chop;
@@ -55,7 +55,7 @@ while (<STDIN>) {
     }
 
     # look for client final output
-    if (/: client-(\d+)-(\d+)-(c|s)-(\d+)-(\d+):.*(\d+)\.(\d+) sec per op/) {
+    if (/: client-(\d+)-(\d+)-(c|s|cs)-(\d+)-(\d+):.*(\d+)\.(\d+) sec per /) {
         $ninst = $1;           # instances number
         $count = $2;           # number of RPCs we did
         $mode = $3;            # c (client)
@@ -63,6 +63,7 @@ while (<STDIN>) {
         $run = $5;             # run/iteration number
         $time = "$6.$7";       # run time in seconds
 
+        $modes{$mode} = 1;     # for sanity check
         $key = $limit;         # use limit as key
         $max = $key if ($max < $key);  # track largest limit we used
         $kcount{$key}++;
@@ -71,7 +72,7 @@ while (<STDIN>) {
     }
 
     # ALL-1-100000-c-256-3: ... times sys=4.784000 (secs)
-    next unless (/^ALL-(\d+)-(\d+)-(c|s)-(\d+)-(\d+)/);
+    next unless (/^ALL-(\d+)-(\d+)-(c|s|cs)-(\d+)-(\d+)/);
     $ninst = $1;               # same format as above
     $count = $2;
     $mode = $3;
@@ -79,11 +80,28 @@ while (<STDIN>) {
     $run = $5;
 
     next unless (/sys=(\d+)\.(\d+)/);
+    $modes{$mode} = 1;         # for sanity check
     $time = "$1.$2";
     $key = "$mode-$limit";     # key include client/server and limit
     $stcount{$key}++;
     $sttot{$key} += $time;
 }
+
+# do some sanity checks
+$bi = $modes{'cs'};            # got bi-directional output?
+if ($bi && ($modes{'c'} || $modes{'s'})) {
+    printf STDERR "process_runner.pl: ERROR: mixed modes\n";
+    exit(1);
+}
+if ($bi) {
+    for ($lcv = 1 ; $lcv <= $max ; $lcv = $lcv * 2) {
+        if ($kcount{"$lcv"} & 1) {
+            printf STDERR "process_runner.pl: ERROR: odd# of bidir results\n";
+            exit(1);
+        }
+    }
+}
+
 
 for ($lcv = 1 ; $lcv <= $max ; $lcv = $lcv * 2) {
     my($kc, $kt, $kspo);
@@ -94,7 +112,7 @@ for ($lcv = 1 ; $lcv <= $max ; $lcv = $lcv * 2) {
     $kt = $ktot{$key};
     $kspo = ($kc) ? sprintf("%f", $kt / $kc) : "<none>";
 
-    $key = "c-$lcv";
+    $key = ($bi) ? "cs-$lcv" : "c-$lcv";
     $cc = $stcount{$key};
     $ct = $sttot{$key};
     $ctime = ($cc) ? sprintf("%f", $ct / $cc) : "<none>";
@@ -104,8 +122,13 @@ for ($lcv = 1 ; $lcv <= $max ; $lcv = $lcv * 2) {
     $st = $sttot{$key};
     $stime = ($sc) ? sprintf("%f", $st / $sc) : "<none>";
 
-    printf "%s %3d %s sec per op, cli/srv sys time %s / %s sec, r=%d\n",
-        $type, $lcv, $kspo, $ctime, $stime, $kc;
+    if ($bi) {
+        printf "%s %3d %s sec per op, sys time %s sec, r=%d\n",
+            $type, $lcv, $kspo, $ctime, $kc/2;
+    } else {
+        printf "%s %3d %s sec per op, cli/srv sys time %s / %s sec, r=%d\n",
+            $type, $lcv, $kspo, $ctime, $stime, $kc;
+    }
 }
 
 exit(0);
