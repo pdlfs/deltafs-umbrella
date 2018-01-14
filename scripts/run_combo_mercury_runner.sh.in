@@ -77,8 +77,7 @@ instances=(1)                                   # currently not changing this
 ###############
 # Core script #
 ###############
-###source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
-source /proj/TableFS/testXYZ/scripts/common.sh      # XXXCDC DEBUG
+source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
 
 message "Script begin..."
 # keep track of start time so we can see how long this takes
