@@ -677,7 +677,7 @@ do_run() {
 
     prelib_env="" # empty, will not insert any LD_PRELOAD stuff
     if [ x"$prelib" != x ]; then
-        prelib_env="\"LD_PRELOAD\" \"$prelib\""
+        prelib_env="LD_PRELOAD $prelib"
     fi
 
     # pp: make a more human readable version of "p"

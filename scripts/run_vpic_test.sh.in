@@ -53,7 +53,7 @@ arg_deckid="trecon-part/turbulence"
 arg_bbos_buddies="0"
 arg_should_skip_query="0"
 arg_should_do_multipass_query="0"
-# set the lib to preload or leave empty to avoid preloading anything
+# set the lib to preload or set to "x" to avoid preloading anything
 arg_pre="${VPIC_PRE:-libdeltafs-preload.so}"
 # use an io skeleton program to emulate the io pattern.
 # will not build a real vpic input deck.
@@ -135,7 +135,7 @@ else
 fi
 
 # prepare the lib for LD_PRELOAD
-if [ x"$arg_pre" != x ]; then
+if [ x"$arg_pre" != xx ]; then
     prog_pre="${dfsu_prefix}/lib/$arg_pre"
 else
     prog_pre=""
