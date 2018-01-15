@@ -665,10 +665,12 @@ cat ${ddir}/${deckpath}/config.h
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 # @3 ppn
+# @4 jobdeck
 do_run() {
     runtype=$1
     p=$2
     ppn=${3:-0}
+    jobdeck=${4:-"${jobdir}/current-deck.op"}
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -703,14 +705,14 @@ do_run() {
     clear_caches
 
     message ""
-    message "[DECK] --- $(ls -lni --full-time ${jobdir}/current-deck.op)"
+    message "[DECK] --- $(ls -lni --full-time ${jobdeck})"
     message ""
 
     ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
     message "=================================================================="
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores and $nodes nodes !!!"
     message "------------"
-    message "> Using ${jobdir}/current-deck.op"
+    message "> Using ${jobdeck}"
     message "> Job dir is ${jobdir}"
     message "> Experiment dir is ${exp_dir}"
     message "> Log to ${exp_logfile}"
@@ -738,7 +740,7 @@ do_run() {
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdeck}" \
             "${EXTRA_MPIOPTS-}"
 
         message ""
@@ -858,7 +860,7 @@ do_run() {
             "PLFSDIR_Lg_parts" ${XX_LG_PARTS:-"2"}
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdir}/current-deck.op" \
+        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdeck}" \
             "${EXTRA_MPIOPTS-}"
 
         message ""
