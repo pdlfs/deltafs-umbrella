@@ -665,13 +665,20 @@ cat ${ddir}/${deckpath}/config.h
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 # @3 ppn
-# @4 jobdeck
+# @4 lib to preload
+# @5 job deck
 do_run() {
     runtype=$1
     p=$2
     ppn=${3:-0}
-    jobdeck=${4:-"${jobdir}/current-deck.op"}
+    prelib=${4:-"${dfsu_prefix}/lib/libdeltafs-preload.so"}
+    jobdeck=${5:-"${jobdir}/current-deck.op"}
     jobdeck1=$(echo $jobdeck | cut -d' ' -f1)
+
+    prelib_env="" # empty, will not insert any LD_PRELOAD stuff
+    if [ x"$prelib" != x ]; then
+        prelib_env="\"LD_PRELOAD\" \"$prelib\""
+    fi
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -732,9 +739,8 @@ do_run() {
         message "-INFO- done"
 
         ### WRITE PATH ###
-        env_vars=(
+        env_vars=($prelib_env
             "VPIC_current_working_dir" "${vpic_dir}"
-            "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Ignore_dirs" ${XX_IGNORE_DIRS:-":"}
             "PRELOAD_Log_home" "${exp_jobdir}/exp-info"
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
@@ -802,9 +808,8 @@ do_run() {
             shuflogfile="/"    # preload treats '/' as disabled
         fi
 
-        env_vars=(
+        env_vars=($prelib_env
             "VPIC_current_working_dir" "${vpic_dir}"
-            "LD_PRELOAD" "${dfsu_prefix}/lib/libdeltafs-preload.so"
             "PRELOAD_Ignore_dirs" ${XX_IGNORE_DIRS:-":"}
             "PRELOAD_Deltafs_mntp" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
