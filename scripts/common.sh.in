@@ -676,7 +676,7 @@ do_run() {
     jobdeck1=$(echo $jobdeck | cut -d' ' -f1)
 
     prelib_env="" # empty, will not insert any LD_PRELOAD stuff
-    if [ x"$prelib" != x ]; then
+    if [ x"$prelib" != xx ]; then
         prelib_env="LD_PRELOAD $prelib"
     fi
 

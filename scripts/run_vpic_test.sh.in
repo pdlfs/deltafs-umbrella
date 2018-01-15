@@ -138,7 +138,7 @@ fi
 if [ x"$arg_pre" != xx ]; then
     prog_pre="${dfsu_prefix}/lib/$arg_pre"
 else
-    prog_pre=""
+    prog_pre="x"
 fi
 
 message ""
