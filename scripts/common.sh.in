@@ -671,6 +671,7 @@ do_run() {
     p=$2
     ppn=${3:-0}
     jobdeck=${4:-"${jobdir}/current-deck.op"}
+    jobdeck1=$(echo $jobdeck | cut -d' ' -f1)
 
     # pp: make a more human readable version of "p"
     if [ $((p / (10**6))) -gt 0 ]; then
@@ -705,14 +706,14 @@ do_run() {
     clear_caches
 
     message ""
-    message "[DECK] --- $(ls -lni --full-time ${jobdeck})"
+    message "[DECK] --- $(ls -lni --full-time ${jobdeck1})"
     message ""
 
     ### SPAM ENOUGH TO MAKE BOSS HAPPY ###
     message "=================================================================="
     message "!!! Running VPIC ($runtype) with $pp particles on $cores cores and $nodes nodes !!!"
     message "------------"
-    message "> Using ${jobdeck}"
+    message "> Using ${jobdeck1}"
     message "> Job dir is ${jobdir}"
     message "> Experiment dir is ${exp_dir}"
     message "> Log to ${exp_logfile}"
