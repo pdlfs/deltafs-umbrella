@@ -220,8 +220,7 @@ loadargs() {
     # make sure key is alphanumeric or _
     loadargs_check=`echo $loadargs_key | sed -e 's/[A-Za-z0-9_]//g'`
     loadargs_val=`echo $loadargs_arg | sed -n 's/^[A-Za-z0-9_]*=//p'`
-    if [ "$loadargs_check" != "" -o "$loadargs_key" = "" -o \
-         "$loadargs_val" = "" ] ; then
+    if [ "$loadargs_check" != "" -o "$loadargs_key" = "" ]; then
       echo "loadargs: bad keyval arg: $loadargs_arg"
       exit 1
     fi
@@ -665,18 +664,18 @@ cat ${ddir}/${deckpath}/config.h
 # @1 experiment type in {"baseline", "deltafs", "shuffle_test"}
 # @2 number of particles
 # @3 ppn
-# @4 lib to preload
-# @5 job deck
+# @4 job deck
+# @5 lib to preload (disabled if not set)
 do_run() {
     runtype=$1
     p=$2
     ppn=${3:-0}
-    prelib=${4:-"${dfsu_prefix}/lib/libdeltafs-preload.so"}
-    jobdeck=${5:-"${jobdir}/current-deck.op"}
+    jobdeck=${4:-"${jobdir}/current-deck.op"}
     jobdeck1=$(echo $jobdeck | cut -d' ' -f1)
+    prelib=${5:-}
 
     prelib_env="" # empty, will not insert any LD_PRELOAD stuff
-    if [ x"$prelib" != xx ]; then
+    if [ x"$prelib" != x ]; then
         prelib_env="LD_PRELOAD $prelib"
     fi
 
