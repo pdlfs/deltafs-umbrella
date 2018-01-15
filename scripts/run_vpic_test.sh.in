@@ -55,7 +55,8 @@ arg_should_skip_query="0"
 arg_should_do_multipass_query="0"
 # use an io skeleton program to emulate the io pattern.
 # will not build a real vpic input deck.
-arg_emu=""
+arg_emu="${VPIC_EMU}"
+arg_emu_opts="${VPIC_EMU_OPTS}"
 
 ###############
 # Core script #
@@ -126,7 +127,7 @@ if [ x"$arg_emu" == x ]; then
         $arg_tx $arg_ty $arg_tz $arg_num_vpic_dumps $arg_num_vpic_steps
     jobdeck="${jobdir}/current-deck.op"
 else
-    jobdeck="${dfsu_prefix}/${arg_emu} -T 1800 $deck $arg_deckid \
+    jobdeck="${dfsu_prefix}/${arg_emu} ${arg_emu_opts} $deck $arg_deckid \
         $arg_px $arg_py $arg_pz $arg_tx $arg_ty $arg_tz \
         $arg_num_vpic_dumps $arg_num_vpic_steps"
 fi
