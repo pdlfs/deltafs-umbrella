@@ -109,12 +109,12 @@ esac
 ### other options ###
 case $arg_test_type in
 "shuffle_test")
-    export BYPASS_WRITE=1
+    export XX_BYPASS_WRITE=1
     ;;
 
 esac
 
-if [ ${BYPASS_WRITE:-0} -ne 0 ]; then
+if [ ${XX_BYPASS_WRITE:-0} -ne 0 ]; then
     do_querying=0
 fi
 build_deck $deck $arg_deckid $arg_px $arg_py $arg_pz \
