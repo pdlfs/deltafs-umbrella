@@ -68,7 +68,6 @@ ip_subnet="$arg_ip_subnet"
 nodes="$arg_nodes"
 vpic_epochs="$arg_num_vpic_dumps"
 vpic_steps="$arg_num_vpic_steps"
-deckid="$arg_deckid"
 bbos_buddies="$arg_bbos_buddies"
 
 message "Script begin..."
