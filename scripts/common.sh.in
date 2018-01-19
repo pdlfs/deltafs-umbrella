@@ -813,6 +813,7 @@ do_run() {
             "PRELOAD_Deltafs_mntp" "particle"
             "PRELOAD_Local_root" "${plfs_dir}"
             "PRELOAD_Log_home" "${exp_jobdir}/exp-info"
+            "PRELOAD_Pthread_tap" ${XX_PTHREAD_TAP:-"0"}
             "PRELOAD_Bypass_deltafs_namespace" "1"
             "PRELOAD_Bypass_shuffle" ${XX_BYPASS_SHUFFLE:-"0"}
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
