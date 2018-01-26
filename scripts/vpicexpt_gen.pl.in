@@ -265,7 +265,7 @@ sub savefile {
 my($cmd) = join(" ", @ARGV);
 my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $deckid,
    $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations,
-   $overcommit, $partition, $platform, $prefix, $run, $scaletime,
+   $overcommit, $partition, $platform, $postruncmd, $prefix, $run, $scaletime,
    $script, $skipreads, $tag, $tests);
 my($defplatform);
 
@@ -303,6 +303,7 @@ $rv = GetOptions(
     "overcommit=s"   =>  \$overcommit,
     "partition=s"    =>  \$partition,
     "platform=s"     =>  \$platform,
+    "postruncmd=s"   =>  \$postruncmd,
     "prefix=s"       =>  \$prefix,
     "run=s"          =>  \$run,
     "scaletime=f"    =>  \$scaletime,
@@ -330,6 +331,7 @@ sub usage {
     print STDERR "\t--iterations I    #of iterations for each run\n";
     print STDERR "\t--overcommit S    overcommit (enable/disable/default)\n";
     print STDERR "\t--partition S     slurm partition (srun only)\n";
+    print STDERR "\t--postruncmd S    cmd to postprocess output dir\n";
     print STDERR "\t--run S           limit which run to generate\n";
     print STDERR "\t--scaletime F     run time limit scaling\n";
     print STDERR "\t--script S        vpic run script (run_vpic_test.sh)\n";
@@ -374,7 +376,8 @@ if ($platform ne $defplatform && !defined($extraopts)) {
 #
 # sanity checking
 #
-my($exprow, $exp, $postfun, @rns, %wantrun, @ekeys, @cleanenv);
+my($exprow, $exp, $postfun, @rns, %wantrun, $prun_on);
+my(@ekeys, @cleanenv);
 my(@opts, %opts_skipgen, @fmtbuf, $vpicgen_fmtopts);
 my($fullextra, $EXPPARAMS_regex);
 $exprow = $TOC{$experiment};
@@ -407,6 +410,31 @@ usage("bad overcommit value") if ($overcommit ne '' &&
   $overcommit ne 'default');
 usage("overcommit only valid for slurm/srun")
   if ($platform ne 'srun' && $overcommit ne '');
+
+$prun_on = 0;
+$postruncmd =~ s/^\s+//;        # make sure no leading spaces
+if ($postruncmd ne '') {
+  my($prun, @pth, $found, $dir);
+  $prun = $postruncmd;
+  $prun =~ s/\s.*//;
+  if (substr($prun, 0, 1) eq "/") {
+    usage("can't find $prun script") unless (-x $prun);
+  } else {
+    @pth = split(/:/, $ENV{'PATH'});
+    foreach $dir (@pth) {
+      $found = 1 if (-x "$dir/$prun");
+      last if ($found);
+    }
+    if (!$found && -x "$prefix/scripts/$prun") {    # last ditch, script dir
+      $found++;
+      $postruncmd = "$prefix/scripts/$postruncmd";
+    }
+    usage("can't find $prun script anywhere") unless ($found);
+  }
+  $postruncmd = "$postruncmd \$jobdir";   # append dir as arb
+  $prun_on = 1;
+}
+
 usage("bad scale time") if ($scaletime <= 0.0);
 usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
                               $tests ne "baseline,deltafs" &&
@@ -438,6 +466,7 @@ foreach (@envs) {
     "iterations"  => $iterations,
     "overcommit"  => $overcommit,
     "partition"   => $partition,
+    "postruncmd"  => $postruncmd,
     "run"         => $run,
     "scaletime"   => $scaletime,
     "script"      => $script,
@@ -681,6 +710,10 @@ do
         bbos_buddies=\$bbosbuddies \\
         should_skip_query=\$skipreads
 
+    if [ $prun_on != 0 ]; then
+      echo running postrun command
+      $postruncmd
+    fi
     echo saving iteration in \$jobdir/I-\$it
     mkdir -p \$jobdir/I-\$it
     mv \$jobdir/[a-z]* \$jobdir/I-\$it
