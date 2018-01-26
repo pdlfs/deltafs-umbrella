@@ -845,8 +845,10 @@ do_run() {
             "SHUFFLE_Subnet" "${ip_subnet}"
             "SHUFFLE_Finalize_pause" ${XX_SH_FINAL_PAUSE:-"0"}
             "SHUFFLE_Force_global_barrier" ${XX_SH_FORCE_GLOBAL:-"0"}
+            "SHUFFLE_Local_senderlimit" ${XX_SH_LSNDLIMIT:-"0"}
             "SHUFFLE_Local_buftarget" ${XX_SH_LBUFTGT:-"131072"}
             "SHUFFLE_Local_maxrpc" ${XX_SH_LMAXRPC:-"16"}
+            "SHUFFLE_Remote_senderlimit" ${XX_SH_RSNDLIMIT:-"0"}
             "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
             "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Dq_min" ${XX_SH_DMIN:-"1024"}

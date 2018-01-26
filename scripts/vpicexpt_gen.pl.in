@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17br, @sc17bx, @sc17c, @sc17cx);
+my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bo, @sc17bi, @sc17br, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
@@ -49,7 +49,20 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17br, @sc17bx, @sc17c, @
 [    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   30,   10,  "3072GiB"],
 );
 
-# sc17bi: similar to sc17b but with fixed nodes and scaling cores per node
+# sc17bo: similar to sc17b but with a single node and scaling cores per node
+@sc17bo = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,   1,   30,    1,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,   2,   30,    2,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,   4,   30,    3,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,   8,   30,    4,    "32GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,  16,   30,    5,    "64GiB"],
+[     1,     3,    75,  16,   4,   0,   0,   1,   1,  32,   30,   10,    "96GiB"],
+);
+
+# sc17bi: similar to sc17b but with fixed 32 nodes and scaling cores per node
 @sc17bi = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -113,6 +126,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bi, @sc17br, @sc17bx, @sc17c, @
     "minimal" => [ \@minimal, \&stdpost ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
+    "sc17bo"  => [ \@sc17bo,  \&stdpost_2d ],
     "sc17bi"  => [ \@sc17bi,  \&stdpost_2d ],
     "sc17br"  => [ \@sc17br,  \&stdpost_2d ],
     "sc17bx"  => [ \@sc17bx,  \&stdpost_2d ],
