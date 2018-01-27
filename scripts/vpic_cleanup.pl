@@ -28,7 +28,7 @@ chdir($ARGV[0]) || die "Cannot chdir($ARGV[0]) - $!";
 
 if ($logstats) {
     my(@input);
-    @input = glob("shuflog.*");
+    @input = glob("deltafs_*/shuflog.*");
     foreach (@input) {
         logstats_file($_);
     }
