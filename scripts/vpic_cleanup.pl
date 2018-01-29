@@ -50,8 +50,7 @@ sub logstats_file {
     }
 
     while (<$fh>) {
-        next unless / SHUF NOTE /;
-        s/^.* shuf.\d+. SHUF NOTE //;
+        next unless (s/^.* shuf.\d+. SHUF (NOTE|WARN|ERR|CRIT|ALRT|EMRG) //);
         push(@out, $_);
     }
 
