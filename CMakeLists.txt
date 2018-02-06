@@ -66,12 +66,13 @@ umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v17.7")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.6")
-umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.39")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "f106e1cc") # Feb18, was v1.39
 umbrella_opt_default (DELTAFS_TAG "v2017.10.2")
 umbrella_opt_default (MERCURY_RUNNER_TAG "c16d9ddc")  # Jan 2018
-umbrella_opt_default (MERCURY_TAG "df38b616")         # Jan 2018
+umbrella_opt_default (MERCURY_TAG "6c82baf7")         # Feb 2018
+umbrella_opt_default (MSSG_TAG "13c059ed")            # Feb 2018
 umbrella_opt_default (NEXUS_RUNNER_TAG "master")
-umbrella_opt_default (OFI_TAG "4392f477")             # Dec 2017, master
+umbrella_opt_default (OFI_TAG "ca8dcaa8")             # Feb 2018, master
 umbrella_opt_default (SSG_TAG "0164e690")
 umbrella_opt_default (VPIC_TAG "b2578261")            # Nov 2017
 
@@ -111,6 +112,7 @@ include (umbrella/deltafs-nexus)
 include (umbrella/deltafs-vpic-preload)
 include (umbrella/mercury)
 include (umbrella/mercury-runner)
+include (umbrella/mssg)
 include (umbrella/nexus-runner)
 include (umbrella/ssg)
 include (umbrella/trecon-reader)
