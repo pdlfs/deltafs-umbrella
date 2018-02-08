@@ -9,7 +9,8 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bo, @sc17bi, @sc17br, @sc17bx, @sc17c, @sc17cx);
+my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17ba, @sc17bi, @sc17bj,
+@sc17br, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
@@ -49,8 +50,9 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bo, @sc17bi, @sc17br, @sc17bx, 
 [    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   30,   10,  "3072GiB"],
 );
 
-# sc17bo: similar to sc17b but with a single node and scaling cores per node
-@sc17bo = (
+# sc17ba: similar to sc17b but with a single node and scaling cores per node
+#  - used to be named sc17bo
+@sc17ba = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
 [     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
@@ -75,7 +77,20 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bo, @sc17bi, @sc17br, @sc17bx, 
 [    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   30,   10,  "3072GiB"],
 );
 
-# sc17br: similar to sc17b but with reduced ppn
+# sc17bj: similar to sc17b but with fixed 32 nodes and scaling px
+@sc17bj = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[    32,     3,    75,   1,   4,   0,   0,   1,   1,  32,   30,    2,   "192GiB"],
+[    32,     3,    75,   2,   4,   0,   0,   1,   1,  32,   30,    3,   "384GiB"],
+[    32,     3,    75,   4,   4,   0,   0,   1,   1,  32,   30,    4,   "768GiB"],
+[    32,     3,    75,   8,   4,   0,   0,   1,   1,  32,   30,    5,  "1536GiB"],
+[    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   60,   10,  "3072GiB"],
+[    32,     3,    75,  32,   4,   0,   0,   1,   1,  32,  120,   20,  "6144GiB"],
+);
+
+# sc17br: similar to sc17b but with ppn reduced to 1
 @sc17br = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -126,8 +141,9 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc17b, @sc17bo, @sc17bi, @sc17br, @sc17bx, 
     "minimal" => [ \@minimal, \&stdpost ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
-    "sc17bo"  => [ \@sc17bo,  \&stdpost_2d ],
+    "sc17ba"  => [ \@sc17ba,  \&stdpost_2d ],
     "sc17bi"  => [ \@sc17bi,  \&stdpost_2d ],
+    "sc17bj"  => [ \@sc17bj,  \&stdpost_2d ],
     "sc17br"  => [ \@sc17br,  \&stdpost_2d ],
     "sc17bx"  => [ \@sc17bx,  \&stdpost_2d ],
     "sc17c"   => [ \@sc17c,   \&stdpost_2d ],
