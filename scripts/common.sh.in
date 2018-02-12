@@ -414,9 +414,13 @@ gen_hosts() {
     cat $jobdir/hosts.txt | head -n $nodes | \
         tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
         die "failed to create vpic.hosts file"
-    cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
-        tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
-        die "failed to create bbos.hosts file"
+    if [ "${bbos_buddies}" = "0" ]; then
+        message "-INFO- supressing zero length bbos.hosts"
+    else
+        cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
+            die "failed to create bbos.hosts file"
+    fi
 
     ### set host list variables ###
 
