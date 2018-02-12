@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc18a0, @sc17b, @sc17ba, @sc17bb,
+my(%TOC, @minimal, @fanrun, @sc17a, @sc18a, @sc17b, @sc17ba, @sc17bb,
 @sc17bi, @sc17bj, @sc17br, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
@@ -37,16 +37,17 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc18a0, @sc17b, @sc17ba, @sc17bb,
 [    64,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
 );
 
-# sc18a0: for the sc18 parctive paper
-@sc18a0 = (
+# sc18a: for the sc18 parctive paper
+@sc18a = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
 [     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
-[    32,     6,   150,  32,   1,   0,   0,   1,   1,  32,   90,    1,   "480GiB"],
-[    32,     6,   150,  64,   1,   0,   0,   1,   1,  32,   90,    1,   "480GiB"],
-[    32,     6,   150, 128,   1,   0,   0,   1,   1,  32,   90,    1,   "480GiB"],
-[    32,     6,   150, 256,   1,   0,   0,   1,   1,  32,   90,    1,   "480GiB"],
-[    32,     6,   150, 512,   1,   0,   0,   1,   1,  32,   90,    1,   "480GiB"],
+[    32,     1,    25, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
+[    32,     2,    50, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
+[    32,     3,    75, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
+[    32,     4,   100, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
+[    32,     5,   125, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
+[    32,     6,   150, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
 );
 
 # sc17b: for testing the shuffle layer and the network stack
@@ -173,7 +174,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc18a0, @sc17b, @sc17ba, @sc17bb,
 %TOC = (
     "minimal" => [ \@minimal, \&stdpost ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
-    "sc18a0"  => [ \@sc18a0,  \&stdpost_2d ],
+    "sc18a"   => [ \@sc18a,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
     "sc17ba"  => [ \@sc17ba,  \&stdpost_2d ],
     "sc17bb"  => [ \@sc17bb,  \&stdpost_2d ],
