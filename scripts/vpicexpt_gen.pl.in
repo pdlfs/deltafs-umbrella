@@ -173,6 +173,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc18a0, @sc17b, @sc17ba, @sc17bb,
 %TOC = (
     "minimal" => [ \@minimal, \&stdpost ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
+    "sc18a0"  => [ \@sc18a0,  \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
     "sc17ba"  => [ \@sc17ba,  \&stdpost_2d ],
     "sc17bb"  => [ \@sc17bb,  \&stdpost_2d ],
