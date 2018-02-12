@@ -713,14 +713,15 @@ do_run() {
     ### log file for this exp ###
     exp_logfile="$exp_jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
 
-    reset_bbdir
+    ### purge data left by a prev job iter
+    reset_bbdir  ### will skip removing data when DW is OFF
 
     message "--------------- [   DOIT   ] --------------"
     message "!!! NOTICE !!! starting exp >> >> ${exp_tag}..."
     message ""
 
-    ### ATTENTION: data might go to bb ###
-    exp_dir="$bbdir/$exp_tag"
+    ### ATTENTION: data may or may not goto DW ###
+    exp_dir="$bbdir/$exp_tag"  ### when DW is OFF, bbdir == jobdir
     message "-INFO- creating exp dir..."
     do_mpirun 1 1 "" "" "mkdir -p ${exp_dir}"
     message "-INFO- done"
