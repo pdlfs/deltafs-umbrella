@@ -311,6 +311,22 @@ get_bbdir() {
 }
 
 #
+# reset_bbdir: cleanup bbdir between 2 job iterations.
+# use: $bbdir
+#
+reset_bbdir() {
+    if [ x${DW_JOB_STRIPED-} = x ]; then
+      message "-INFO- skipping reset of bbdir (bb disabled)..."
+    else
+      message "-INFO- reset bbdir..."
+      do_mpirun 1 1 "" "" "rm -r ${bbdir}"
+      do_mpirun 1 1 "" "" "mkdir -p ${bbdir}"
+      do_mpirun 1 1 "" "" "ls ${bbdir}"
+      message "-INFO- bbdir = ${bbdir}"
+    fi
+}
+
+#
 # bb_stageoutwait: wait for a stageout to complete
 # uses: $dwsessid, $dwconfid
 #
@@ -696,6 +712,8 @@ do_run() {
     cd $exp_jobdir || die "cd to $exp_jobdir failed"
     ### log file for this exp ###
     exp_logfile="$exp_jobdir/$exp_tag.log"   ### NOTE !! absolute path !! ###
+
+    reset_bbdir
 
     message "--------------- [   DOIT   ] --------------"
     message "!!! NOTICE !!! starting exp >> >> ${exp_tag}..."
