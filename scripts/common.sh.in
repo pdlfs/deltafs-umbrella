@@ -414,23 +414,23 @@ gen_hosts() {
     cat $jobdir/hosts.txt | head -n $nodes | \
         tr '\n' ',' | sed '$s/,$//' > $jobdir/vpic.hosts || \
         die "failed to create vpic.hosts file"
-    if [ "${bbos_buddies}" = "0" ]; then
-        message "-INFO- supressing zero length bbos.hosts"
-    else
-        cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
-            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
-            die "failed to create bbos.hosts file"
-    fi
-
-    ### set host list variables ###
 
     vpic_nodes=$(cat ${jobdir}/vpic.hosts)
     num_vpic_nodes=$(cat ${jobdir}/vpic.hosts | tr ',' '\n' | sort | wc -l)
     message "-INFO- num vpic nodes = ${num_vpic_nodes}"
 
-    bbos_nodes=$(cat ${jobdir}/bbos.hosts)
-    num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | tr ',' '\n' | sort | wc -l)
-    message "-INFO- num bbos nodes = ${num_bbos_nodes}"
+    if [ "${bbos_buddies}" = "0" ]; then
+        message "-INFO- supressing zero length bbos.hosts"
+        bbos_nodes=""
+        num_bbos_nodes=0
+    else
+        cat $jobdir/hosts.txt | tail -n $bbos_buddies | \
+            tr '\n' ',' | sed '$s/,$//' > $jobdir/bbos.hosts || \
+            die "failed to create bbos.hosts file"
+        bbos_nodes=$(cat ${jobdir}/bbos.hosts)
+        num_bbos_nodes=$(cat ${jobdir}/bbos.hosts | tr ',' '\n' | sort | wc -l)
+        message "-INFO- num bbos nodes = ${num_bbos_nodes}"
+    fi
 }
 
 #
@@ -671,9 +671,8 @@ cat ${ddir}/${deckpath}/config.h
 # do_run: run a vpic experiment
 #
 # uses: $dfsu_prefix, $jobdir, $bbdir, $cores, $nodes, $logfile, $vpic_nodes,
-#        $bb_log_size, $bbos_buddies
 #        $jobdir/current-deck.op (precompiled deck)
-#        $jobdir/bbos.hosts, $jobdir/vpic.hosts
+#        $jobdir/vpic.hosts
 # creates: an experiment tag: {runtype}_P{particles}_C${cores}_N${nodes}
 #          $bbdir/$exp_tag - primary output directory for the experiment
 #          $jobdir/$exp_tag - secondary output directory for the experiment
