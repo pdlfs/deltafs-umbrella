@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @fanrun, @sc17a, @sc18a, @sc17b, @sc17ba, @sc17bb,
+my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @sc18a, @sc17b, @sc17ba, @sc17bb,
 @sc17bi, @sc17bj, @sc17br, @sc17bx, @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
@@ -17,6 +17,18 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc18a, @sc17b, @sc17ba, @sc17bb,
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
 [     2,     2,  2500,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
+);
+
+# dwtest: for testing the burst-buffer system
+@dwtest = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5,    "1GiB"],
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1024GiB"],
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5, "2048GiB"],
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5, "3072GiB"],
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5, "4096GiB"],
+[     1,     1,    10,   1,   4,   1,   1,   0,   1,   4,   10,    5, "5120GiB"],
 );
 
 # Fan run: for the run that Fan requested
@@ -173,6 +185,7 @@ my(%TOC, @minimal, @fanrun, @sc17a, @sc18a, @sc17b, @sc17ba, @sc17bb,
 # table of contents (experiments available)
 %TOC = (
     "minimal" => [ \@minimal, \&stdpost ],
+    "dwtest"  => [ \@dwtest,  \&stdpost_2d ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc18a"   => [ \@sc18a,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
