@@ -892,7 +892,8 @@ do_run() {
             "PLFSDIR_Filter_bits_per_key" ${XX_BF_BITS:-"14"}
             "PLFSDIR_Lg_parts" ${XX_LG_PARTS:-"2"}
             "PLFSDIR_Use_leveldb" ${XX_USE_LEVELDB:-"0"}
-            "PLFSDIR_Force_l0" ${XX_LEVELDB_L0ONLY:-"0"}
+            "PLFSDIR_Ldb_force_l0" ${XX_LEVELDB_L0ONLY:-"0"}
+            "PLFSDIR_Ldb_use_bf" ${XX_LEVELDB_WITHBF:-"0"}
             "PLFSDIR_Env_name" ${XX_ENV_NAME:-"posix.unbufferedio"}
         )
 
