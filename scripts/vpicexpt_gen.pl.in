@@ -789,6 +789,19 @@ ENDOPTS
 set | egrep '$EXPPARAMS_regex' > \$jobdir/EXPPARAMS
 
 #
+# echo back config to the job log
+#
+echo ''
+echo VPICGENOPTS contains:
+cat \$jobdir/VPICGENOPTS
+echo end of VPICGENOPTS
+echo ''
+echo EXPPARAMS contains:
+cat \$jobdir/EXPPARAMS
+echo end of EXPPARAMS
+echo ''
+
+#
 # loop through iterations...
 #
 it=0
