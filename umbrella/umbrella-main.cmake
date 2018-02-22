@@ -98,6 +98,10 @@ endif ()
 set (UMBRELLA_COMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
 if (UMBRELLA_MPI)
     set (UMBRELLA_MPICOMP CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
+else ()
+    # if MPI is off, fall back to standard compilers.  this allows us
+    # to compile projects where MPI is optional...
+    set (UMBRELLA_MPICOMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
 endif ()
 
 # some systems have PKG_CONFIG_PATH already set, so we need to add to it

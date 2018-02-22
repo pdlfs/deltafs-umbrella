@@ -15,7 +15,7 @@ if (NOT TARGET ssg)
 #
 # umbrella option variables
 #
-umbrella_defineopt (SSG_REPO "https://github.com/pdlfs/ssg.git"
+umbrella_defineopt (SSG_REPO "https://xgitlab.cels.anl.gov/sds/ssg.git"
      STRING "SSG GIT repository")
 umbrella_defineopt (SSG_TAG "master" STRING "SSG GIT tag")
 umbrella_defineopt (SSG_TAR "ssg-${SSG_TAG}.tar.gz" STRING "SSG cache tar file")
@@ -29,12 +29,12 @@ umbrella_download (SSG_DOWNLOAD ssg ${SSG_TAR}
 umbrella_patchcheck (SSG_PATCHCMD ssg)
 
 # ssg requirements
-include (umbrella/mercury)
+include (umbrella/margo)
 
 #
 # create ssg target
 #
-ExternalProject_Add (ssg DEPENDS mercury
+ExternalProject_Add (ssg DEPENDS margo
     ${SSG_DOWNLOAD} ${SSG_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_MPICOMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
