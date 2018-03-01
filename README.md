@@ -14,18 +14,22 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 
 * deltafs dependencies
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
-  * ssg (https://xgitlab.cels.anl.gov/sds/ssg.git)
+  * mssg (https://github.com/pdlfs/mssg.git)
   * mercury-rpc (https://github.com/mercury-hpc/mercury.git)
   * bmi (http://git.mcs.anl.gov/bmi.git)
   * libfabric (https://github.com/ofiwg/libfabric.git)
   * cci (https://github.com/CCI/cci.git)
 * deltafs
   * deltafs (https://github.com/pdlfs/deltafs.git)
+  * deltafs-common (https://github.com/pdlfs/pdlfs-common.git_
   * deltafs-nexus (https://github.com/pdlfs/deltafs-nexus.git)
   * deltafs-bb (https://github.com/pdlfs/deltafs-bb.git)
 * vpic
   * deltafs-vpic-preload (https://github.com/pdlfs/deltafs-vpic-preload.git)
   * vpic (https://github.com/pdlfs/vpic.git)
+* support
+  * mercury-runner (https://github.com/pdlfs/mercury-runner.git)
+  * nexus-runner (https://github.com/pdlfs/nexus-runner.git)
 
 ### Installation
 
@@ -37,9 +41,9 @@ On Ubuntu 16.04.2, these requirements could be obtained by:
 sudo apt-get update  # Optional, though highly recommended
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
-sudo apt-get install libboost-dev libltdl-dev libopenmpi-dev
+sudo apt-get install libboost-dev libltdl-dev libmpich-dev
 sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci in order to enable ibverbs
-sudo apt-get install openmpi-bin git
+sudo apt-get install git
 ```
 
 To build deltafs and install it under a specific prefix (e.g. $HOME/deltafs):
@@ -72,34 +76,26 @@ make
 
 ### Run vpic with mpi on top of deltafs
 
-*// We have used openmpi's command line syntax. Different mpi distributions usually have slightly different syntaxes.*
+Running vpic is a two step process.  First you run vpicexpt_gen.pl to generate a set of one or more vpic run scripts, then you can run vpic with the generated scripts.
 
-First, start a single deltafs metadata server process:
-
+For example, to generate scripts for a "minimal" run:
 ```
-rm -rf $HOME/deltafs/var && mkdir -p $HOME/deltafs/var
-
-export DELTAFS_RunDir="$HOME/deltafs/var/run"
-export DELTAFS_Outputs="$HOME/deltafs/var/metadata"
-export DELTAFS_FioConf="root=$HOME/deltafs/var/data"
-export DELTAFS_FioName="posix"
-
-mpirun -n 1 -x DELTAFS_FioName \
-       -x DELTAFS_FioConf \
-       -x DELTAFS_Outputs \
-       -x DELTAFS_RunDir \
-       $HOME/deltafs/bin/deltafs-srvr
-
+mkdir $HOME/deltafs/runs
+$HOME/deltafs/scripts/vpicexpt_gen.pl --experiment minimal $HOME/deltafs/runs
 ```
 
-Second, start vpic app:
+This will generate $HOME/deltafs/runs/vpic-minimal-0-baseline.sh and $HOME/deltafs/runs/vpic-minimal-0-deltafs.sh for running a minimal baseline and deltafs run.
 
+Before running these scripts, keep in mind that all vpic output goes to the directory specified in the $JOBDIRHOME environment variable.  If $JOBDIRHOME is not set, then the default directory is $HOME/jobs.  Typically we point $JOBDIRHOME to a scratch parallel filesystem since vpic may generate alot of output.
+
+Run vpic:
 ```
-mpirun -np 16 [ -npernode ... ] [ -hostfile ... ] -x "DELTAFS_RunDir=$HOME/deltafs/var/run" \
-       -x "LD_PRELOAD=$HOME/deltafs/lib/libdeltafs-preload.so" \
-       -x "PDLFS_Root=particle" \
-       $HOME/deltafs/bin/turbulence-part.op
+$HOME/deltafs/runs/vpic-minimal-0-baseline.sh
+
+$HOME/deltafs/runs/vpic-minimal-0-deltafs.sh
 ```
+
+After doing a run, cleanup $JOBDIRHOME if needed.
 
 Note: it is assumed that $HOME is backed by a shared file system that can be accessed by all mpi nodes.
 
