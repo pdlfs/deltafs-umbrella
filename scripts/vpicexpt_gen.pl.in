@@ -9,8 +9,8 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @sc18a, @sc18b, @sc18k0, @sc17b,
-@sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
+my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @sc18a, @sc18b, @sc18r, @sc18k0,
+@sc17b, @sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
 @sc17c, @sc17cx);
 
 # minimal: for quick tests of script infrastructure
@@ -74,6 +74,21 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @sc18a, @sc18b, @sc18k0, @sc17b,
 [    32,     4,   100,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
 [    32,     5,   125,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
 [    32,     6,   150,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
+);
+
+# sc18r: for the sc18 parctive paper
+@sc18r = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,    2,  "5440GiB"],
+[    64,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,    4, "10880GiB"],
+[   128,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,    8, "21760GiB"],
+[   256,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,   16, "43520GiB"],
+[   512,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,   32, "87040GiB"],
+[  1024,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,   64,"174080GiB"],
+[  2048,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,  128,"348160GiB"],
+[  4096,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,  256,"696320GiB"],
 );
 
 # sc18k0: for the sc18 parctive paper
@@ -213,6 +228,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @sc18a, @sc18b, @sc18k0, @sc17b,
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc18a"   => [ \@sc18a,   \&stdpost_2d ],
     "sc18b"   => [ \@sc18b,   \&stdpost_2d ],
+    "sc18r"   => [ \@sc18r,   \&stdpost_2d ],
     "sc18k0"  => [ \@sc18k0,  \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
     "sc17ba"  => [ \@sc17ba,  \&stdpost_2d ],
