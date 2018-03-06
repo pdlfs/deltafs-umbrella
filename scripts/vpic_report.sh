@@ -47,7 +47,7 @@ total_iotime=0
 echo "TOTAL IO TIME"
 for iotime in `cat $logfile | grep -F "Dumping duration" | cut -d' ' -f4`
 do
-    total_iotime=`echo $total_iotime + $iotime | bc`
+    total_iotime=`echo "print $total_iotime + $iotime" | python`
     echo "+ $iotime"
 done
 echo '---------------'
@@ -55,8 +55,11 @@ echo "= $total_iotime (secs)"
 echo ''
 
 # STEP 2 - TOTAL OUTPUT SIZE
-echo "TOTAL OUTPUT IN BYTES"
-cat $logfile | grep -A 3 -F "du -sb" | grep -v srun | grep -v 'Output size:' | cut -f1
+echo "TOTAL OUTPUT SIZE"
+output_bytes=`cat $logfile | grep -A 3 -F "du -sb" | grep -v srun | grep -v 'Output size:' | cut -f1`
+echo "$output_bytes bytes"
+out=`echo "print format(1.0 * $output_bytes / 1024 / 1024 / 1024 / 1024, '.3f')" | python`
+echo "$out TiB"
 echo ''
 
 # STEP 3 - QUERY LATENCY
