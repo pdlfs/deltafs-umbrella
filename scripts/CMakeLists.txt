@@ -17,7 +17,7 @@ set (install-files README.md vpic_plots.R)
 
 # executable scripts to install
 set (install-programs basic-bb.sh ethq.pl process_logs.sh
-     process_runner.pl report_runner.pl vpic_cleanup.pl)
+     process_runner.pl report_runner.pl vpic_report.sh vpic_cleanup.pl)
 
 # executable scripts to @-expand and then install
 set (install-programs-in common.sh.in run_local_mercury_runner.sh.in
