@@ -15,6 +15,7 @@ e=`cat $logfile | grep -F experiment= | head -n 1 | cut -d= -f2`
 r=`cat $logfile | grep -F run= | head -n 1 | cut -d= -f2`
 n=`cat $logfile | grep -F nodes= | head -n 1 | cut -d= -f2`
 p=`cat $logfile | grep -F ppn= | head -n 1 | cut -d= -f2`
+extra_opts=`cat $logfile | grep -F extraopts= | head -n 1 | cut -d= -f2-`
 # CHECK DW
 dw=`cat $logfile | grep -F dw=int | wc -l`
 if [ $dw -gt 0 ]; then
@@ -23,7 +24,7 @@ b=`head -n 100 $logfile | grep -F $bb_instance_id | grep -F nid | wc -l`
 else
 b=0
 fi
-echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b, test=$t"
+echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b, test=$t, mpi=[$extra_opts]"
 # CHECK CN/BN RATIO
 if [ $(($b * 32)) -gt $n ]; then
    echo 'WARNING: TOO MANY BB NODES!'
@@ -49,7 +50,7 @@ echo ''
 
 # STEP 1 - TOTAL IO TIME
 total_iotime=0
-echo "TOTAL IO TIME"
+echo "TOTAL IO TIME ($b BB NODES)"
 for iotime in `cat $logfile | grep -F "Dumping duration" | cut -d' ' -f4`
 do
     total_iotime=`echo "print $total_iotime + $iotime" | python`
