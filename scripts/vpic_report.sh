@@ -10,6 +10,7 @@ fi
 
 echo "Parsing results from $logfile ..."
 # CHECK BASIC CONF
+t=`cat $logfile | grep -F tests= | head -n 1 | cut -d= -f2`
 e=`cat $logfile | grep -F experiment= | head -n 1 | cut -d= -f2`
 r=`cat $logfile | grep -F run= | head -n 1 | cut -d= -f2`
 n=`cat $logfile | grep -F nodes= | head -n 1 | cut -d= -f2`
@@ -22,7 +23,7 @@ b=`head -n 100 $logfile | grep -F $bb_instance_id | grep -F nid | wc -l`
 else
 b=0
 fi
-echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b"
+echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b, test=$t"
 # CHECK CN/BN RATIO
 if [ $(($b * 32)) -gt $n ]; then
    echo 'WARNING: TOO MANY BB NODES!'
@@ -31,7 +32,11 @@ fi
 # CHECK IF THE RUN HAS FINISHED OK
 x=`cat $logfile | grep -iF "all done" | wc -l`
 echo $x "lines of \"-INFO- all done\"..."
-if [ $x -ge 2 ]; then
+num_ok=2
+if [ x"$t" = x"baseline" ]; then
+    num_ok=1  # baseline runs only need 1 OK
+fi
+if [ $x -ge $num_ok ]; then
     echo 'OK!'
 else
     echo 'ABORT!'
@@ -64,7 +69,11 @@ echo ''
 
 # STEP 3 - QUERY LATENCY
 echo "QUERY LATENCY"
-cat $logfile | grep "Latency Per Query" | cut -d: -f2- | cut -d' ' -f2-
+if [ x"$t" = x"baseline" ]; then
+    cat $logfile | grep "Overall:"
+else
+    cat $logfile | grep "Latency Per Query" | cut -d: -f2- | cut -d' ' -f2-
+fi
 echo ''
 
 echo 'Done'
