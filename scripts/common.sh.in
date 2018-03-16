@@ -869,9 +869,9 @@ do_run() {
             "SHUFFLE_Force_global_barrier" ${XX_SH_FORCE_GLOBAL:-"0"}
             "SHUFFLE_Local_senderlimit" ${XX_SH_LSNDLIMIT:-"16"}
             "SHUFFLE_Remote_senderlimit" ${XX_SH_RSNDLIMIT:-"16"}
-            "SHUFFLE_Local_maxrpc" ${XX_SH_LOMAXRPC:-"8"}
-            "SHUFFLE_Relay_maxrpc" ${XX_SH_LRMAXRPC:-"8"}
-            "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"8"}
+            "SHUFFLE_Local_maxrpc" ${XX_SH_LOMAXRPC:-"16"}
+            "SHUFFLE_Relay_maxrpc" ${XX_SH_LRMAXRPC:-"16"}
+            "SHUFFLE_Remote_maxrpc" ${XX_SH_RMAXRPC:-"16"}
             "SHUFFLE_Local_buftarget" ${XX_SH_LOBUFTGT:-"32768"}
             "SHUFFLE_Relay_buftarget" ${XX_SH_LRBUFTGT:-"32768"}
             "SHUFFLE_Remote_buftarget" ${XX_SH_RBUFTGT:-"32768"}
