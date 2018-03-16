@@ -24,7 +24,6 @@ addons:
       - git
       - cmake-data
       - cmake
-      - g++-4.4
       - g++-4.6
       - g++-4.8
       - g++-5
@@ -35,7 +34,6 @@ env:
   global:
     - GIT_SSL_NO_VERIFY=true
   matrix:
-    - GCC=4.4
     - GCC=4.6
     - GCC=4.8
     - GCC=5
