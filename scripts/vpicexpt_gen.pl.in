@@ -18,7 +18,8 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 @minimal = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
-[     2,     2,  2500,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
+[     1,     2,   250,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
+[     2,     2,   250,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
 );
 
 # dwtest: for testing the burst-buffer system
