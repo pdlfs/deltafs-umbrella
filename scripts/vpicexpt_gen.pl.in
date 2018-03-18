@@ -10,7 +10,7 @@ use strict;
 # define experiments here
 ##############################################################################
 my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
-@sc18a, @sc18b, @sc18c, @sc18k, @sc18r, @sc18n, @sc18s,
+@sc18a, @sc18b, @sc18c, @sc18d, @sc18k, @sc18r, @sc18n, @sc18s,
 @sc17b, @sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
 @sc17c, @sc17cx);
 
@@ -52,7 +52,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    64,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
 );
 
-# sc18a: for the sc18 parctive paper (LANL-Trinitite)
+# sc18a: for the sc18 practive paper (LANL-Trinitite)
 @sc18a = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -65,7 +65,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     6,   150, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
 );
 
-# sc18b: for the sc18 parctive paper (LANL-Trinitite)
+# sc18b: for the sc18 practive paper (LANL-Trinitite)
 @sc18b = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -78,7 +78,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     6,   150,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
 );
 
-# sc18c: for the sc18 parctive paper (LANL-Trinitite)
+# sc18c: for the sc18 practive paper (LANL-Trinitite)
 @sc18c = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -88,7 +88,22 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   60,   10,  "3072GiB"],
 );
 
-# sc18k: for the sc18 parctive paper (KNL)
+# sc18d: for the sc18 practive paper (LANL-Trinitite)
+@sc18d = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "192GiB"],
+[     2,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "384GiB"],
+[     4,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "768GiB"],
+[     8,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "1536GiB"],
+[    16,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "6144GiB"],
+[    64,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10, "12288GiB"],
+[    96,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10, "18432GiB"],
+);
+
+# sc18k: for the sc18 practive paper (KNL)
 @sc18k = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -98,7 +113,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     3,    75,   8,   4,   0,   0,   1,   1,  64,   90,   10,  "3072GiB"],
 );
 
-# sc18r: for the sc18 parctive paper (LANL-Trinity)
+# sc18r: for the sc18 practive paper (LANL-Trinity)
 @sc18r = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -113,7 +128,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [  4096,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,  256,"655360GiB"],
 );
 
-# sc18n: for the sc18 parctive paper (PDL-Narwhal)
+# sc18n: for the sc18 practive paper (PDL-Narwhal)
 @sc18n = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
@@ -133,7 +148,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [   256,     1,    10,   4,   4,   0,   0,   1,   1,   4,   30,   10, "0GiB"],
 );
 
-# sc18s: for the sc18 parctive paper (PDL-Susitna)
+# sc18s: for the sc18 practive paper (PDL-Susitna)
 @sc18s = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
@@ -274,6 +289,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
     "sc18a"   => [ \@sc18a,   \&stdpost_2d ],
     "sc18b"   => [ \@sc18b,   \&stdpost_2d ],
     "sc18c"   => [ \@sc18c,   \&stdpost_2d ],
+    "sc18d"   => [ \@sc18d,   \&stdpost_2d ],
     "sc18k"   => [ \@sc18k,   \&stdpost_2d ],
     "sc18r"   => [ \@sc18r,   \&stdpost_2d ],
     "sc18n"   => [ \@sc18n,   \&stdpost_2d ],
