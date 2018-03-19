@@ -41,8 +41,7 @@ fi
 if [ $x -ge $num_ok ]; then
     echo 'OK!'
 else
-    echo 'ABORT!'
-    exit 1
+    echo 'NOT OK! THE RUN MAY HAVE FAILED IN THE MIDDLE --- WILL PARSE AS MUCH AS WE CAN'
 fi
 echo ''
 
