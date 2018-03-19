@@ -899,6 +899,8 @@ do_run() {
             "PLFSDIR_Env_name" ${XX_ENV_NAME:-"posix.unbufferedio"}
             "NEXUS_ALT_LOCAL" ${XX_NX_LOCAL:-"na+sm"}
             "NEXUS_BYPASS_LOCAL" ${XX_NX_ONEHG:-"0"}
+            "DELTAFS_API_RATELIMIT" ${XX_IMD_RATELIMIT:-"0"}
+            "DELTAFS_API_DROPDATA" ${XX_IMD_DROPDATA:-"0"}
         )
 
         do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdeck}" \
