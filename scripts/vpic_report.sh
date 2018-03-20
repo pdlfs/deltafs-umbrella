@@ -17,17 +17,18 @@ n=`cat $logfile | grep -F nodes= | head -n 1 | cut -d= -f2`
 p=`cat $logfile | grep -F ppn= | head -n 1 | cut -d= -f2`
 extraopts=`cat $logfile | grep -F extraopts= | head -n 1 | cut -d= -f2-`
 skipreads=`cat $logfile | grep -F skipreads= | head -n 1 | cut -d= -f2`
+dw=`cat $logfile | grep -F dw= | head -n 1 | cut -d= -f2`
 # CHECK DW
-dw=`cat $logfile | grep -F dw=int | wc -l`
-if [ $dw -gt 0 ]; then
+if [ x$dw = xint -o x$dw = xbw ]; then
 bb_instance_id=`cat $logfile | grep -F ">>> dw ids" | cut -d'/' -f4`
-b=`head -n 100 $logfile | grep -F $bb_instance_id | grep -F nid | wc -l`
+echo "BB INSTANCE ID is $bb_instance_id"
+b=`cat $logfile | grep -F "$bb_instance_id" | grep -F nid | wc -l`
 else
 b=0
 fi
-echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b, test=$t, mpi=[$extraopts]"
+echo "exp=$e, run=$r, node=$n, ppn=$p, bb_nodes=$b (mode=$dw), test=$t, mpi=[$extraopts]"
 # CHECK CN/BN RATIO
-if [ $(($b * 32)) -gt $n ]; then
+if [ x$dw = xint -a $(($b * 32)) -gt $n ]; then
    echo 'WARNING: TOO MANY BB NODES!'
 fi
 
