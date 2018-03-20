@@ -75,6 +75,7 @@ else
     echo "QUERY LATENCY"
     if [ x"$t" = x"baseline" ]; then
         cat $logfile | grep "Overall:"
+        echo 'NOTE: USE THE SECOND NUMBER'
     else
         cat $logfile | grep "Latency Per Query" | cut -d: -f2- | cut -d' ' -f2-
     fi
