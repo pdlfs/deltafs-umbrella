@@ -10,7 +10,7 @@ use strict;
 # define experiments here
 ##############################################################################
 my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
-@sc18a, @sc18b, @sc18c, @sc18d, @sc18k, @sc18r, @sc18n, @sc18s,
+@sc18a, @sc18b, @sc18c, @sc18d, @sc18k, @sc18l, @sc18r, @sc18n, @sc18s,
 @sc17b, @sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
 @sc17c, @sc17cx);
 
@@ -92,7 +92,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 @sc18d = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
-[     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     2,    50,   2,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
 [     1,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "192GiB"],
 [     2,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "384GiB"],
 [     4,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "768GiB"],
@@ -111,6 +111,21 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     1,    25,   8,   4,   0,   0,   1,   1,  64,   90,   10,  "3072GiB"],
 [    32,     2,    50,   8,   4,   0,   0,   1,   1,  64,   90,   10,  "3072GiB"],
 [    32,     3,    75,   8,   4,   0,   0,   1,   1,  64,   90,   10,  "3072GiB"],
+);
+
+# sc18l: for the sc18 practive paper (KNL)
+@sc18l = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   2,   2,   0,   0,   1,   1,  64,   10,    1,    "32GiB"],
+[     1,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     2,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,   "384GiB"],
+[     4,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,   "768GiB"],
+[     8,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "1536GiB"],
+[    16,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "3072GiB"],
+[    32,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "6144GiB"],
+[    64,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10, "12288GiB"],
+[    96,     5,   125,   8,   4,   0,   0,   1,   1,  64,  150,   10, "18432GiB"],
 );
 
 # sc18r: for the sc18 practive paper (LANL-Trinity)
@@ -291,6 +306,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
     "sc18c"   => [ \@sc18c,   \&stdpost_2d ],
     "sc18d"   => [ \@sc18d,   \&stdpost_2d ],
     "sc18k"   => [ \@sc18k,   \&stdpost_2d ],
+    "sc18l"   => [ \@sc18l,   \&stdpost_2d ],
     "sc18r"   => [ \@sc18r,   \&stdpost_2d ],
     "sc18n"   => [ \@sc18n,   \&stdpost_2d ],
     "sc18s"   => [ \@sc18s,   \&stdpost_2d ],
