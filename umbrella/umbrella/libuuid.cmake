@@ -38,7 +38,7 @@ umbrella_patchcheck (LIBUUID_PATCHCMD libuuid)
 #
 ExternalProject_Add (libuuid ${LIBUUID_DOWNLOAD} ${LIBUUID_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --without-ncurses --disable-all-programs --enable-libuuid
                       --disable-bash-completion --disable-colors-default 
                       --prefix=${CMAKE_INSTALL_PREFIX}

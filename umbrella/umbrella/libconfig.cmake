@@ -44,7 +44,7 @@ ExternalProject_Add (libconfig ${LIBCONFIG_DOWNLOAD} ${LIBCONFIG_PATCHCMD}
     # XXX: old one has wrong# args to scanctx_push_include()
     CONFIGURE_COMMAND touch <SOURCE_DIR>/lib/scanner.l
         COMMAND       <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       ${LIBCONFIG_INFOINFO}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       ${LIBCONFIG_FPFLAGS}

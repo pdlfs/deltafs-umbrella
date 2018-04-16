@@ -30,15 +30,16 @@ umbrella_download (ABT_IO_DOWNLOAD abt-io ${ABT_IO_TAR}
 umbrella_patchcheck (ABT_IO_PATCHCMD abt-io)
 
 # abt-io requirements
+include (umbrella/abt-snoozer)
 include (umbrella/argobots)
 
 #
 # create abt-io target
 #
-ExternalProject_Add (abt-io DEPENDS argobots
+ExternalProject_Add (abt-io DEPENDS argobots abt-snoozer
     ${ABT_IO_DOWNLOAD} ${ABT_IO_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_MPICOMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       ${UMBRELLA_PKGCFGPATH}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared

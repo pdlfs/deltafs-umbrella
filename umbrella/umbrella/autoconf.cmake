@@ -35,7 +35,7 @@ umbrella_patchcheck (AUTOCONF_PATCHCMD autoconf)
 #
 ExternalProject_Add (autoconf ${AUTOCONF_DOWNLOAD} ${AUTOCONF_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       UPDATE_COMMAND "")
 

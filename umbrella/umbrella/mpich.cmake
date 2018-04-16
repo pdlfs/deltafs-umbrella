@@ -37,7 +37,7 @@ umbrella_patchcheck (MPICH_PATCHCMD mpich)
 #
 ExternalProject_Add (mpich ${MPICH_DOWNLOAD} ${MPICH_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --disable-fortran
                       UPDATE_COMMAND "")

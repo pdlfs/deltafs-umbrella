@@ -40,7 +40,7 @@ include (umbrella/mercury)   # XXX: margo?
 ExternalProject_Add (hg-bulk-pool DEPENDS argobots mercury
     ${HG_BULK_POOL_DOWNLOAD} ${HG_BULK_POOL_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_MPICOMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       ${UMBRELLA_PKGCFGPATH}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared

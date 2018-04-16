@@ -40,7 +40,7 @@ umbrella_patchcheck (LIBZMQ3X_PATCHCMD libzmq3x)
 #
 ExternalProject_Add (libzmq3x ${LIBZMQ3X_DOWNLOAD} ${LIBZMQ3X_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       UPDATE_COMMAND "")
 

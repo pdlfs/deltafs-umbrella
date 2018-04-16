@@ -33,7 +33,7 @@ umbrella_patchcheck (BMI_PATCHCMD bmi)
 #
 ExternalProject_Add (bmi ${BMI_DOWNLOAD} ${BMI_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared --enable-bmi-only
     UPDATE_COMMAND "")

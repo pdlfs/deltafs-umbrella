@@ -43,7 +43,7 @@ include (umbrella/libev)
 ExternalProject_Add (abt-snoozer DEPENDS argobots libev
     ${ABT_SNOOZER_DOWNLOAD} ${ABT_SNOOZER_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       ${UMBRELLA_PKGCFGPATH}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --with-libev=${CMAKE_INSTALL_PREFIX}

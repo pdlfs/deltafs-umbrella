@@ -37,7 +37,7 @@ umbrella_patchcheck (LIBEV_PATCHCMD libev)
 #
 ExternalProject_Add (libev ${LIBEV_DOWNLOAD} ${LIBEV_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       UPDATE_COMMAND "")
 

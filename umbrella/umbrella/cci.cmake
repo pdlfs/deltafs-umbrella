@@ -98,7 +98,7 @@ umbrella_patchcheck (CCI_PATCHCMD cci)
 #
 ExternalProject_Add (cci ${CCI_DOWNLOAD} ${CCI_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       ${CCI_GNIAC} ${CCI_VERBSAC}
                       UPDATE_COMMAND "")

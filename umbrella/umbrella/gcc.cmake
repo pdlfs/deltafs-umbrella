@@ -46,7 +46,7 @@ umbrella_patchcheck (GCC_PATCHCMD gcc)
 #
 ExternalProject_Add (gcc ${GCC_DOWNLOAD} ${GCC_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}/gcc
                       --disable-bootstrap --enable-languages=c,c++
                       --enable-shared --enable-threads=posix

@@ -47,7 +47,7 @@ umbrella_patchcheck (BOOST_PATCHCMD boost)
 #
 ExternalProject_Add (boost ${BOOST_DOWNLOAD} ${BOOST_PATCHCMD}
     CONFIGURE_COMMAND cd <SOURCE_DIR> && 
-        ${UMBRELLA_COMP} ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+        ${UMBRELLA_COMP} ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
           ./bootstrap.sh --with-libraries=${BOOST_WITHLIBS}
                        --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_COMMAND cd <SOURCE_DIR> && 

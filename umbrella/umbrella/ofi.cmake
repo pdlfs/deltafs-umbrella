@@ -42,7 +42,7 @@ umbrella_patchcheck (OFI_PATCHCMD ofi)
 #
 ExternalProject_Add (ofi ${OFI_DOWNLOAD} ${OFI_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       ${OFI_CRAY_EXTRA}
     UPDATE_COMMAND "")

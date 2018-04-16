@@ -35,7 +35,7 @@ umbrella_patchcheck (LIBTOOL_PATCHCMD libtool)
 #
 ExternalProject_Add (libtool ${LIBTOOL_DOWNLOAD} ${LIBTOOL_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       UPDATE_COMMAND "")
 

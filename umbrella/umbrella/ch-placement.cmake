@@ -37,7 +37,7 @@ umbrella_testcommand (CH_PLACEMENT_TESTCMD TEST_COMMAND make check)
 ExternalProject_Add (ch-placement
     ${CH_PLACEMENT_DOWNLOAD} ${CH_PLACEMENT_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared
     UPDATE_COMMAND ""

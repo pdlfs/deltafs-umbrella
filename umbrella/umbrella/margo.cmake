@@ -43,7 +43,7 @@ include (umbrella/mercury)
 ExternalProject_Add (margo DEPENDS abt-snoozer mercury
     ${MARGO_DOWNLOAD} ${MARGO_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       ${UMBRELLA_PKGCFGPATH}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""

@@ -35,7 +35,7 @@ umbrella_patchcheck (SPARSEHASH_PATCHCMD sparsehash)
 #
 ExternalProject_Add (sparsehash ${SPARSEHASH_DOWNLOAD} ${SPARSEHASH_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND "")
 

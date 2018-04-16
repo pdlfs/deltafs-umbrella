@@ -44,7 +44,7 @@ umbrella_testcommand (ARGOBOTS_TESTCMD TEST_COMMAND make -C test check)
 ExternalProject_Add (argobots
     ${ARGOBOTS_DOWNLOAD} ${ARGOBOTS_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
-                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAG}
+                      ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
     UPDATE_COMMAND ""
     ${ARGOBOTS_TESTCMD}
