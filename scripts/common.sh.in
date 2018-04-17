@@ -858,6 +858,7 @@ do_run() {
             "SHUFFLE_Mercury_cache_handles" ${XX_HG_CACHE_HDL:-"0"}
             "SHUFFLE_Mercury_rusage" ${XX_HG_RUSAGE:-"0"}
             "SHUFFLE_Mercury_nice" ${XX_HG_NICE:-"0"}
+            "SHUFFLE_Num_hg_errors" ${XX_HG_MAX_ERRORS:-"1"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
