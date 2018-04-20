@@ -52,7 +52,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    64,     8,  1000,  16,   4,   0,   0,   1,   1,   8,  100,    0,    "25GiB"],
 );
 
-# sc18a: for the sc18 practive paper (LANL-Trinitite)
+# sc18a: for the sc18 practive paper (LevelDB, LANL-Trinitite)
 @sc18a = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -65,7 +65,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     6,   150, 256,   1,   0,   0,   1,   1,  32,   90,    1,  "5120GiB"],
 );
 
-# sc18b: for the sc18 practive paper (LANL-Trinitite)
+# sc18b: for the sc18 practive paper (LevelDB, LANL-Trinitite)
 @sc18b = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -78,17 +78,22 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     6,   150,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
 );
 
-# sc18c: for the sc18 practive paper (LANL-Trinitite)
+# sc18c: for the sc18 practive paper (PDSW17, LANL-Trinitite)
 @sc18c = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
 [     1,     2,    50,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
-[    32,     1,    25,  16,   4,   0,   0,   1,   1,  32,   60,   10,  "3072GiB"],
-[    32,     2,    50,  16,   4,   0,   0,   1,   1,  32,   60,   10,  "3072GiB"],
-[    32,     3,    75,  16,   4,   0,   0,   1,   1,  32,   60,   10,  "3072GiB"],
+[     1,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "160GiB"],
+[     2,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "320GiB"],
+[     4,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "640GiB"],
+[     8,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "1280GiB"],
+[    16,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "2560GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "5120GiB"],
+[    64,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10, "10240GiB"],
+[    96,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10, "15360GiB"],
 );
 
-# sc18d: for the sc18 practive paper (LANL-Trinitite)
+# sc18d: for the sc18 practive paper (Rate-Limiting, LANL-Trinitite)
 @sc18d = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -103,7 +108,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    96,     5,   125,  16,   4,   0,   0,   1,   1,  32,  120,   10, "18432GiB"],
 );
 
-# sc18e: for the sc18 practive paper (LANL-Trinitite)
+# sc18e: for the sc18 practive paper (Rate-Limiting, LANL-Trinitite, PPN=64)
 @sc18e = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -118,7 +123,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    96,     5,   125,   8,   4,   0,   0,   1,   1,  64,  120,   10, "18432GiB"],
 );
 
-# sc18f: for the sc18 practive paper (LANL-Trinitite)
+# sc18f: for the sc18 practive paper (Rate-Limiting, LANL-Trinitite, PPN=16)
 @sc18f = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
