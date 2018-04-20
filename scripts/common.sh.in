@@ -858,7 +858,7 @@ do_run() {
             "SHUFFLE_Mercury_cache_handles" ${XX_HG_CACHE_HDL:-"0"}
             "SHUFFLE_Mercury_rusage" ${XX_HG_RUSAGE:-"0"}
             "SHUFFLE_Mercury_nice" ${XX_HG_NICE:-"0"}
-            "SHUFFLE_Num_hg_errors" ${XX_HG_MAX_ERRORS:-"1"}
+            "SHUFFLE_Mercury_max_errors" ${XX_HG_MAX_ERRORS:-"1"}
             "SHUFFLE_Buffer_per_queue" ${XX_RPC_BUF:-"32768"}
             "SHUFFLE_Num_outstanding_rpc" ${XX_RPC_DEPTH:-"16"}
             "SHUFFLE_Use_worker_thread" ${XX_RPC_USE_WORKER:-"1"}
@@ -892,8 +892,10 @@ do_run() {
             "PLFSDIR_Index_min_write_size" ${XX_MIN_INDEX_BUF:-"2MiB"}
             "PLFSDIR_Index_buf_size" ${XX_MAX_INDEX_BUF:-"2MiB"}
             "PLFSDIR_Key_size" ${XX_KEY_SIZE:-"8"}
-            "PLFSDIR_Filter_bits_per_key" ${XX_BF_BITS:-"14"}
+            "PLFSDIR_Filter_bits_per_key" ${XX_BF_BITS:-"12"}
             "PLFSDIR_Lg_parts" ${XX_LG_PARTS:-"2"}
+            "PLFSDIR_Force_leveldb_format" ${XX_FORCE_LEVELDB_FMT:-"0"}
+            "PLFSDIR_Unordered_storage" ${XX_SKIP_SORT:-"0"}
             "PLFSDIR_Use_leveldb" ${XX_USE_LEVELDB:-"0"}
             "PLFSDIR_Ldb_force_l0" ${XX_LEVELDB_L0ONLY:-"0"}
             "PLFSDIR_Ldb_use_bf" ${XX_LEVELDB_WITHBF:-"0"}
