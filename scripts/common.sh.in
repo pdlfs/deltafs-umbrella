@@ -849,6 +849,8 @@ do_run() {
             "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_BAR:-"0"}
             "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BAR:-"1"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
+            "PRELOAD_No_epoch_pre_flushing_wait" ${XX_NO_PRE_FLUSH_WAIT:-"1"}
+            "PRELOAD_No_epoch_pre_flushing_sync" ${XX_NO_PRE_FLUSH_SYNC:-"1"}
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
             "PRELOAD_Enable_bg_sngcomp" ${XX_BG_SNGCOMP:-"0"}
