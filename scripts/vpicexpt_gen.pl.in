@@ -10,7 +10,8 @@ use strict;
 # define experiments here
 ##############################################################################
 my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
-@sc18a, @sc18b, @sc18c, @sc18d, @sc18e, @sc18f, @sc18k, @sc18l, @sc18r, @sc18n, @sc18s,
+@sc18a, @sc18b, @sc18c, @sc18d, @sc18e, @sc18f,
+@sc18k, @sc18l, @sc18r, @sc18n, @sc18s, @sc18w,
 @sc17b, @sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
 @sc17c, @sc17cx);
 
@@ -78,7 +79,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [    32,     6,   150,   4,   4,   0,   0,   1,   1,  32,  120,   10,  "3072GiB"],
 );
 
-# sc18c: for the sc18 practive paper (PDSW17, LANL-Trinitite)
+# sc18c: for the sc18 practive paper (PDSW17-like, LANL-Trinitite)
 @sc18c = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
@@ -209,6 +210,21 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
 [     8,     1,    10,   4,   4,   0,   0,   1,   1,  32,   30,   10, "0GiB"],
 [    16,     1,    10,   4,   4,   0,   0,   1,   1,  32,   30,   10, "0GiB"],
 [    32,     1,    10,   4,   4,   0,   0,   1,   1,  32,   30,   10, "0GiB"],
+);
+
+# sc18w: for the sc18 practive paper (PDSW17-like, Long-Compute, LANL-Trinitite)
+@sc18w = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,   300,   4,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[     1,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "160GiB"],
+[     2,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "320GiB"],
+[     4,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,   "640GiB"],
+[     8,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "1280GiB"],
+[    16,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "2560GiB"],
+[    32,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10,  "5120GiB"],
+[    64,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10, "10240GiB"],
+[    96,     5,   750,  16,   4,   0,   0,   1,   1,  32,  120,   10, "15360GiB"],
 );
 
 # sc17b: for testing the shuffle layer and the network stack
@@ -347,6 +363,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a,
     "sc18r"   => [ \@sc18r,   \&stdpost_2d ],
     "sc18n"   => [ \@sc18n,   \&stdpost_2d ],
     "sc18s"   => [ \@sc18s,   \&stdpost_2d ],
+    "sc18w"   => [ \@sc18w,   \&stdpost_2d ],
     "sc17b"   => [ \@sc17b,   \&stdpost_2d ],
     "sc17ba"  => [ \@sc17ba,  \&stdpost_2d ],
     "sc17bb"  => [ \@sc17bb,  \&stdpost_2d ],
