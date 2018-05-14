@@ -66,10 +66,27 @@ echo "TOTAL OUTPUT SIZE"
 output_bytes=`cat $logfile | grep -A 3 -F "du -sb" | grep -v srun | grep -v 'Output size:' | cut -f1`
 echo "$output_bytes bytes"
 out=`echo "print format(1.0 * $output_bytes / 1024 / 1024 / 1024 / 1024, '.3f')" | python`
-echo "$out TiB"
+echo "= $out TiB"
 echo ''
 
-# STEP 3 - QUERY LATENCY
+# STEP 3 - CPU UTIL
+echo "CPU UTIL (usr time + sys time)"
+total_cpu=0
+total_n=0
+for cpu in `cat $logfile | grep -F 'avg cpu' | cut -d= -f2 | cut -d' ' -f2 | cut -d'%' -f1`
+do
+    total_cpu=`echo "print $total_cpu + $cpu" | python`
+    total_n=$((total_n + 1))
+    echo "> $cpu%"
+done
+if [ $total_n -ne 0 ]; then
+    echo '---------------'
+    avg_cpu=`echo "print format(1.0 * $total_cpu / $total_n, '.2f')" | python`
+    echo "= $avg_cpu%"
+fi
+echo ''
+
+# STEP 4 - QUERY LATENCY
 if [ $skipreads -ne 0 ]; then
     echo "READ BYPASSED - NO QUERY RESULTS"
 else
