@@ -35,8 +35,7 @@ include (umbrella/deltafs)
 #
 # create vpic target
 #
-ExternalProject_Add (vpic DEPENDS deltafs
-    ${VPIC_DOWNLOAD} ${VPIC_PATCHCMD}
+ExternalProject_Add (vpic ${VPIC_DOWNLOAD} ${VPIC_PATCHCMD}
 
     #
     # TODO: This code makes me sad, but then again this VPIC version
