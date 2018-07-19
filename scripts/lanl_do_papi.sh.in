@@ -7,6 +7,11 @@
 #SBATCH --partition=knl
 #SBATCH --output=/users/%u/joblogs/papi-try-%j.out
 
-@CMAKE_INSTALL_PREFIX@/scripts/run_papi.sh
+PPN=64
+NUMA_OPTS="-m 1"
+EVENTS="PAPI_L2_DCA PAPI_L2_DCM"
+
+@CMAKE_INSTALL_PREFIX@/scripts/run_papi.sh "ppn=$PPN" \
+    "numa_opts=$NUMA_OPTS" "events=$EVENTS"
 
 exit 0
