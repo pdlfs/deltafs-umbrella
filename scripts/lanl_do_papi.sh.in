@@ -1,0 +1,12 @@
+#!/bin/bash -eu
+
+#SBATCH --job-name papi-try
+#SBATCH --time=0:30:00
+#SBATCH --nodes=1
+#SBATCH --constraint=knl,quad,flat
+#SBATCH --partition=knl
+#SBATCH --output=/users/%u/joblogs/papi-try-%j.out
+
+@CMAKE_INSTALL_PREFIX@/scripts/run_papi.sh
+
+exit 0
