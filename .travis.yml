@@ -20,6 +20,8 @@ addons:
       - libibverbs-dev
       - librdmacm-dev
       - libmpich-dev
+      - libpapi-dev
+      - libnuma-dev
       - mpich
       - git
       - cmake-data
