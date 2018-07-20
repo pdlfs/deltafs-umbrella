@@ -30,6 +30,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 * support
   * mercury-runner (https://github.com/pdlfs/mercury-runner.git)
   * nexus-runner (https://github.com/pdlfs/nexus-runner.git)
+  * papi-try (https://github.com/pdlfs/papi-try.git)
 
 ### Installation
 
