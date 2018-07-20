@@ -39,11 +39,13 @@ A recent CXX compiler with standard building tools including make, cmake (used b
 On Ubuntu 16.04.2, these requirements could be obtained by:
 
 ```
-sudo apt-get update  # Optional, though highly recommended
+sudo apt-get update
+
 sudo apt-get install gcc g++ make cmake
 sudo apt-get install autoconf automake libtool pkg-config
-sudo apt-get install libboost-dev libltdl-dev libmpich-dev
+sudo apt-get install libpapi-dev libnuma-dev libboost-dev libltdl-dev libmpich-dev
 sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci in order to enable ibverbs
+
 sudo apt-get install git
 ```
 
