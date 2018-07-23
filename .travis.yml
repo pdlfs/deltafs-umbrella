@@ -31,6 +31,7 @@ addons:
       - g++-5
       - g++-6
       - g++-7
+      - g++-8
 
 env:
   global:
@@ -41,6 +42,7 @@ env:
     - GCC=5
     - GCC=6
     - GCC=7
+    - GCC=8
 
 install:
   - export CXX="g++-${GCC}"
@@ -56,7 +58,7 @@ before_script:
 script:
   - date
   - mkdir -p /tmp/deltafs
-  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE .
+  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON .
   - make
   - date
 
