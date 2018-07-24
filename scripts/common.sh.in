@@ -61,6 +61,8 @@
 #            we'll try and figure it out if not provided by user
 #  $JOBRUNCMD - aprun/srun/mpirun command to use, should match $JOBENV
 #               (only used if JOBENV is set by user)
+#  $JOBHOSTS - nodes to run jobs (default: localhost)
+#              (only used if not running on a Cray or an Emulab platform)
 #  $EXTRA_MPIOPTS - additional options that need to be passed to mpirun
 #  $DW_SESSION_OVERRIDE - (cray) override the datawarp sessionid (for dbg)
 #
@@ -382,10 +384,9 @@ gen_hostfile() {
             die "failed to create hosts.txt file"
     else
 
-        # For simple tests using a single-node
-        message "!!! WARNING !!! CRAY or Emulab not available, using localhost"
+        message "!!! WARNING !!! CRAY or Emulab not available, reading @ENV[JOBHOSTS]"
 
-        echo "localhost" > $jobdir/hosts.txt || \
+        echo "${JOBHOSTS:-localhost}" | tr ',' '\n' > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
     fi
 
