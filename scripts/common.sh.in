@@ -442,14 +442,14 @@ clear_caches() {
     message "-INFO- clearing node caches..."
 
     if [ $JOBENV = moab -o $JOBENV = slurm ]; then
-        message "!!! WARNING !!! skipping cache clear ... no cray sudo access"
-        #aprun -L $vpic_nodes -n $cores -N $nodes sudo sh -c \
-        #    'echo 3 > /proc/sys/vm/drop_caches'
-    else
+        message "!!! NOTICE !!! skipping cache clear ... no cray sudo access"
+    elif [ -f "/share/testbed/bin/emulab-mpirunall" ]; then
         # this does more than just $vpic_nodes (does them all)
         # but that isn't really a problem...
         /share/testbed/bin/emulab-mpirunall sudo sh -c \
             'echo 3 > /proc/sys/vm/drop_caches'
+    else
+        message "!!! NOTICE !!! skipping cache clear ... not on Emulab"
     fi
 
     message "-INFO- done"
