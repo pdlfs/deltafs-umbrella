@@ -63,7 +63,9 @@ echo ''
 
 # STEP 2 - TOTAL OUTPUT SIZE
 echo "TOTAL OUTPUT SIZE"
-output_bytes=`cat $logfile | grep -A 3 -F "du -sb" | grep -v srun | grep -v 'Output size:' | cut -f1`
+output_bytes=`cat $logfile | grep -A 3 -F "du -sb" \
+    | grep -v -F 'srun' | grep -v -F 'mpirun' | grep -v -F 'aprun' \
+    | grep -v -F 'Output size:' | cut -f1`
 echo "$output_bytes bytes"
 out=`echo "print format(1.0 * $output_bytes / 1024 / 1024 / 1024 / 1024, '.3f')" | python`
 echo "= $out TiB"
