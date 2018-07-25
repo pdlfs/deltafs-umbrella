@@ -19,8 +19,10 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a,
 @minimal = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
-[     1,     2,   250,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
-[     2,     2,   250,   1,   4,   1,   1,   0,   1,   4,   10,    5, "1GiB"],
+[     2,     2,    50,   4,   2,   0,   0,   1,   1,   4,   10,    5, "32GiB"],
+[     1,     2,    50,   4,   2,   0,   0,   1,   1,   4,   10,    5, "32GiB"],
+[     2,     2,    50,   4,   2,   0,   0,   1,   1,   4,   10,    5, "32GiB"],
+[     4,     2,    50,   4,   2,   0,   0,   1,   1,   4,   10,    5, "32GiB"],
 );
 
 # dwtest: for testing the burst-buffer system
@@ -361,7 +363,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a,
 
 # table of contents (experiments available)
 %TOC = (
-    "minimal" => [ \@minimal, \&stdpost ],
+    "minimal" => [ \@minimal, \&stdpost_2d ],
     "dwtest"  => [ \@dwtest,  \&stdpost_2d ],
     "pd18a"   => [ \@pd18a,   \&stdpost_2d ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
