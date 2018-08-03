@@ -66,7 +66,7 @@ umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v18.4")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.9")
-umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.57")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.58")
 umbrella_opt_default (DELTAFS_TAG "v2018.4.7")
 umbrella_opt_default (MERCURY_RUNNER_TAG "c16d9ddc")  # Jan 2018
 umbrella_opt_default (MERCURY_TAG "f1d12612")         # Mar 2018
