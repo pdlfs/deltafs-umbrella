@@ -857,10 +857,9 @@ do_run() {
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
             "PRELOAD_Enable_bg_sngcomp" ${XX_BG_SNGCOMP:-"0"}
-            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"8"}
+            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"11"}
             "PRELOAD_Particle_size" ${XX_PARTICLE_SIZE:-"40"}
             "PRELOAD_Particle_extra_size" ${XX_PARTICLE_EXTRA_SIZE:-"0"}
-            "PRELOAD_Particle_hex_fname" ${XX_HEX_FNAME:-"1"}
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
             "SHUFFLE_Mercury_progress_timeout" ${XX_HG_TIMEOUT:-"100"}
             "SHUFFLE_Mercury_progress_warn_interval" ${XX_HG_INTERVAL:-"1000"}
