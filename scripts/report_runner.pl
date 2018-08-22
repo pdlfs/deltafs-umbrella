@@ -45,9 +45,37 @@
 
 
 use strict;
+use Getopt::Long;
+
+my($rv, $tags);
+my(%tagmap);
+
+$rv = GetOptions(
+    "tags=s"     => \$tags,
+);
+
+sub usage {
+    my($msg) = @_;
+    print STDERR "ERR: $msg\n" if ($msg ne '');
+    print STDERR "usage: report_runner.pl [options] result-files ...\n";
+    print STDERR "general options:\n";
+    print STDERR "\t--tags  [tags]   tags\n";
+    print STDERR "\n";
+    print STDERR "tag format: str1=tag1,str2=tag2,...\n";
+    exit(1);
+}
+
+usage() if ($rv != 1 || $#ARGV < 0);
+if ($tags ne '') {
+    @_ = split(/,/, $tags);
+    foreach (@_) {
+        next unless (/(\S+)=(\S+)/);
+        $tagmap{$1} = $2;
+    }
+}
 
 my(@res) = @ARGV;
-my($lcv, $base);
+my($lcv, $base, $prefix);
 my(%n_nas, %b_nas, %n_sizes, %b_sizes, %n_prpcs, %b_prpcs);
 my(%results, %lines);
 
@@ -55,8 +83,16 @@ my(%results, %lines);
 foreach $lcv (@res) {
     $base = $lcv;
     $base =~ s@.*/@@;
+    $prefix = substr($lcv, 0, length($lcv) - length($base));
     $base =~ s/.result$//;
-    my($type, $na, $one, $size) = split(/-/, $base);
+    my($type, $orig_na, $one, $size) = split(/-/, $base);
+    my($na) = $orig_na;
+    foreach (sort keys %tagmap) {
+        if (index($prefix, $_) != -1) {
+            $na = $tagmap{$_};
+            last;
+        }
+    }
     if ($type ne 'norm' && $type ne 'bulk') {
         print STDERR "unknown file $lcv, skip\n";
         next;
@@ -77,7 +113,7 @@ foreach $lcv (@res) {
     while (<IN>) {
         chop;
         my(@data) = split(" ");
-        unless (substr($na, 0, length($data[0])) eq $data[0]) {
+        unless (substr($orig_na, 0, length($data[0])) eq $data[0]) {
             print STDERR "bad line data0 $lcv\n";
             next;
         }
