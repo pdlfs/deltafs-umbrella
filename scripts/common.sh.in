@@ -890,9 +890,9 @@ do_run() {
             "SHUFFLE_Force_rpc" ${XX_ALWAYS_SHUFFLE:-"0"}
             "SHUFFLE_Hash_sig" ${XX_RPC_HASHSIG:-"0"}
             "SHUFFLE_Paranoid_checks" ${XX_RPC_CHECKS:-"0"}
+            "SHUFFLE_Random_flush" ${XX_RPC_RANDOM_FLUSH:-"0"}
             "SHUFFLE_Recv_radix" ${XX_RECV_RADIX:-"0"}
             "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"0"}
-            "SHUFFLE_Random_flush" ${XX_SH_RANDOM_FLUSH:-"0"}
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
             "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
             "PLFSDIR_Compaction_buf_size" ${XX_COMP_BUF:-"4MiB"}
