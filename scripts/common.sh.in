@@ -914,6 +914,7 @@ do_run() {
             "NEXUS_ALT_LOCAL" ${XX_NX_LOCAL:-"na+sm"}
             "NEXUS_BYPASS_LOCAL" ${XX_NX_ONEHG:-"0"}
             "DELTAFS_TC_RATE" ${XX_IMD_RATELIMIT:-"0"}
+            "DELTAFS_TC_SERIALIO" ${XX_IMD_SERIALIO:-"0"}
             "DELTAFS_TC_SYNCONCLOSE" ${XX_IMD_SYNCONCLOSE:-"0"}
             "DELTAFS_TC_IGNORESYNC" ${XX_IMD_IGNORESYNC:-"0"}
             "DELTAFS_TC_DROPDATA" ${XX_IMD_DROPDATA:-"0"}
