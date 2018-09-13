@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a, @pd18b, @pd18x,
+my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a, @pd18b, @pd18h, @pd18x,
 @sc18a, @sc18b, @sc18c, @sc18d, @sc18e, @sc18f,
 @sc18k, @sc18l, @sc18r, @sc18n, @sc18s, @sc18w,
 @sc17b, @sc17ba, @sc17bb, @sc17bi, @sc17bj, @sc17br, @sc17bx,
@@ -77,6 +77,18 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a, @pd18b, @pd18x,
 [    32,     5,   125,   8,   4,   0,   0,   1,   1,  68,  150,   10,  "6528GiB"],
 [    32,     5,   125,   8,   4,   0,   0,   1,   1, 136,  150,   10, "13056GiB"],
 [    32,     5,   125,   8,   4,   0,   0,   1,   1, 272,  150,   10, "26112GiB"],
+);
+
+# pd18h: for the pdsw18 KNL paper (Haswell)
+@pd18h = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     2,    50,   2,   2,   0,   0,   1,   1,  32,   10,    1,    "32GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,   8,  150,   10,  "1632GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  16,  150,   10,  "3264GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  32,  150,   10,  "6528GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1,  64,  150,   10, "13056GiB"],
+[    32,     5,   125,  16,   4,   0,   0,   1,   1, 128,  150,   10, "26112GiB"],
 );
 
 # pd18x: for the pdsw18 KNL paper
@@ -394,6 +406,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @sc17a, @pd18a, @pd18b, @pd18x,
     "dwtest"  => [ \@dwtest,  \&stdpost_2d ],
     "pd18a"   => [ \@pd18a,   \&stdpost_2d ],
     "pd18b"   => [ \@pd18b,   \&stdpost_2d ],
+    "pd18h"   => [ \@pd18h,   \&stdpost_2d ],
     "pd18x"   => [ \@pd18x,   \&stdpost_2d ],
     "sc17a"   => [ \@sc17a,   \&stdpost_2d ],
     "sc18a"   => [ \@sc18a,   \&stdpost_2d ],
