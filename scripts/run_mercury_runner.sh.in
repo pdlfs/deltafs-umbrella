@@ -160,7 +160,7 @@ run_one() {
         cmd="$cmd -i $reqsz"
     fi
 
-    the_cmd="$cmd -m s $num $saddress $caddress"
+    the_cmd="$cmd ${EXTRA_RUNNEROPTS:-} -m s $num $saddress $caddress"
 
     # start the run
     message "!!! NOTICE !!! starting run (Instances: $num, Address spec: $saddress/$caddress)..."
