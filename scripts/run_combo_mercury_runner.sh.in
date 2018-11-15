@@ -155,7 +155,15 @@ run_one() {
 
     saddress="$proto"
     caddress="$proto"
-    cmd="$runner"
+    cmd="$runner -g"
+    if [ "$proto" = "bmi+tcp" ]; then
+        # XXX: ugh.  "-g" won't work for bmi+tcp na if MR_TWOWAY isn't set.
+        # XXX: error: "Cannot convert addr to string if not listening"
+        # XXX: since we have all the addressing info on cmd line, we
+        # XXX: hack around this by switching off "-g" for bmi+tcp...
+        message "NOTE: HACK: removing '-g' for bmi+tcp..."
+        cmd="$runner"
+    fi
     if [ "$islocal" = 1 ]; then
         if [ "$proto" = "bmi+tcp" ]; then
             # XXX: avoids port warning error from bmi+tcp by fixing ports
@@ -191,7 +199,7 @@ run_one() {
     fi
     # build command line
     # use slogfile for log; we'll move .0/.1 at the end
-    cmd="$cmd -c ${nrpcs} -l $limit -M -g -q -r $iter -s $slogfile -t ${timeo}"
+    cmd="$cmd -c ${nrpcs} -l $limit -M -q -r $iter -s $slogfile -t ${timeo}"
     if [ x$bulksz != x ]; then
         cmd="$cmd -S $bulksz -L $bulksz"
     fi
