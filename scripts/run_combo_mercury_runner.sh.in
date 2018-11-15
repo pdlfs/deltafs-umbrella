@@ -153,21 +153,29 @@ run_one() {
     message "====================================================="
     message ""
 
-    if [ $islocal = 1 ]; then
-        if [ $proto = "ofi+gni" -o $proto = "bmi+tcp" ]; then
-            message "NOTE: applying local ofi+gni/bmi+tcp HACK..."
+    saddress="$proto"
+    caddress="$proto"
+    cmd="$runner"
+    if [ "$islocal" = 1 ]; then
+        if [ "$proto" = "bmi+tcp" ]; then
+            # XXX: avoids port warning error from bmi+tcp by fixing ports
+            # XXX: note: bmi+tcp can only run 1 instance, so fix is ok
+            message "NOTE: applying local bmi+tcp HACK..."
             saddress="${proto}://${host1_ip}:22222"
             caddress="${proto}://${host1_ip}:22223"
-            cmd="$runner"
-        else
-            saddress="h0=${proto}"
-            caddress="h1=${proto}"
-            cmd="$runner -d ${jobdir}"
+        fi
+        if [ "$proto" = "cci+tcp" -o "$proto" = "ofi+tcp" ]; then
+            # we add IPs for IP subnet selection...  0 is the wildcard port.
+            saddress="${proto}://${host1_ip}:0"
+            caddress="${proto}://${host1_ip}:0"
         fi
     else
-        saddress="${proto}://${host1_ip}:%d"
-        caddress="${proto}://${host2_ip}:%d"
-        cmd="$runner"
+        if [ "$proto" = "bmi+tcp" -o "$proto" = "cci+tcp" \
+                                  -o "$proto" = "ofi+tcp" ]; then
+            # add IPs for subnet selection
+            saddress="${proto}://${host1_ip}:%d"
+            caddress="${proto}://${host2_ip}:%d"
+        fi
     fi
 
     # generate log file names (maybe they should be passed in?)
@@ -183,7 +191,7 @@ run_one() {
     fi
     # build command line
     # use slogfile for log; we'll move .0/.1 at the end
-    cmd="$cmd -c ${nrpcs} -l $limit -M -q -r $iter -s $slogfile -t ${timeo}"
+    cmd="$cmd -c ${nrpcs} -l $limit -M -g -q -r $iter -s $slogfile -t ${timeo}"
     if [ x$bulksz != x ]; then
         cmd="$cmd -S $bulksz -L $bulksz"
     fi
