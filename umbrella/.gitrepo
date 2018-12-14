@@ -7,5 +7,5 @@
 	remote = git@dev.pdl.cmu.edu:pdlfs/umbrella
 	branch = master
 	commit = 4b244de5f45df57796c28706b52bde0eeebff516
-	parent = a452770437d0ad3ed1fa94d6ee468ad7a6721b36
+	parent = 860e82844abff27c45f4ce968bfc75a9dbaab18c
 	cmdver = 0.3.1
