@@ -9,6 +9,7 @@
 #  MERCURY_TAG  - tag to checkout of git
 #  MERCURY_TAR  - cache tar file name (default should be ok)
 #
+#  MERCURY_GNI_USEUDREG - Force use of udreg instead of internal MR cache
 #  MERCURY_OPA - force use of OPA atomic lib
 #  MERCURY_POST_LIMIT - enable post limit
 #  MERCURY_SELF_FORWARD - enable self forward thread
@@ -36,6 +37,8 @@ umbrella_defineopt (MERCURY_TAR "mercury-${MERCURY_TAG}.tar.gz"
 #
 # non-na options
 #
+umbrella_defineopt (MERCURY_GNI_USEUDREG "ON" BOOL
+                    " Force use of udreg instead of internal MR cache")
 umbrella_defineopt (MERCURY_OPA "OFF" BOOL "Force use of OPA atomic lib")
 umbrella_defineopt (MERCURY_POST_LIMIT "ON" BOOL "Enable post limit")
 umbrella_defineopt (MERCURY_SELF_FORWARD "OFF" BOOL "Enable self forward thread")
@@ -96,6 +99,10 @@ if (MERCURY_CCI)
 endif (MERCURY_CCI)
 
 if (MERCURY_OFI)
+    if (DEFINED ENV{CRAYPE_VERSION})
+        list (APPEND MERCURY_CMAKE_ARGS
+              -DNA_OFI_GNI_USE_UDREG=${MERCURY_GNI_USEUDREG})
+    endif ()
     list (APPEND MERCURY_DEPENDS ofi)
     include (umbrella/ofi)
 endif (MERCURY_OFI)
@@ -111,6 +118,9 @@ message (STATUS "    HG post limit: ${MERCURY_POST_LIMIT}")
 message (STATUS "    HG force OPA: ${MERCURY_OPA}")
 message (STATUS "    NAs: bmi=${MERCURY_BMI} cci=${MERCURY_CCI}")
 message (STATUS "    NAs: ofi=${MERCURY_OFI} sm=${MERCURY_SM}")
+if (DEFINED ENV{CRAYPE_VERSION})
+    message (STATUS "    NAs: ofi_udreg=${MERCURY_GNI_USEUDREG}")
+endif ()
 
 #
 # generate parts of the ExternalProject_Add args...
