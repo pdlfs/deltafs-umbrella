@@ -75,7 +75,7 @@ umbrella_opt_default (PAPI_TRY_TAG "v1.3")
 umbrella_opt_default (HEX_RUNNER_TAG "v1.0")
 umbrella_opt_default (NEXUS_RUNNER_TAG "4450339b")    # Mar 2018
 umbrella_opt_default (OFI_TAG "a7f3a97f")             # Dec 2018
-umbrella_opt_default (VPIC_TAG "b2578261")            # Nov 2017
+umbrella_opt_default (VPIC_TAG "9a64531e")            # Dec 2018
 
 #
 # any additional cache variables we want to add that are not already
