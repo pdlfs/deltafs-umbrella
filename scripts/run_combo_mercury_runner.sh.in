@@ -54,6 +54,13 @@ else
   nb_mode="cs"         # bidirectional (but we only report 1 direction)
 fi
 
+# pollspin
+if [ ${MR_POLLSPIN:-"0"} = "0" ]; then
+  nb_pollspin="0"      # do not poll/spin
+else
+  nb_pollspin="1"      # yes, poll/spin!
+fi
+
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=(${MR_NPROTOS:-bmi+tcp cci+tcp})     # protocols to test
 n_sizes=(${MR_NSIZES:-64 1024 4096})          # RPC snd size ("-i" flag)
@@ -149,7 +156,7 @@ run_one() {
     message "Starting new test at: ${now}"
     message "Testing protocol '$proto' with $num Mercury instances"
     message "reqsz=${reqsz:-'n/a'}, bulksz=${bulksz:-'n/a'}, limit=$limit, nrpcs=$nrpcs"
-    message "Iteration $iter out of $repeats, mode ${nb_mode}"
+    message "Iteration $iter out of $repeats, mode ${nb_mode}, poll ${nb_pollspin}"
     message "====================================================="
     message ""
 
@@ -205,6 +212,9 @@ run_one() {
     fi
     if [ x$reqsz != x ]; then
         cmd="$cmd -i $reqsz"
+    fi
+    if [ "${nb_pollspin}" != 0 ]; then
+        cmd="$cmd -P"
     fi
 
     the_cmd="$cmd -m ${nb_mode} $num $saddress $caddress"
