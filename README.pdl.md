@@ -53,10 +53,6 @@ git lfs install --local
 # Secondly, config git-lfs to use github.com as the service provider,
 # which by default will be dev.pdl.cmu.edu
 git config --add lfs.url git@github.com:pdlfs/deltafs-umbrella.git
-git config --add lfs.pushurl git@github.com:pdlfs/deltafs-umbrella.git
-
-# Update lfs lock setting
-git config 'lfs.https://github.com/pdlfs/deltafs-umbrella.git.locksverify' true
 
 # Next, fetch all git-lfs files
 git lfs pull
