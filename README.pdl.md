@@ -43,7 +43,7 @@ Here, it is assumed that git-lfs has been installed.
 ```bash
 # First, git-clone from dev.pdl.cmu.edu but avoid fetching
 # any git-lfs files because this will fail anyway
-git lfs clone --exclude="cache.0" git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
+env GIT_LFS_SKIP_SMUDGE=1 git clone git@dev.pdl.cmu.edu:pdlfs/deltafs-umbrella.git
 
 cd deltafs-umbrella
 
