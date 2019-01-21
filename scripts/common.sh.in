@@ -1,7 +1,8 @@
 #!/bin/bash -eu
 
 #
-# Copyright (c) 2017, Carnegie Mellon University.
+# Copyright (c) 2017-2019, Carnegie Mellon University and
+#    Los Alamos National Laboratory.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -843,7 +844,7 @@ do_run() {
             "PRELOAD_Bypass_write" ${XX_BYPASS_WRITE:-"0"}
             "PRELOAD_Bypass_placement" ${XX_BYPASS_CH:-"0"}
             "PRELOAD_Skip_mon" ${XX_SKIP_MON:-"0"}
-            "PRELOAD_Skip_papi" ${XX_SKIP_PAPI:-"0"}
+            "PRELOAD_Skip_papi" ${XX_SKIP_PAPI:-"1"}
             "PRELOAD_Skip_sampling" ${XX_SKIP_SAMP:-"0"}
             "PRELOAD_Sample_threshold" ${XX_SAMP_TH:-"64"}
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
@@ -860,7 +861,7 @@ do_run() {
             "PRELOAD_Enable_bg_sngcomp" ${XX_BG_SNGCOMP:-"0"}
             "PRELOAD_Enable_wisc" ${XX_FMT_WISC:-"0"}
             "PRELOAD_Particle_buf_size" ${XX_PARTICLE_BUF_SIZE-"$((2*1024*1024))"}
-            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"11"}
+            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"19"}
             "PRELOAD_Particle_size" ${XX_PARTICLE_SIZE:-"40"}
             "PRELOAD_Particle_extra_size" ${XX_PARTICLE_EXTRA_SIZE:-"0"}
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
