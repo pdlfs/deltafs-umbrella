@@ -64,7 +64,7 @@ umbrella_opt_default (BMI_TAG "2abbe991")             # Aug 2017
 umbrella_opt_default (CCI_TAG "3ab663e0")
 umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
-umbrella_opt_default (DELTAFS_COMMON_TAG "v19.0")
+umbrella_opt_default (DELTAFS_COMMON_TAG "v19.2")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.12")
 umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.70")
 umbrella_opt_default (DELTAFS_TAG "v2019.1")
