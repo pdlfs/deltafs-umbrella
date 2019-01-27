@@ -119,7 +119,8 @@ case $arg_test_type in
 
 esac
 
-if [ ${XX_BYPASS_WRITE:-0} -ne 0 ]; then
+if [ ${XX_BYPASS_WRITE:-0} -ne 0 -a $do_querying -ne 0 ]; then
+    message "!!! WRITE BYPASSED MUST SKIP QUERIES"
     do_querying=0
 fi
 
