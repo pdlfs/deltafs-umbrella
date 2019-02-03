@@ -9,7 +9,7 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c,
+my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c, @cs19d, @cs19e, @cs19f,
 @pd18a, @pd18b, @pd18c, @pd18d, @pd18e, @pd18f, @pd18h,
 @pd18i, @pd18j, @pd18x, @pd18y, @sc18a, @sc18b, @sc18c,
 @sc18d, @sc18e, @sc18f, @sc18k, @sc18l, @sc18r, @sc18n,
@@ -87,8 +87,23 @@ my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c,
 [    96,     1,    25,  16,   4,   0,   0,   1,   1,  32,  150,   10,  "4608GiB"],
 );
 
-# cs19c: for the ics19 KNL paper
+# cs19c: for the ics19 KNL paper (px=16)
 @cs19c = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     1,    25,   2,   2,   0,   0,   1,   1,  64,   10,    1,    "32GiB"],
+[     1,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     2,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     4,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     8,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,   "384GiB"],
+[    16,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,   "768GiB"],
+[    32,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,  "1536GiB"],
+[    64,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,  "3072GiB"],
+[    96,     1,    25,  16,   4,   0,   0,   1,   1,  64,  150,   10,  "4608GiB"],
+);
+
+# cs19d: for the ics19 KNL paper (px=8)
+@cs19d = (
 #         vpic   vpic                                      max  base
 # nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
 [     1,     1,    25,   2,   2,   0,   0,   1,   1,  64,   10,    1,    "32GiB"],
@@ -100,6 +115,36 @@ my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c,
 [    32,     1,    25,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "1536GiB"],
 [    64,     1,    25,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "3072GiB"],
 [    96,     1,    25,   8,   4,   0,   0,   1,   1,  64,  150,   10,  "4608GiB"],
+);
+
+# cs19e: for the ics19 KNL paper (px=4)
+@cs19e = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     1,    25,   2,   2,   0,   0,   1,   1,  64,   10,    1,    "32GiB"],
+[     1,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     2,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     4,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     8,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,   "384GiB"],
+[    16,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,   "768GiB"],
+[    32,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,  "1536GiB"],
+[    64,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,  "3072GiB"],
+[    96,     1,    25,   4,   4,   0,   0,   1,   1,  64,  150,   10,  "4608GiB"],
+);
+
+# cs19f: for the ics19 KNL paper (px=2)
+@cs19f = (
+#         vpic   vpic                                      max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra,    dwsize
+[     1,     1,    25,   2,   2,   0,   0,   1,   1,  64,   10,    1,    "32GiB"],
+[     1,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     2,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     4,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,   "192GiB"],
+[     8,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,   "384GiB"],
+[    16,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,   "768GiB"],
+[    32,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,  "1536GiB"],
+[    64,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,  "3072GiB"],
+[    96,     1,    25,   2,   4,   0,   0,   1,   1,  64,  150,   10,  "4608GiB"],
 );
 
 # pd18a: for the pdsw18 KNL paper
@@ -553,6 +598,9 @@ my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c,
     "cs19a"   => [ \@cs19a,   \&stdpost_2d ],
     "cs19b"   => [ \@cs19b,   \&stdpost_2d ],
     "cs19c"   => [ \@cs19c,   \&stdpost_2d ],
+    "cs19d"   => [ \@cs19d,   \&stdpost_2d ],
+    "cs19e"   => [ \@cs19e,   \&stdpost_2d ],
+    "cs19f"   => [ \@cs19f,   \&stdpost_2d ],
     "pd18a"   => [ \@pd18a,   \&stdpost_2d ],
     "pd18b"   => [ \@pd18b,   \&stdpost_2d ],
     "pd18c"   => [ \@pd18c,   \&stdpost_2d ],
