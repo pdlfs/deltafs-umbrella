@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+#
+# cobalt_pbs_nodefile  generate a nodefile under cobalt
+# 15-Feb-2019  chuck@ece.cmu.edu
+#
+# based on the run_on_all_nids.py script I got from phil
+#
+
+use strict;
+
+my($outfile) = @ARGV;
+die "usage: cobalt_pbs_nodefile [output-file]" unless ($outfile ne "");
+die "error: COBALT_PARTNAME not defined" 
+    unless (defined($ENV{'COBALT_PARTNAME'}));
+
+my(@nidgroups, $nidgroup, $s, $e, %nidset, $result);
+@nidgroups = split(/,/, $ENV{'COBALT_PARTNAME'});
+foreach $nidgroup (@nidgroups) {
+  if ($nidgroup =~ /^(\d+)-(\d+)$/) {
+    if ($1 <= $2) {
+      $s = $1; $e = $2;
+    } else {
+      $s = $2; $e = $1;
+    }
+  } elsif ($nidgroup =~ /^(\d+)$/) {
+    $s = $e = $1;
+  } else {
+    die "bad COBALT_PARTNAME value: " . $ENV{'COBALT_PARTNAME'};
+  }
+  while ($s <= $e) {
+    $nidset{$s++} = 1;
+  }
+}
+
+$result = join("\n", sort { $a <=> $b } keys %nidset) . "\n";
+open(OUTPUT, ">$outfile") || die "cannot open $outfile ($!)";
+die "write error ($!)" if (!print(OUTPUT $result) || !close(OUTPUT));
+exit(0);

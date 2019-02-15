@@ -58,9 +58,9 @@
 # environment variables we set/use:
 #  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
 #                example: /lustre/ttscratch1/users/$USER
-#  $JOBENV - operating env (one of moab, slurm, openmpi, or mpich)
+#  $JOBENV - operating env (one of moab, slurm, cobalt, openmpi, or mpich)
 #            we'll try and figure it out if not provided by user
-#  $JOBRUNCMD - aprun/srun/mpirun command to use, should match $JOBENV
+#  $JOBRUNCMD - aprun/srun/mpirun/runjob command to use, should match $JOBENV
 #               (only used if JOBENV is set by user)
 #  $JOBHOSTS - nodes to run jobs (default: localhost)
 #              (only used if not running on a Cray or an Emulab platform)
@@ -85,6 +85,10 @@
 #       XXX: this node list is in compact form, we need to expand it
 #            to get a full list of nodes.  there is a helper perl script
 #            called "generate_pbs_nodefile" that will do this for us
+#
+#  Cray env running cobalt:
+#    $COBALT_JOBID - job id
+#    $COBALT_PARTNAME - list of all nodes (in compact form)
 #
 
 #
@@ -153,16 +157,18 @@ common_init() {
       export JOBENV=moab
     elif [ x${SLURM_JOBID-} != x ]; then
       export JOBENV=slurm
-    elif [ `which mpirun.mpich` ]; then
+    elif [ x${COBALT_JOBID-} != x ]; then
+      export JOBENV=cobalt
+    elif [ `which mpirun.mpich 2>/dev/null` ]; then
       export JOBENV=mpich
-    elif [ `which mpirun.openmpi` ]; then
+    elif [ `which mpirun.openmpi 2>/dev/null` ]; then
       export JOBENV=openmpi
     else
       die "common.sh UNABLE TO DETERMINE ENV - ABORTING"
     fi
   else
     # verify user selected something we know about
-    if [ $JOBENV != moab -a $JOBENV != slurm -a \
+    if [ $JOBENV != moab -a $JOBENV != slurm -a $JOBENV != cobalt -a \
          $JOBENV != mpich -a $JOBENV != openmpi ]; then
       die "bad JOBENV ($JOBENV) provided by user - ABORTING"
     fi
@@ -174,6 +180,14 @@ common_init() {
       export JOBRUNCMD=aprun
     elif [ $JOBENV = slurm ]; then
       export JOBRUNCMD=srun
+    elif [ $JOBENV = cobalt ]; then
+      if [ `which aprun 2>/dev/null` ]; then
+        JOBRUNCMD=aprun
+      elif [ `which runjob 2>/dev/null` ]; then
+        JOBRUNCMD=runjob
+      else
+        die "cobalt: cannot find JOBRUNCMD - ABORTING!"
+      fi
     elif [ $JOBENV = mpich ]; then
       export JOBRUNCMD=mpirun.mpich
     elif [ $JOBENV = openmpi ]; then
@@ -194,8 +208,13 @@ common_init() {
          x${SLURM_JOB_NODELIST-} = x ]; then
       die "bad slurm setup - check jobname and nodelist"
     fi
-    if [ ! `which generate_pbs_nodefile` ]; then
+    if [ ! `which generate_pbs_nodefile 2>/dev/null` ]; then
       die "slurm helper script generate_pbs_nodefile not found in path"
+    fi
+  elif [ $JOBENV = cobalt ]; then    # does not give us job name...
+    if [ x${COBALT_JOBID-} = x -o \
+         x${COBALT_PARTNAME-} = x ]; then
+      die "bad cobalt setup - check jobid and partname"
     fi
   fi
 }
@@ -236,7 +255,7 @@ loadargs() {
 #
 # get_jobdir: setup $jobdir var and makes sure $jobdir is present
 # uses: $JOBENV, $MOAB_JOBNAME, $PBS_JOBID,
-#       $SLURM_JOB_NAME, $SLURM_JOBID, $JOBDIRHOME
+#       $SLURM_JOB_NAME, $SLURM_JOBID, $COBALT_JOBID, $JOBDIRHOME
 # sets: $jobdir  (XXX: also $logfile)
 #
 get_jobdir() {
@@ -250,6 +269,8 @@ get_jobdir() {
         jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID}
     elif [ $JOBENV = slurm ]; then
         jobdir=${jobdirhome}/${SLURM_JOB_NAME}.${SLURM_JOBID}
+    elif [ $JOBENV = cobalt ]; then
+        jobdir=${jobdirhome}/`basename $0`.${COBALT_JOBID}
     elif [ x${MPIJOBNAME-} != x ]; then
         jobdir=${jobdirhome}/${MPIJOBNAME}.${MPIJOBID-$$}
     else
@@ -355,7 +376,9 @@ bb_stageoutwait() {
 # gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
 # one host per line.
 # uses: $JOBENV, $PBS_NODEFILE
-#       $SLURMJOB_NODELIST/generate_pbs_nodefile, $jobdir
+#       $SLURMJOB_NODELIST/generate_pbs_nodefile,
+#       $COBALT_PARTNAME/cobalt_pbs_nodefile,
+#       $jobdir
 # sets: $all_nodes, $num_all_nodes
 # creates: $jobdir/hosts.txt
 #
@@ -375,6 +398,12 @@ gen_hostfile() {
         cat $tmp_nodefile | uniq | sort > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
         rm -f $tmp_nodefile
+
+    elif [ $JOBENV = cobalt ]; then
+
+        # generate hostfile on CRAY
+        $dfsu_prefix/scripts/cobalt_pbs_nodefile $jobdir/hosts.txt || \
+            die "failed to create hosts.txt file"
 
     elif [ -f "/share/testbed/bin/emulab-listall" ]; then
 
@@ -442,8 +471,8 @@ gen_hosts() {
 clear_caches() {
     message "-INFO- clearing node caches..."
 
-    if [ $JOBENV = moab -o $JOBENV = slurm ]; then
-        message "!!! NOTICE !!! skipping cache clear ... no cray sudo access"
+    if [ $JOBENV = moab -o $JOBENV = slurm -o $JOBENV = cobalt ]; then
+        message "!!! NOTICE !!! skipping cache clear ... no hpc sudo access"
     elif [ -f "/share/testbed/bin/emulab-mpirunall" -a "${DROP_CACHE-}x" != "x" ]; then
         # this does more than just $vpic_nodes (does them all)
         # but that isn't really a problem...
@@ -457,7 +486,7 @@ clear_caches() {
 }
 
 #
-# do_mpirun: Run CRAY MPICH, ANL MPICH, or OpenMPI run command
+# do_mpirun: Run CRAY MPICH/slurm/cobalt, ANL MPICH, or OpenMPI run command
 #
 # Arguments:
 # @1 number of processes
@@ -486,9 +515,9 @@ do_mpirun() {
 
     envstr=""; npstr=""; hstr=""
 
-    if [ $JOBENV = moab ]; then
+    if [ $JOBRUNCMD = aprun ]; then
 
-        # CRAY running moab....  we need to use aprun
+        # CRAY with aprun (could be moab or cobalt)
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-e %s=%s " ${envs[@]}`
         fi
@@ -507,9 +536,9 @@ do_mpirun() {
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ $JOBENV = slurm ]; then
+    elif [ $JOBRUNCMD = srun ]; then
 
-        # CRAY running slurm....  we need to use srun
+        # we are running slurm....
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "%s=%s," ${envs[@]}`
             # XXX: "ALL" isn't documented in srun(1) man page, but it works.
@@ -533,7 +562,7 @@ do_mpirun() {
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ $JOBENV = mpich ]; then
+    elif [ $JOBENV = mpich ]; then   # XXX: convert to JOBRUNCMD
 
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-env %s %s " ${envs[@]}`
@@ -581,7 +610,7 @@ do_mpirun() {
 
     else
 
-        die "could not find a supported mpirun or aprun command"
+        die "could not find a supported do_mpirun command"
 
     fi
 }
