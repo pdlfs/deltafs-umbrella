@@ -45,7 +45,9 @@ set -euo pipefail
 ####################
 # Input parameters #
 ####################
-subnet=${1:-"10.92"}    # 10.92=narwhal, 10.53=susitna_fge, 11.128=trinitite
+# 10.92=narwhal, 10.53=susitna_fge, 11.128=trinitite
+# default is to use "hostname -i" ip
+subnet=${1:-""}
 
 # mode (one way or two way)
 if [ ${MR_TWOWAY:-"0"} = "0" ]; then
@@ -106,21 +108,40 @@ else
 fi
 
 #
-# convert hostnames to IPs using hostname -I on remote nodes
-# and put results in host*-ips.txt in $jobdir, load into
-# host1_ip and host2_ip, also taking $subnet into consideration
+# get IP addresses for the endpoints.  if we were not given a subnet,
+# then we just use "hostname -i" ... if we have a subnet, then we use
+# "ifconfig -a" to get a list of IPs and use $subnet to filter.  we
+# used to use "hostname -I" but Cray's hostname is too old and does not
+# support the "-I" flag...
 #
 host1=$(echo "$all_nodes" | sort | head -n 1)
-do_mpirun 1 1 "" $host1 "hostname -i" "" $logfile $jobdir/host1-ips.txt
-host1_ip=$(cat $jobdir/host1-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
-if [ -z $host1_ip ]; then die "wrong subnet"; fi
-message ">>> Host 1: hostname = $host1, ip = $host1_ip"
+if [ -z "$subnet" ]; then
+    do_mpirun 1 1 "" $host1 "hostname -i" "" $logfile $jobdir/host1-ips.txt
+    host1_ip=$(head -1 $jobdir/host1-ips.txt)
+else
+    do_mpirun 1 1 "" $host1 "ifconfig -a" "" $logfile $jobdir/host1-ifc.txt
+    host1_ip=$(grep 'inet addr:' $jobdir/host1-ifc.txt | \
+               sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
+               fgrep $subnet || true)
+    if [ -z $host1_ip ]; then die "wrong subnet"; fi
+fi
 
 if [ $islocal = 0 ]; then
     host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
-    do_mpirun 1 1 "" $host2 "hostname -i" "" $logfile $jobdir/host2-ips.txt
-    host2_ip=$(cat $jobdir/host2-ips.txt | tr ' ' '\n' | grep $subnet | head -1)
-    if [ -z $host2_ip ]; then die "wrong subnet"; fi
+    if [ -z "$subnet" ]; then
+        do_mpirun 1 1 "" $host2 "hostname -i" "" $logfile $jobdir/host2-ips.txt
+        host2_ip=$(head -1 $jobdir/host2-ips.txt)
+    else
+        do_mpirun 1 1 "" $host2 "ifconfig -a" "" $logfile $jobdir/host2-ifc.txt
+        host2_ip=$(grep 'inet addr:' $jobdir/host2-ifc.txt | \
+                   sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
+                   fgrep $subnet || true)
+        if [ -z $host2_ip ]; then die "wrong subnet"; fi
+    fi
+fi
+
+message ">>> Host 1: hostname = $host1, ip = $host1_ip"
+if [ $islocal = 0 ]; then
     message ">>> Host 2: hostname = $host2, ip = $host2_ip"
 fi
 
