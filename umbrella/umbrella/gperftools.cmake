@@ -23,7 +23,7 @@ umbrella_defineopt (GPERFTOOLS_TAR "gperftools-${GPERFTOOLS_TAG}.tar.gz"
     STRING "GPERFTOOLS cache tar file")
 
 umbrella_defineopt (GPERFTOOLS_FRAMEPOINTER "off"
-                    BOOLEAN "enable frame pointer")
+                    BOOL "enable frame pointer")
 
 if (GPERFTOOLS_FRAMEPOINTER)
     set (GPERFTOOLS_FPFLAGS "--enable-frame-pointers")

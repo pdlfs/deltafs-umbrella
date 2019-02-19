@@ -30,7 +30,7 @@ umbrella_defineopt (H5PART_URLFILE "H5Part-1.6.6.tar.gz"
 umbrella_defineopt (H5PART_URLMD5 "327c63d198e38a12565b74cffdf1f9d7"
     STRING "MD5 of tar file")
 
-umbrella_defineopt (H5PART_USEURL "ON" BOOLEAN "Use URL to download h5part")
+umbrella_defineopt (H5PART_USEURL "ON" BOOL "Use URL to download h5part")
 
 umbrella_defineopt (H5PART_TAR "h5part-${H5PART_TAG}.tar.gz"
     STRING "h5part cache tar file")

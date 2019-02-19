@@ -30,7 +30,7 @@ umbrella_defineopt (EIGEN_URL_MD5 "1a47e78efe365a97de0c022d127607c3"
      STRING "EIGEN download URL md5")
 
 # not everyone has mercurial hg installed, so use URL by default
-umbrella_defineopt (EIGEN_USEURL "ON" BOOLEAN "Use URL to download EIGEN")
+umbrella_defineopt (EIGEN_USEURL "ON" BOOL "Use URL to download EIGEN")
 
 umbrella_defineopt (EIGEN_TAR "eigen-${EIGEN_TAG}.tar.gz" 
     STRING "EIGEN cache tar file")

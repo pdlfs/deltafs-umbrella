@@ -37,15 +37,15 @@ umbrella_defineopt (CCI_URL
 umbrella_defineopt (CCI_URL_MD5 "070b2ba4eca92a846c093f2cd000d3b2"
      STRING "CCI download URL md5")
 
-umbrella_defineopt (CCI_USEURL "OFF" BOOLEAN "Use URL to download CCI")
+umbrella_defineopt (CCI_USEURL "OFF" BOOL "Use URL to download CCI")
 
 umbrella_defineopt (CCI_TAR "cci-${CCI_TAG}.tar.gz" STRING "CCI cache tar file")
 
-umbrella_defineopt (CCI_GNI "OFF" BOOLEAN "Enable GNI backend in CCI")
+umbrella_defineopt (CCI_GNI "OFF" BOOL "Enable GNI backend in CCI")
 umbrella_defineopt (CCI_GNI_PREFIX "" STRING "GNI prefix for CCI")
 umbrella_defineopt (CCI_GNI_LIBDIR "" STRING "GNI libdir flag for CCI")
 
-umbrella_defineopt (CCI_VERBS "OFF" BOOLEAN "Enable verbs backend in CCI")
+umbrella_defineopt (CCI_VERBS "OFF" BOOL "Enable verbs backend in CCI")
 umbrella_defineopt (CCI_VERBS_PREFIX "" STRING "verbs prefix for CCI")
 umbrella_defineopt (CCI_VERBS_LIBDIR "" STRING "verbs libdir flag for CCI")
 
