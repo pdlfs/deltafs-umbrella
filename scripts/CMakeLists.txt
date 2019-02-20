@@ -16,15 +16,17 @@ project (deltafs-umbrella-scripts NONE)
 set (install-files README.md vpic_plots.R)
 
 # executable scripts to install
-set (install-programs basic-bb.sh cobalt_pbs_nodefile ethq.pl process_logs.sh
-     process_runner.pl report_runner.pl vpic_report.sh vpic_cleanup.pl)
+set (install-programs basic-bb.sh cbatch cobalt_pbs_nodefile ethq.pl
+     process_logs.sh process_runner.pl report_runner.pl vpic_report.sh
+     vpic_cleanup.pl)
 
 # executable scripts to @-expand and then install
-set (install-programs-in common.sh.in run_local_mercury_runner.sh.in
-     run_mercury_runner.sh.in run_combo_mercury_runner.sh.in
-     run_sndrcv_test.sh.in run_vpic_test.sh.in run_bbos_test.sh.in
+set (install-programs-in anl_do_combo_mercrunner.sh.in common.sh.in
      lanl_do_combo_mercrunner.sh.in lanl_do_mercury_runner.sh.in
-     vpic_mkcombo.pl.in vpicexpt_gen.pl.in)
+     run_bbos_test.sh.in run_combo_mercury_runner.sh.in
+     run_local_mercury_runner.sh.in run_mercury_runner.sh.in
+     run_sndrcv_test.sh.in run_vpic_test.sh.in vpic_mkcombo.pl.in
+     vpicexpt_gen.pl.in)
 
 #
 # expand ${install-programs-in} and build a list of output files for install

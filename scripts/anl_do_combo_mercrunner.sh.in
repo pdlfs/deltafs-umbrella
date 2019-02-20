@@ -1,0 +1,36 @@
+#!/bin/bash -eu
+#COBALT --jobname mercury-runner
+#COBALT -t 20
+#COBALT -n 2
+#COBALT --mode script
+#COBALT --output %HOME%/joblogs/mercury-runner-$COBALT_JOBID.out
+#COBALT --error %HOME%/joblogs/mercury-runner-$COBALT_JOBID.out
+#COBALT --debuglog %HOME%/joblogs/mercury-runner-$COBALT_JOBID.clog
+#COBALT -A radix-io
+#COBALT -q debug-flat-quad
+
+subnet=""
+
+# uncomment to change the default values below
+
+###export MR_TWOWAY=1
+###export MR_LOCAL=1
+###export MR_POLLSPIN=1
+
+###export MR_NPROTOS="bmi+tcp"
+###export MR_NSIZES="64 1024 4096"
+###export MR_NLIMITS="1 2 4 8 16"
+###export MR_NREPEATS=2
+###export MR_NRPCS=100000
+###export MR_NTIMEOUT=120
+
+###export MR_BPROTOS="bmi+tcp"
+###export MR_BSIZES="2m"
+###export MR_BLIMITS="1 2"
+###export MR_BREPEATS=2
+###export MR_BRPCS=10000
+###export MR_BTIMEOUT=120
+
+@CMAKE_INSTALL_PREFIX@/scripts/run_mercury_runner.sh $subnet
+
+exit 0
