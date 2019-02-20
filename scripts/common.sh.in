@@ -887,7 +887,7 @@ do_run() {
             "PRELOAD_Print_meminfo" ${XX_PRINT_MEMINFO:-"0"}
             "PRELOAD_Enable_verbose_mode" ${XX_VERBOSE:-"1"}
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
-            "PRELOAD_Enable_bg_sglcomp" ${XX_BG_SGLCOMP:-"0"}
+            "PRELOAD_Bg_threads" ${XX_BG_DEPTH:-"4"}
             "PRELOAD_Enable_bloomy" ${XX_FMT_BLOOM:-"0"}
             "PRELOAD_Enable_wisc" ${XX_FMT_WISC:-"0"}
             "PRELOAD_Particle_buf_size" ${XX_PARTICLE_BUF_SIZE-"$((2*1024*1024))"}
