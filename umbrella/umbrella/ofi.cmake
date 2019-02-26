@@ -22,8 +22,10 @@ umbrella_defineopt (OFI_TAR "ofi-${OFI_TAG}.tar.gz" STRING "OFI cache tar file")
 
 #
 # XXX: we are currently hardwiring extra stuff on the cray
+# XXX: have to explicitly disable verbs on ANL theta or we get link errors
 #
-if (DEFINED ENV{CRAYPE_VERSION} AND NOT DEFINED OFI_CRAY_EXTRA)
+if ("${CMAKE_C_COMPILER_WRAPPER}" STREQUAL "CrayPrgEnv" AND
+    NOT DEFINED OFI_CRAY_EXTRA)
     set (OFI_CRAY_EXTRA --enable-gni --enable-ugni-static --enable-sockets
          --disable-rxd --disable-rxm --disable-udp --disable-usnic
          --disable-verbs --with-kdreg=no)

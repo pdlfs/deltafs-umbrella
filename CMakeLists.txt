@@ -96,13 +96,6 @@ set (PDLFS_OPTIONS -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                    -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
                    -DPDLFS_VERBOSE=${DELTAFS_VERBOSE})
 
-# overwrite default flags, we want to allow it to build verbs
-if (DEFINED ENV{CRAYPE_VERSION})
-    set (OFI_CRAY_EXTRA --enable-gni --enable-ugni-static --enable-sockets
-         --disable-rxd --disable-rxm --disable-udp --disable-usnic
-         --with-kdreg=no)
-endif ()
-
 include (umbrella/ch-placement)
 include (umbrella/deltafs)
 include (umbrella/deltafs-bb)
