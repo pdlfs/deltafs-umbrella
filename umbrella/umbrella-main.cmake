@@ -11,162 +11,6 @@ if (NOT UMBRELLA_INIT_DONE)
 endif ()
 
 #
-# get umbrella prefix/base directory
-#
-get_filename_component (UMBRELLA_PREFIX ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
-
-
-#
-# all umbrella builds use the build-in cmake ExternalProject routines
-#
-include (ExternalProject)
-
-#
-# pull in MPI if requested
-#
-if (UMBRELLA_MPI)
-    find_package (MPI MODULE REQUIRED)
-endif ()
-
-#
-# set default build type and insert it to cache.  add additional options.
-#
-if (NOT CMAKE_BUILD_TYPE)
-    set (CMAKE_BUILD_TYPE RelWithDebInfo
-         CACHE STRING "Choose the type of build." FORCE)
-    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-                  "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
-endif ()
-
-set (UMBRELLA_BUILD_TESTS "ON" CACHE BOOL "Build unit tests")
-find_file (UMBRELLA_CACHEDIR cache PATH ${CMAKE_SOURCE_DIR}
-           DOC "Cache directory of tar files" NO_DEFAULT_PATH)
-set (UMBRELLA_PATCHDIR "${UMBRELLA_PREFIX}/patches"
-     CACHE STRING "Internal patch directory")
-mark_as_advanced (UMBRELLA_PATCHDIR)
-set (UMBRELLA_SKIP_TESTS "OFF" CACHE BOOL "Skip running unit tests")
-set (UMBRELLA_USER_PATCHDIR "${CMAKE_SOURCE_DIR}/patches"
-     CACHE STRING "User patch directory")
-
-#
-# set up the prefix path for packaged software that we may want to
-# link to (e.g. third party libraries).   this will get added to
-# the configure command line (for autotools-based projects).
-#
-# we also want our install prefix to be in the prefix path too (it
-# isn't by default).
-#
-list (APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
-list (REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
-foreach (prefix ${CMAKE_PREFIX_PATH})
-    list (APPEND CMAKE_INCLUDE_PATH "${prefix}/include")
-    list (APPEND CMAKE_LIBRARY_PATH "${prefix}/lib")
-    set (UMBRELLA_PKGCFGPATH "${UMBRELLA_PKGCFGPATH}:${prefix}/lib/pkgconfig")
-endforeach ()
-list (REMOVE_DUPLICATES CMAKE_INCLUDE_PATH)
-list (REMOVE_DUPLICATES CMAKE_LIBRARY_PATH)
-# remove leading ":"
-string (SUBSTRING "${UMBRELLA_PKGCFGPATH}" 1 -1 UMBRELLA_PKGCFGPATH)
-
-#
-# build command-line variable settings for autotools configure scripts:
-#   ${UMBRELLA_CPPFLAGS}   -- preprocessor flags for autoconf
-#   ${UMBRELLA_LDFLAGS}    -- linker flags for autoconf
-#   ${UMBRELLA_COMP}       -- C/C++ compilers for autoconf
-#   ${UMBRELLA_MPICOMP}    -- C/C++ compilers with MPI for autoconf
-#   ${UMBRELLA_PKGCFGPATH} -- PKG_CONFIG_PATH setting
-#
-# users can reflect the cmake settings (including prefixes) down
-# to the configure script via env vars CPPFLAGS, LDFLAGS, CC, AND CXX.
-#
-if (CMAKE_INCLUDE_PATH)
-  foreach (umbrella_inc ${CMAKE_INCLUDE_PATH})
-      set (UMBRELLA_CPPFLAGS "${UMBRELLA_CPPFLAGS} -I${inc}")
-  endforeach ()
-  # remove the leading space
-  string (SUBSTRING ${UMBRELLA_CPPFLAGS} 1 -1 UMBRELLA_CPPFLAGS)
-  set (UMBRELLA_CPPFLAGS "CPPFLAGS=${cppflags}")
-endif ()
-if (CMAKE_LIBRARY_PATH)
-  foreach (lib ${CMAKE_LIBRARY_PATH})
-      set (UMBRELLA_LDFLAGS
-           "${UMBRELLA_LDFLAGS} -L${lib} -Wl,-rpath,${lib}")
-  endforeach ()
-  string (SUBSTRING ${UMBRELLA_LDFLAGS} 1 -1 UMBRELLA_LDFLAGS)
-  set (UMBRELLA_LDFLAGS "LDFLAGS=${UMBRELLA_LDFLAGS}")
-endif ()
-# compiler settings, the second one is to force an mpi wrapper based compile.
-set (UMBRELLA_COMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
-if (UMBRELLA_MPI)
-    set (UMBRELLA_MPICOMP CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
-else ()
-    # if MPI is off, fall back to standard compilers.  this allows us
-    # to compile projects where MPI is optional...
-    set (UMBRELLA_MPICOMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
-endif ()
-
-# some systems have PKG_CONFIG_PATH already set, so we need to add to it
-if (DEFINED ENV{PKG_CONFIG_PATH})
-  set (UMBRELLA_PKGCFGPATH "${UMBRELLA_PKGCFGPATH}:$ENV{PKG_CONFIG_PATH}")
-endif ()
-set (UMBRELLA_PKGCFGPATH "PKG_CONFIG_PATH=${UMBRELLA_PKGCFGPATH}")
-
-#
-# provide ${UMBRELLA_CMAKECACHE} for cmake-based projects.  we want
-# these values to propagate from the umbrella on down...
-#
-# XXX: tried passing through CMAKE_SYSTEM_NAME here, but that causes
-# cmakes under us to think we are crosscompiling even if the passed
-# in system name matches the host (see Modules/CMakeDetermineSystem.cmake).
-#                -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
-#
-set (UMBRELLA_CMAKECACHE
-                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
-                -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
-                -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_INSTALL_PREFIX}
-                -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
-                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=1
-     )
-
-message (STATUS "The umbrella framework is enabled")
-
-#
-# print the current config so users are aware of the current settings...
-#
-message (STATUS "Current Umbrella settings:")
-message (STATUS "  target OS: ${CMAKE_SYSTEM_NAME} "
-                             "${CMAKE_SYSTEM_VERSION}")
-message (STATUS "  host OS: ${CMAKE_HOST_SYSTEM_NAME} "
-                           "${CMAKE_HOST_SYSTEM_VERSION}")
-message (STATUS "  build type: ${CMAKE_BUILD_TYPE}")
-if (EXISTS "${UMBRELLA_USER_PATCHDIR}")
-    message (STATUS "  user patch dir: ${UMBRELLA_USER_PATCHDIR}")
-endif ()
-if (UMBRELLA_CACHEDIR)
-    message (STATUS "  tar cache directory: ${UMBRELLA_CACHEDIR}")
-endif ()
-message (STATUS "  CXX compiler: ${CMAKE_CXX_COMPILER} "
-                  "(${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION})")
-if (UMBRELLA_MPI)
-    message (STATUS "  MPI CXX wrapper:  ${MPI_CXX_COMPILER}")
-endif ()
-message (STATUS "  C compiler: ${CMAKE_C_COMPILER} "
-                  "(${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION})")
-if (UMBRELLA_MPI)
-    message (STATUS "  MPI C wrapper:  ${MPI_C_COMPILER}")
-endif ()
-message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
-message (STATUS "  build tests: ${UMBRELLA_BUILD_TESTS}")
-if (UMBRELLA_BUILD_TESTS)
-    message (STATUS "  skip running tests: ${UMBRELLA_SKIP_TESTS}")
-else ()
-    message (STATUS "  skip running tests: <off, build disabled>")
-endif ()
-message (STATUS "  ${UMBRELLA_PKGCFGPATH}")
-
-
-#
 # various helper function
 #
 
@@ -310,3 +154,275 @@ function (umbrella_opt_default var newdefault)
         set (${var} ${newdefault} PARENT_SCOPE)
     endif ()
 endfunction ()
+
+#
+# umbrella_get_pkgcfglist: get list of package cfg directories
+# currently configured in the environment that we need to consider.
+#
+function(umbrella_get_pkgcfglist outvar)
+    unset(rv)
+    set(srcvars PKG_CONFIG_PATH)
+    if("${CMAKE_C_COMPILER_WRAPPER}" STREQUAL "CrayPrgEnv")
+        # extra variables of interest on the cray
+        list(APPEND srcvars PKG_CONFIG_PATH_DEFAULT PE_PKG_CONFIG_PATH)
+    endif()
+    foreach(pkgcfgvar ${srcvars})
+        file(TO_CMAKE_PATH "$ENV{${pkgcfgvar}}" pkgcfg)
+        list(APPEND rv ${pkgcfg})
+    endforeach()
+    if(rv)
+        list(REMOVE_DUPLICATES rv)
+    endif()
+    set(${outvar} "${rv}" PARENT_SCOPE)   # push results to parent
+endfunction()
+
+#
+# umbrella_get_prefixpath: get the value of ${UMBRELLA_PREFIX_PATH}.
+# this is what we pass down to projects as their ${CMAKE_PREFIX_PATH}.
+# include directories specified to pkgconfig (PKG_CONFIG_PATH...).
+#
+function(umbrella_get_prefixpath pkgcfglist outvar)
+    set(rv ${CMAKE_PREFIX_PATH})        # start with our prefix path...
+    # cray: newer versions of cmake already added to system prefix path
+    if("${CMAKE_C_COMPILER_WRAPPER}" STREQUAL "CrayPrgEnv" AND
+       CMAKE_VERSION VERSION_GREATER 3.14)
+        unset(pkgcfglist)
+    endif()
+    foreach(path ${pkgcfglist})
+        string(REGEX REPLACE "(.*)/lib[^/]*/pkgconfig$" "\\1" path "${path}")
+        if(NOT "${path}" STREQUAL "")
+            list(APPEND rv "${path}")
+        endif()
+    endforeach()
+    if(rv)
+        list(REMOVE_DUPLICATES rv)
+    endif()
+    set(${outvar} "${rv}" PARENT_SCOPE)   # push results to parent
+endfunction()
+
+#
+# main code
+#
+
+#
+# public UMBRELLA_* variables:
+#
+#   UMBRELLA_PREFIX: base directory for umbrella files
+#   UMBRELLA_MPI: user sets this if we are using MPI (default=off)
+#   UMBRELLA_BUILD_TESTS: build unit tests (default=on)
+#   UMBRELLA_PATCHDIR: system-level patchdir (def=UMBRELLA_PREFIX/patchdir)
+#   UMBRELLA_SKIP_TESTS: skip running tests (default=OFF)
+#   UMBRELLA_USER_PATCHDIR: user patch dir (def=CMAKE_SOURCE_DIR/patches)
+#   UMBRELLA_PKGCFGLIST: (internal) list of pkgconfig directories from env
+#   UMBRELLA_PREFIX_PATH: passed down as CMAKE_PREFIX_PATH (see below)
+#   UMBRELLA_CMAKECACHE: init cache values for cmake-based projects
+#
+# for autotools-based projects:
+#   UMBRELLA_PKGCFGPATH: PKG_CONFIG_PATH to pass to configure script
+#   UMBRELLA_CPPFLAGS: preprocessor flags to pass into configure script
+#   UMBRELLA_LDFLAGS: link flags to pass into configure script
+#   UMBRELLA_COMP: C/C++ compilers for autoconf
+#   UMBRELLA_MPICOMP: C/C++ compilers with MPI for autoconf
+#
+# users specify the installation prefix as ${CMAKE_INSTALL_PREFIX}.
+# cmake adds this to the ${CMAKE_SYSTEM_PREFIX_PATH} so that find_file,
+# find_path, etc. search it.
+#
+# users may also specify ${CMAKE_PREFIX_PATH} to add prefixes to the
+# search path.  note that cmake searches ${CMAKE_PREFIX_PATH} before
+# ${CMAKE_SYTEM_PREFIX_PATH}.
+#
+# In addition to ${CMAKE_PREFIX_PATH}, users may also specify
+# ${CMAKE_INCLUDE_PATH} and ${CMAKE_LIBRARY_PATH}.  the difference
+# between the two is that cmake appends the appropriate subdirectory
+# names (e.g. "include") to directories in ${CMAKE_PREFIX_PATH}
+# but does not modify the paths in ${CMAKE_INCLUDE_PATH}.   thus,
+# if you have directory /usr/pkg in ${CMAKE_PREFIX_PATH} you do not
+# need to add /usr/pkg/include to ${CMAKE_INCLUDE_PATH} (that would be
+# redundant).
+#
+# useful additional prefixes can also be extracted from $ENV{PKG_CFG_PATH}.
+# in fact, this is done automatically on Crays in cmake 3.15 or newer.
+# for other systems, we do it manually.
+#
+# all this needs to be reflected back out on the command line for
+# autoconfig-based packages.
+#
+
+#
+# get umbrella prefix/base directory
+#
+get_filename_component (UMBRELLA_PREFIX ${CMAKE_CURRENT_LIST_FILE} DIRECTORY)
+
+#
+# all umbrella builds use the build-in cmake ExternalProject routines
+#
+include (ExternalProject)
+
+#
+# pull in MPI if requested
+#
+if (UMBRELLA_MPI)
+    find_package (MPI MODULE REQUIRED)
+endif ()
+
+#
+# set default build type and insert it to cache.  add additional options.
+#
+if (NOT CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE RelWithDebInfo
+         CACHE STRING "Choose the type of build." FORCE)
+    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+                  "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+endif ()
+
+set (UMBRELLA_BUILD_TESTS "ON" CACHE BOOL "Build unit tests")
+find_file (UMBRELLA_CACHEDIR cache PATH ${CMAKE_SOURCE_DIR}
+           DOC "Cache directory of tar files" NO_DEFAULT_PATH)
+set (UMBRELLA_PATCHDIR "${UMBRELLA_PREFIX}/patches"
+     CACHE STRING "Internal patch directory")
+mark_as_advanced (UMBRELLA_PATCHDIR)
+set (UMBRELLA_SKIP_TESTS "OFF" CACHE BOOL "Skip running unit tests")
+set (UMBRELLA_USER_PATCHDIR "${CMAKE_SOURCE_DIR}/patches"
+     CACHE STRING "User patch directory")
+
+#
+# init UMBRELLA_PREFIX_PATH with our CMAKE_PREFIX_PATH and possible
+# additional prefixes from PKG_CONFIG_PATH-like variables.  this is
+# passed down to projects as their CMAKE_PREFIX_PATH...
+#
+umbrella_get_pkgcfglist(UMBRELLA_PKGCFGLIST)
+umbrella_get_prefixpath("${UMBRELLA_PKGCFGLIST}" UMBRELLA_PREFIX_PATH)
+
+#
+# UMBRELLA_PKGCFGPATH contains "PKG_CONFIG_PATH=<path>" for adding
+# to the ./configure script command line...  we build it as a cmake
+# list and then convert it to a string.
+#
+# XXX: assume we only create "lib" (no "lib64") in install prefix.
+# if we start doing lib64 too, may need to provide an extra cfg
+# variable to help us.
+#
+set(UMBRELLA_PKGCFGPATH "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+foreach(prefix ${CMAKE_PREFIX_PATH})
+    if(EXISTS "${prefix}/lib64/pkgconfig")
+        list(APPEND UMBRELLA_PKGCFGPATH "${prefix}/lib64/pkgconfig")
+    endif()
+    if(EXISTS "${prefix}/lib/pkgconfig")
+        list(APPEND UMBRELLA_PKGCFGPATH "${prefix}/lib/pkgconfig")
+    endif()
+endforeach()
+list(APPEND UMBRELLA_PKGCFGPATH ${UMBRELLA_PKGCFGLIST})
+list(REMOVE_DUPLICATES UMBRELLA_PKGCFGPATH)
+# XXX: don't use file TO_NATIVE_PATH, it is not the opposite of TO_CMAKE_PATH
+string(REPLACE ";" ":" UMBRELLA_PKGCFGPATH "${UMBRELLA_PKGCFGPATH}")
+set (UMBRELLA_PKGCFGPATH "PKG_CONFIG_PATH=${UMBRELLA_PKGCFGPATH}")
+
+#
+# UMBRELLA_CPPFLAGS: preprocessor flags for autoconfig projects.
+# we assume we just need CMAKE_INSTALL_PREFIX, CMAKE_PREFIX_PATH,
+# and CMAKE_INCLUDE_PATH.  for other stuff autoconfig will use
+# pkg-config to find additional header paths...
+#
+set(UMBRELLA_CPPFLAGS "-I${CMAKE_INSTALL_PREFIX}/include")
+foreach(umbrella_val ${CMAKE_INCLUDE_PATH})
+    set(UMBRELLA_CPPFLAGS "${UMBRELLA_CPPFLAGS} -I${umbrella_val}")
+endforeach()
+foreach(umbrella_val ${CMAKE_PREFIX_PATH})
+    set(UMBRELLA_CPPFLAGS "${UMBRELLA_CPPFLAGS} -I${umbrella_val}/include")
+endforeach()
+set(UMBRELLA_CPPFLAGS "CPPFLAGS=${UMBRELLA_CPPFLAGS}")
+
+#
+# UMBRELLA_LDFLAGS: linker flags for autoconfig projects.
+# we assume we just need CMAKE_INSTALL_PREFIX, CMAKE_PREFIX_PATH,
+# and CMAKE_LIBRARY_PATH.  for other stuff autoconfig will use
+# pkg-config to find additional header paths...  the main question
+# is do we go with prefix/lib64 or prefix/lib?  for what we are building
+# we assume it is always going to be "lib" (can't know for sure, since
+# we may be running before anything gets installed)... for the
+# CMAKE_PREFIX_PATH we test for lib64 and use if present, otherwise we
+# stick with plain old lib.
+#
+set(UMBRELLA_LDFLAGS
+    "-L${CMAKE_INSTALL_PREFIX}/lib -Wl,-rpath,${CMAKE_INSTALL_PREFIX}/lib")
+foreach(umbrella_val ${CMAKE_LIBRARY_PATH})
+    set(UMBRELLA_LDFLAGS
+        "${UMBRELLA_LDFLAGS} -L${umbrella_val} -Wl,-rpath,${umbrella_val}")
+endforeach()
+foreach(umbrella_val ${CMAKE_PREFIX_PATH})
+    if(EXISTS "${umbrella_val}/lib64")
+        set(UMBRELLA_LDFLAGS "${UMBRELLA_LDFLAGS} -L${umbrella_val}/lib64")
+        set(UMBRELLA_LDFLAGS
+            "${UMBRELLA_LDFLAGS} -Wl,-rpath,${umbrella_val}/lib64")
+    elseif(EXISTS "${umbrella_val}/lib")
+        set(UMBRELLA_LDFLAGS "${UMBRELLA_LDFLAGS} -L${umbrella_val}/lib")
+        set(UMBRELLA_LDFLAGS
+            "${UMBRELLA_LDFLAGS} -Wl,-rpath,${umbrella_val}/lib")
+    endif()
+endforeach()
+set(UMBRELLA_LDFLAGS "LDFLAGS=${UMBRELLA_LDFLAGS}")
+
+# compiler settings, the second one is to force an mpi wrapper based compile.
+set (UMBRELLA_COMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
+if (UMBRELLA_MPI)
+    set (UMBRELLA_MPICOMP CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
+else ()
+    # if MPI is off, fall back to standard compilers.  this allows us
+    # to compile projects where MPI is optional...
+    set (UMBRELLA_MPICOMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
+endif ()
+
+#
+# provide ${UMBRELLA_CMAKECACHE} for cmake-based projects.  we want
+# these values to propagate from the umbrella on down...
+#
+# XXX: tried passing through CMAKE_SYSTEM_NAME here, but that causes
+# cmakes under us to think we are crosscompiling even if the passed
+# in system name matches the host (see Modules/CMakeDetermineSystem.cmake).
+#                -DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}
+#
+set (UMBRELLA_CMAKECACHE
+                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+                -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+                -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
+                -DCMAKE_INSTALL_PREFIX:STRING=${CMAKE_INSTALL_PREFIX}
+                -DCMAKE_PREFIX_PATH:STRING=${UMBRELLA_PREFIX_PATH}
+                -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=1
+     )
+
+message (STATUS "The umbrella framework is enabled")
+
+#
+# print the current config so users are aware of the current settings...
+#
+message (STATUS "Current Umbrella settings:")
+message (STATUS "  target OS: ${CMAKE_SYSTEM_NAME} "
+                             "${CMAKE_SYSTEM_VERSION}")
+message (STATUS "  host OS: ${CMAKE_HOST_SYSTEM_NAME} "
+                           "${CMAKE_HOST_SYSTEM_VERSION}")
+message (STATUS "  build type: ${CMAKE_BUILD_TYPE}")
+if (EXISTS "${UMBRELLA_USER_PATCHDIR}")
+    message (STATUS "  user patch dir: ${UMBRELLA_USER_PATCHDIR}")
+endif ()
+if (UMBRELLA_CACHEDIR)
+    message (STATUS "  tar cache directory: ${UMBRELLA_CACHEDIR}")
+endif ()
+message (STATUS "  CXX compiler: ${CMAKE_CXX_COMPILER} "
+                  "(${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION})")
+if (UMBRELLA_MPI)
+    message (STATUS "  MPI CXX wrapper:  ${MPI_CXX_COMPILER}")
+endif ()
+message (STATUS "  C compiler: ${CMAKE_C_COMPILER} "
+                  "(${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION})")
+if (UMBRELLA_MPI)
+    message (STATUS "  MPI C wrapper:  ${MPI_C_COMPILER}")
+endif ()
+message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
+message (STATUS "  build tests: ${UMBRELLA_BUILD_TESTS}")
+if (UMBRELLA_BUILD_TESTS)
+    message (STATUS "  skip running tests: ${UMBRELLA_SKIP_TESTS}")
+else ()
+    message (STATUS "  skip running tests: <off, build disabled>")
+endif ()
+message (STATUS "  ${UMBRELLA_PKGCFGPATH}")
