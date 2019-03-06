@@ -31,6 +31,6 @@ subnet=""
 ###export MR_BRPCS=10000
 ###export MR_BTIMEOUT=120
 
-@CMAKE_INSTALL_PREFIX@/scripts/run_mercury_runner.sh $subnet
+@CMAKE_INSTALL_PREFIX@/scripts/run_combo_mercury_runner.sh $subnet
 
 exit 0
