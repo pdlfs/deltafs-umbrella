@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 #COBALT --jobname mercury-runner
-#COBALT -t 20
+#COBALT -t 55
 #COBALT -n 2
 #COBALT --mode script
 #COBALT --output %HOME%/joblogs/mercury-runner-$COBALT_JOBID.out

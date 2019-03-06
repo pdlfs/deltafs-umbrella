@@ -530,9 +530,9 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "[MPIEXEC]" "aprun -n $procs" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "aprun -q -n $procs" $npstr $hstr $envstr \
                 $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        aprun -n $procs $npstr $hstr $envstr $extra_opts \
+        aprun -q -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
