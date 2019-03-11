@@ -89,6 +89,7 @@
 #  Cray env running cobalt:
 #    $COBALT_JOBID - job id
 #    $COBALT_PARTNAME - list of all nodes (in compact form)
+#    $COBALT_XJOBNAME - job name (we provide it, optional)
 #
 
 #
@@ -211,7 +212,13 @@ common_init() {
     if [ ! `which generate_pbs_nodefile 2>/dev/null` ]; then
       die "slurm helper script generate_pbs_nodefile not found in path"
     fi
-  elif [ $JOBENV = cobalt ]; then    # does not give us job name...
+  elif [ $JOBENV = cobalt ]; then
+    # cobalt does not give us job name...
+    # make one up and ensure it is always in the env at COBALT_XJOBNAME
+    if [ x${COBALT_XJOBNAME-} = x ]; then
+      export COBALT_XJOBNAME=`basename $0`
+      message "-INFO- common_init: cobalt: xjobname=${COBALT_XJOBNAME}"
+    fi
     if [ x${COBALT_JOBID-} = x -o \
          x${COBALT_PARTNAME-} = x ]; then
       die "bad cobalt setup - check jobid and partname"
@@ -254,8 +261,8 @@ loadargs() {
 # jobdir  ## Lustre
 #
 # get_jobdir: setup $jobdir var and makes sure $jobdir is present
-# uses: $JOBENV, $MOAB_JOBNAME, $PBS_JOBID,
-#       $SLURM_JOB_NAME, $SLURM_JOBID, $COBALT_JOBID, $JOBDIRHOME
+# uses: $JOBENV, $MOAB_JOBNAME, $PBS_JOBID, $SLURM_JOB_NAME, $SLURM_JOBID,
+#       $COBALT_XJOBNAME, $COBALT_JOBID, $JOBDIRHOME
 # sets: $jobdir  (XXX: also $logfile)
 #
 get_jobdir() {
@@ -270,7 +277,7 @@ get_jobdir() {
     elif [ $JOBENV = slurm ]; then
         jobdir=${jobdirhome}/${SLURM_JOB_NAME}.${SLURM_JOBID}
     elif [ $JOBENV = cobalt ]; then
-        jobdir=${jobdirhome}/`basename $0`.${COBALT_JOBID}
+        jobdir=${jobdirhome}/${COBALT_XJOBNAME}.${COBALT_JOBID}
     elif [ x${MPIJOBNAME-} != x ]; then
         jobdir=${jobdirhome}/${MPIJOBNAME}.${MPIJOBID-$$}
     else
