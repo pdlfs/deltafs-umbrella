@@ -1116,6 +1116,10 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
                        "/joblogs/$tag-$experiment-$r-$t-\$COBALT_JOBID.clog");
             push(@out, "#COBALT -A $account") if ($account ne '');
             push(@out, "#COBALT -q $queue") if ($queue ne '');
+            push(@out, "");
+            push(@out, "# XXX: cobalt missing feature: jobname env var");
+            push(@out, "# XXX: fake jobname env var on behalf of cobalt");
+            push(@out, "export COBALT_XJOBNAME=\"$tag-$experiment-$r-$t\"");
         } else {
             push(@out, "# $tag-$experiment-$r-$t - not using batch system");
             push(@out, "export MPIJOBNAME=\"$tag-$experiment-$r-$t\"");
