@@ -1120,6 +1120,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             push(@out, "# XXX: cobalt missing feature: jobname env var");
             push(@out, "# XXX: fake jobname env var on behalf of cobalt");
             push(@out, "export COBALT_XJOBNAME=\"$tag-$experiment-$r-$t\"");
+            push(@out, "");
         } else {
             push(@out, "# $tag-$experiment-$r-$t - not using batch system");
             push(@out, "export MPIJOBNAME=\"$tag-$experiment-$r-$t\"");
