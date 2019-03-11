@@ -711,6 +711,7 @@ sub hms {
 
 #
 # guess_subnet: based on hostname
+# XXX: there needs to be a better way to do this
 #
 sub guess_subnet {
     my($hn) = $hostname;
@@ -724,33 +725,18 @@ sub guess_subnet {
 # guess_platform: based on what's in our path
 #
 sub guess_platform {
-    my(@paths, $try);
+    my(@paths, $path);
     @paths = split(/:/, $ENV{'PATH'});
-    foreach $try ( "srun", "aprun") {
-        foreach ( @paths ) {
-            return($try) if (-x "$_/$try");
+    foreach $path ( @paths ) {
+        return("slurm") if (-x "$path/sbatch");
+        if (-x "$path/qsub") {
+            # cobalt overloads "qsub" ...
+            $_ = `$path/qsub --version 2>&1 `;
+            return("cobalt") if (/cobalt/i);
+            return("moab");
         }
     }
     return("mpi");
-}
-
-#
-# guess_extraopts(platform): try and guess the extra MPI options we need
-#
-sub guess_extraopts {
-    my($plat) = @_;
-    my($hn) = $hostname;
-    if ($hn =~ /^tt-fey/ || $hn =~ /^tr-/) {
-        # moab
-        return "-j 2 -d 2 -cc 0,32:1,33:2,34:3,35:4,36:5,37:6,38:7,39:8,40:" .
-               "9,41:10,42:11,43:12,44:13,45:14,46:15,47:16,48:17,49:" .
-               "18,50:19,51:20,52:21,53:22,54:23,55:24,56:25,57:26,58:" .
-               "27,59:28,60:29,61:30,62:31,63" if ($plat eq 'aprun');
-
-        # slurm
-        return "--cpu_bind=cores" if ($plat eq 'srun');
-    }
-    return(undef);
 }
 
 #
@@ -779,10 +765,10 @@ sub savefile {
 }
 
 my($cmd) = join(" ", @ARGV);
-my($rv, $addrunopts, $bbosbuddies, $constraints, $core_spec, $deckid,
-   $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet, $iterations,
-   $overcommit, $partition, $platform, $postruncmd, $prefix, $run, $scaletime,
-   $script, $skipreads, $tag, $tests);
+my($rv, $account, $addrunopts, $bbosbuddies, $constraints, $core_spec,
+   $deckid, $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet,
+   $iterations, $overcommit, $queue, $partition, $platform, $postruncmd,
+   $prefix, $run, $scaletime, $script, $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
@@ -799,10 +785,8 @@ $skipreads = 0;
 $tag = "vpic";
 $tests = "baseline,deltafs";
 
-# need platform to guess this
-$extraopts = guess_extraopts($platform);
-
 $rv = GetOptions(
+    "account=s"      =>  \$account,
     "addrunopts=s"   =>  \$addrunopts,
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
@@ -817,6 +801,7 @@ $rv = GetOptions(
     "ipsubnet=s"     =>  \$ipsubnet,
     "iterations=i"   =>  \$iterations,
     "overcommit=s"   =>  \$overcommit,
+    "queue=s"        =>  \$queue,
     "partition=s"    =>  \$partition,
     "platform=s"     =>  \$platform,
     "postruncmd=s"   =>  \$postruncmd,
@@ -835,10 +820,11 @@ sub usage {
     print STDERR "usage: vpicexpt_gen [options] outputdir\n";
     print STDERR "\ngenerate experiment batch scripts in spec'd dir\n\n";
     print STDERR "general options:\n";
+    print STDERR "\t--account S       account to charge (cobalt)\n";
     print STDERR "\t--addrunopts S    additional mpirun opts (beyond extra)\n";
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
-    print STDERR "\t--core-spec I     specialized core cnt (srun only)\n";
+    print STDERR "\t--core-spec I     specialized core cnt (slurm only)\n";
     print STDERR "\t--deckid S        vpic deck id (in decks directory)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
@@ -846,7 +832,8 @@ sub usage {
     print STDERR "\t--experiment S    experiment to run\n";
     print STDERR "\t--iterations I    #of iterations for each run\n";
     print STDERR "\t--overcommit S    overcommit (enable/disable/default)\n";
-    print STDERR "\t--partition S     slurm partition (srun only)\n";
+    print STDERR "\t--queue S         job queue to use (cobalt)\n";
+    print STDERR "\t--partition S     slurm partition (slurm only)\n";
     print STDERR "\t--postruncmd S    cmd to postprocess output dir\n";
     print STDERR "\t--run S           limit which run to generate\n";
     print STDERR "\t--scaletime F     run time limit scaling\n";
@@ -881,15 +868,6 @@ sub usage {
 }
 
 #
-# if we are debugging the script and have changed the platform
-# from the default, reguess the extra options (unless we explicitly
-# set them).
-#
-if ($platform ne $defplatform && !defined($extraopts)) {
-    $extraopts = guess_extraopts($platform);
-}
-
-#
 # sanity checking
 #
 my($exprow, $exp, $postfun, @rns, %wantrun, $prun_on);
@@ -901,10 +879,10 @@ $exprow = $TOC{$experiment};
 usage() if ($rv != 1);
 usage("missing output dir") if ($#ARGV != 0);
 usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
-usage("--core-spec only on srun platform")
-    if ($platform ne 'srun' && defined($core_spec));
-usage("--partition only on srun platform")
-    if ($platform ne 'srun' && defined($partition));
+usage("--core-spec only on slurm platform")
+    if ($platform ne 'slurm' && defined($core_spec));
+usage("--partition only on slurm platform")
+    if ($platform ne 'slurm' && defined($partition));
 usage("dw must be 'off', 'bw'  or  'int'")
     if ($dw ne 'off' && $dw ne 'bw' && $dw ne 'int');
 usage("bad deck id, must be in format deckdir/namename")
@@ -924,8 +902,8 @@ foreach (@rns) {
 usage("bad overcommit value") if ($overcommit ne '' &&
   $overcommit ne 'enable' && $overcommit ne 'disable' &&
   $overcommit ne 'default');
-usage("overcommit only valid for slurm/srun")
-  if ($platform ne 'srun' && $overcommit ne '');
+usage("overcommit only valid for slurm")
+  if ($platform ne 'slurm' && $overcommit ne '');
 
 $prun_on = 0;
 $postruncmd =~ s/^\s+//;        # make sure no leading spaces
@@ -971,6 +949,7 @@ foreach (@envs) {
 # print back options
 #
 @opts = (
+    "account"     => $account,
     "adddrunopts" => $addrunopts,
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
@@ -981,6 +960,7 @@ foreach (@envs) {
     "experiment"  => $experiment,
     "iterations"  => $iterations,
     "overcommit"  => $overcommit,
+    "queue"       => $queue,
     "partition"   => $partition,
     "postruncmd"  => $postruncmd,
     "run"         => $run,
@@ -1094,9 +1074,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             $rtime = hms($maxtime * $iterations, $scaletime);
         }
         push(@out, "#!/bin/bash");
-        push(@out, "# this script genereated by vpicexpt_gen");
-        push(@out, "# args=$cmd");
-        if ($platform eq 'srun') {
+        if ($platform eq 'slurm') {
             push(@out, "#SBATCH --job-name $tag-$experiment-$r-$t");
             push(@out, "#SBATCH --time=$rtime");
             push(@out, "#SBATCH --nodes=$totalnodes");
@@ -1112,7 +1090,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             # XXX: lanl docs say to do this, but we aren't using OMP
             push(@out, "");
             push(@out, "export OMP_NUM_THREADS=1");
-        } elsif ($platform eq 'aprun') {
+        } elsif ($platform eq 'moab') {
             push(@out, "#MSUB -N $tag-$experiment-$r-$t");
             push(@out, "#MSUB -l walltime=$rtime");
             if ($constraints eq '') {
@@ -1125,6 +1103,19 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             push(@out, "#MSUB -j oe");
             push(@out, "$dwl") if ($dwl ne '');
             push(@out, "");
+        } elsif ($platform eq 'cobalt') {
+            push(@out, "#COBALT --jobname $tag-$experiment-$r-$t");
+            push(@out, "#COBALT -t $rtime");
+            push(@out, "#COBALT -n $totalnodes");
+            push(@out, "#COBALT --mode script");
+            push(@out, "#COBALT --output " . $ENV{'HOME'} .
+                       "/joblogs/$tag-$experiment-$r-$t-\$COBALT_JOBID.out");
+            push(@out, "#COBALT --error " . $ENV{'HOME'} .
+                       "/joblogs/$tag-$experiment-$r-$t-\$COBALT_JOBID.out");
+            push(@out, "#COBALT --debuglog " . $ENV{'HOME'} .
+                       "/joblogs/$tag-$experiment-$r-$t-\$COBALT_JOBID.clog");
+            push(@out, "#COBALT -A $account") if ($account ne '');
+            push(@out, "#COBALT -q $queue") if ($queue ne '');
         } else {
             push(@out, "# $tag-$experiment-$r-$t - not using batch system");
             push(@out, "export MPIJOBNAME=\"$tag-$experiment-$r-$t\"");
@@ -1134,6 +1125,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
                 push(@out, "# WARN: can't enable data warp on this platform");
             }
         }
+        push(@out, "#");
+        push(@out, "# this script generated by vpicexpt_gen");
+        push(@out, "# args=$cmd");
         push(@out, "");
         push(@out, "", "export EXTRA_MPIOPTS=\"$fullextra\"", "")
             if ($fullextra ne '');
