@@ -915,7 +915,7 @@ do_run() {
             "SHUFFLE_Force_sync_rpc" ${XX_RPC_FORCE_SYNC:-"0"}
             "SHUFFLE_Placement_protocol" ${XX_CH_PROTO:-"ring"}
             "SHUFFLE_Virtual_factor" ${XX_CH_VF:-"1024"}
-            "SHUFFLE_Subnet" "${ip_subnet}"
+            "SHUFFLE_Subnet" "${ip_subnet:-0.0.0.0}"
             "SHUFFLE_Finalize_pause" ${XX_SH_FINAL_PAUSE:-"0"}
             "SHUFFLE_Force_global_barrier" ${XX_SH_FORCE_GLOBAL:-"0"}
             "SHUFFLE_Local_senderlimit" ${XX_SH_LSNDLIMIT:-${XX_RPC_DEPTH:-"16"}}
