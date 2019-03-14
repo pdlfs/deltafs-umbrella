@@ -1,18 +1,35 @@
 #!/usr/bin/env perl
 #
-# cobalt_pbs_nodefile  generate a nodefile under cobalt
+# cobalt_pbs_nodefile  a uniform way to generate a nodefile under cobalt
 # 15-Feb-2019  chuck@ece.cmu.edu
 #
-# based on the run_on_all_nids.py script I got from phil
+# XXX: some cobalts use NODEFILE, others use PARTNAME.  handle both.
 #
-
 use strict;
 
 my($outfile) = @ARGV;
 die "usage: cobalt_pbs_nodefile [output-file]" unless ($outfile ne "");
-die "error: COBALT_PARTNAME not defined" 
+
+#
+# strategy #1: use COBALT_NODEFILE if present
+#
+if (defined($ENV{'COBALT_NODEFILE'}) && -s $ENV{'COBALT_NODEFILE'}) {
+  my($cmd);
+  $cmd = "cp " . $ENV{'COBALT_NODEFILE'} . " $outfile";
+  $_ = system($cmd);
+  die "cp command failed $_ ! ($cmd)" if ($_);
+  exit(0);
+}
+
+#
+# strategy #2: use COBALT_PARTNAME
+#
+die "error: neither COBALT_NODEFILE nor COBALT_PARTNAME provided"
     unless (defined($ENV{'COBALT_PARTNAME'}));
 
+#
+# partly based on the run_on_all_nids.py script I got from phil
+#
 my(@nidgroups, $nidgroup, $s, $e, %nidset, $result);
 @nidgroups = split(/,/, $ENV{'COBALT_PARTNAME'});
 foreach $nidgroup (@nidgroups) {
