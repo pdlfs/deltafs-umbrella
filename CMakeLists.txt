@@ -72,7 +72,7 @@ umbrella_opt_default (MERCURY_RUNNER_TAG "40f75ff2")  # Jan 2019
 umbrella_opt_default (MERCURY_TAG "8e998d25")         # Dec 2018
 umbrella_opt_default (MSSG_TAG "v1.3")
 umbrella_opt_default (NEXUS_RUNNER_TAG "4450339b")    # Mar 2018
-umbrella_opt_default (OFI_TAG "a7f3a97f")             # Dec 2018
+umbrella_opt_default (OFI_TAG "40abb99a")             # Mar 2019
 umbrella_opt_default (VPIC_TAG "9a64531e")            # Dec 2018
 
 #
