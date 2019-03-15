@@ -5,7 +5,28 @@
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](LICENSE.txt)
 
-# deltafs-umbrella
+deltafs-umbrella
+================
+
+```
+XXXXXXXXX
+XX      XX                 XX                  XXXXXXXXXXX
+XX       XX                XX                  XX
+XX        XX               XX                  XX
+XX         XX              XX   XX             XX
+XX          XX             XX   XX             XXXXXXXXX
+XX           XX  XXXXXXX   XX XXXXXXXXXXXXXXX  XX         XX
+XX          XX  XX     XX  XX   XX       XX XX XX      XX
+XX         XX  XX       XX XX   XX      XX  XX XX    XX
+XX        XX   XXXXXXXXXX  XX   XX     XX   XX XX    XXXXXXXX
+XX       XX    XX          XX   XX    XX    XX XX           XX
+XX      XX      XX      XX XX   XX X    XX  XX XX         XX
+XXXXXXXXX        XXXXXXX   XX    XX        XX  XX      XX
+```
+
+DeltaFS was developed, in part, under U.S. Government contract 89233218CNA000001 for Los Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC for the U.S. Department of Energy/National Nuclear Security Administration. Please see the accompanying [LICENSE.txt](LICENSE.txt) for further information. 
+
+### Overview
 
 This package is designed to help our collaborators to quickly setup deltafs on various computing platforms ranging from commodity NFS PRObE clusters to highly-specialized Cray systems customized by different national labs. The package features a highly-automated process that downloads, builds, and installs deltafs (including many of its friends and all their dependencies) along with a demo application (VPIC) that has been preloaded to use deltafs to perform file system activities.
 
