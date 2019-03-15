@@ -38,6 +38,9 @@
 #  $common_noinit - set to non-null disable call to common_init (for dbg)
 #  $ip_subnet - the ip subnet we want to use (x.y.z.t)
 #  $jobdir - per-job shared output directory (abspath)
+#  $jobenv - job environment (moab, slurm, etc.) (string)
+#  $jobruncli - interface to job run command (string)
+#  $jobruncmd - job run command (string)
 #  $logfile - log shared by all exp runs (abspath)
 #  $exp_logfile - log used by one specific exp run (abspath)
 #  $nodes - number of nodes for vpic (int)
@@ -58,12 +61,6 @@
 # environment variables we set/use:
 #  $JOBDIRHOME - where to put job dirs (default: $HOME/jobs)
 #                example: /lustre/ttscratch1/users/$USER
-#  $JOBENV - operating env (one of moab, slurm, cobalt, openmpi, or mpich)
-#            we'll try and figure it out if not provided by user
-#  $JOBRUNCMD - aprun/srun/mpirun/runjob command to use, should match $JOBENV
-#               (only used if JOBENV is set by user)
-#  $JOBHOSTS - nodes to run jobs (default: localhost)
-#              (only used if not running on a Cray or an Emulab platform)
 #  $EXTRA_MPIOPTS - additional options that need to be passed to mpirun
 #  $DW_SESSION_OVERRIDE - (cray) override the datawarp sessionid (for dbg)
 #
@@ -71,14 +68,21 @@
 #
 # environment variables we use as input:
 #  $HOME - your home directory
-#  $DW_JOB_STRIPED - data wrap mount (cray)
+#  $DW_JOB_STRIPED - data warp mount (cray)
+#  $JOBENV - operating env (one of moab, slurm, cobalt, openmpi, or mpich)
+#    if $JOBENV is set, we use:
+#       $JOBRUNCLI - command line interface to job run command
+#       $JOBRUNCMD - command to run jobs
+#  $JOBHOSTS - nodes to run jobs (default: localhost)
+#              (only used if not running on a Cray or an Emulab platform)
+#  $MPIRUN - mpirun command to use (if not running under a scheduler)
 #
-#  Cray env running moab:
+#  Env running moab:
 #    $MOAB_JOBNAME - jobname
 #    $PBS_JOBID - job id
 #    $PBS_NODEFILE - file with list of all nodes
 #
-#  Cray env running slurm:
+#  Env running slurm:
 #    $SLURM_JOB_NAME - jobname
 #    $SLURM_JOBID - job id
 #    $SLURM_JOB_NODELIST - list of all nodes
@@ -86,8 +90,9 @@
 #            to get a full list of nodes.  there is a helper perl script
 #            called "generate_pbs_nodefile" that will do this for us
 #
-#  Cray env running cobalt:
+#  Env running cobalt:
 #    $COBALT_JOBID - job id
+#    $COBALT_NODEFILE - list of all nodes in a file (not always provided)
 #    $COBALT_PARTNAME - list of all nodes (in compact form)
 #    $COBALT_XJOBNAME - job name (we provide it, optional)
 #
@@ -147,64 +152,99 @@ do_querying=${do_querying:-0}
 
 #
 # common_init: init the common.sh layer (mainly detecting env)
-# uses/sets: $JOBENV, $JOBRUNCMD
+# uses/sets: $JOBENV, $JOBRUNCMD, $JOBRUNCLI, $MPIRUN,
+# $jobenv, $jobruncmd, $jobruncli
 #
 common_init() {
 
-  if [ x${JOBENV-} = x ]; then
-    # try and guess our job environment
-    export JOBRUNCMD=""            # only allowed through if JOBENV set by usr
-    if [ x${PBS_JOBID-} != x ]; then
-      export JOBENV=moab
-    elif [ x${SLURM_JOBID-} != x ]; then
-      export JOBENV=slurm
-    elif [ x${COBALT_JOBID-} != x ]; then
-      export JOBENV=cobalt
-    elif [ `which mpirun.mpich 2>/dev/null` ]; then
-      export JOBENV=mpich
-    elif [ `which mpirun.openmpi 2>/dev/null` ]; then
-      export JOBENV=openmpi
-    else
-      die "common.sh UNABLE TO DETERMINE ENV - ABORTING"
-    fi
-  else
-    # verify user selected something we know about
+  #
+  # the priority ordering of things here is:
+  #  1. allow users to hardwire the jobenv using JOBENV
+  #  2. look for job ID#s from a scheduler (moab, slurm, cobalt) to do setup
+  #  3. look to see if we are already running under openmpi or mpich
+  # otherwise we look for a bare MPI environment like this:
+  #  4. allow users to use $MPIRUN to specify a specific MPI to use
+  #  5. look for mpirun.mpich
+  #  6. look for mpirun.openmpi
+  #  7. look for plain mpirun and see if it is mpich or openmpi
+  #  8. give up
+  #
+  if [ x${JOBENV-} != x ]; then     # allow user to hardwire a jobenv
     if [ $JOBENV != moab -a $JOBENV != slurm -a $JOBENV != cobalt -a \
          $JOBENV != mpich -a $JOBENV != openmpi ]; then
       die "bad JOBENV ($JOBENV) provided by user - ABORTING"
     fi
-  fi
-
-  # set JOBRUNCMD to the default if not provided by user
-  if [ x${JOBRUNCMD-} = x ]; then
-    if [ $JOBENV = moab ]; then
-      export JOBRUNCMD=aprun
-    elif [ $JOBENV = slurm ]; then
-      export JOBRUNCMD=srun
-    elif [ $JOBENV = cobalt ]; then
-      if [ `which aprun 2>/dev/null` ]; then
-        JOBRUNCMD=aprun
-      elif [ `which runjob 2>/dev/null` ]; then
-        JOBRUNCMD=runjob
-      else
-        die "cobalt: cannot find JOBRUNCMD - ABORTING!"
-      fi
-    elif [ $JOBENV = mpich ]; then
-      export JOBRUNCMD=mpirun.mpich
-    elif [ $JOBENV = openmpi ]; then
-      export JOBRUNCMD=mpirun.openmpi
+    if [ x${JOBRUNCLI-} = x -o x${JOBRUNCMD-} = x ]; then
+      die "JOBRUNCLI and JOBRUNCMD must be specified with JOBENV - ABORTING"
     fi
+    jobenv=$JOBENV jobruncli=$JOBRUNCLI jobruncmd=$JOBRUNCMD
+  elif [ x${PBS_JOBID-} != x ]; then
+    jobenv=moab jobruncli=aprun jobruncmd=aprun
+  elif [ x${SLURM_JOBID-} != x ]; then
+    jobenv=slurm jobruncli=srun jobruncmd=srun
+  elif [ x${COBALT_JOBID-} != x ]; then
+    jobenv=cobalt
+    if [ `which aprun 2>/dev/null` ]; then
+      jobruncli=aprun jobruncmd=aprun
+    elif [ `which runjob 2>/dev/null` ]; then
+      jobruncli=runjob jobruncmd=runjob
+    elif [ `which mpirun 2>/dev/null` ]; then
+      jobruncmd=mpirun
+      if [ "`mpirun --version 2>&1 | fgrep 'open-mpi.org'`" ]; then
+        jobruncli=openmpi
+      else
+        jobruncli=mpich
+      fi
+    else
+      die "cobalt: cannot determine job cli/cmd - ABORTING!"
+    fi
+  elif [ x${OMPI_COMM_WORLD_SIZE-} != x ]; then  # since ompi 1.3
+    jobenv=openmpi jobruncli=openmpi
+    if [ `which mpirun.openmpi 2>/dev/null` ]; then
+      jobruncmd=mpirun.openmpi
+    else
+      jobruncmd=mpirun
+    fi
+  elif [ x${HYDI_CONTROL_FD-} != x ]; then       # XXX maybe
+    jobenv=mpich jobruncli=mpich
+    if [ `which mpirun.mpich 2>/dev/null` ]; then
+      jobruncmd=mpirun.mpich
+    else
+      jobruncmd=mpirun
+    fi
+  elif [ x${MPIRUN-} != x ]; then
+    if [ "`${MPIRUN} --version 2>&1 | fgrep 'open-mpi.org'`" ]; then
+      jobenv=openmpi jobruncli=openmpi jobruncmd=${MPIRUN}
+    elif [ "`${MPIRUN} --version 2>&1 | fgrep 'HYDRA'`" ]; then
+      jobenv=mpich jobruncli=mpich jobruncmd=${MPIRUN}
+    else
+      die "MPIRUN: cannot determine MPI type for cmd $MPIRUN - ABORTING"
+    fi
+  elif [ `which mpirun.mpich 2>/dev/null` ]; then
+    jobenv=mpich jobruncli=mpich jobruncmd=mpirun.mpich
+  elif [ `which mpirun.openmpi 2>/dev/null` ]; then
+    jobenv=openmpi jobruncli=openmpi jobruncmd=mpirun.openmpi
+  elif [ `which mpirun 2>/dev/null` ]; then
+    if [ "`mpirun --version 2>&1 | fgrep 'open-mpi.org'`" ]; then
+      jobenv=openmpi jobruncli=openmpi jobruncmd=mpirun
+    else
+      jobenv=mpich jobruncli=mpich jobruncmd=mpirun
+    fi
+  else
+    die "common.sh UNABLE TO DETERMINE ENV - ABORTING"
   fi
 
-  message "-INFO- common_init: JOBENV=$JOBENV, JOBRUNCMD=$JOBRUNCMD"
+  message "-INFO- common_init: JOBENV=$jobenv, CLI=$jobruncli, CMD=$jobruncmd"
 
-  # verify cray env is set as expected
-  if [ $JOBENV = moab ]; then
+  #
+  # do some sanity checks
+  #
+  if [ $jobenv = moab ]; then
     if [ x${PBS_JOBID-} = x -o x${MOAB_JOBNAME-} = x \
          -o ! -f "$PBS_NODEFILE" ]; then
       die "bad moab setup - check jobname and nodefile"
     fi
-  elif [ $JOBENV = slurm ]; then
+  elif [ $jobenv = slurm ]; then
     if [ x${SLURM_JOBID-} = x -o x${SLURM_JOB_NAME-} = x -o \
          x${SLURM_JOB_NODELIST-} = x ]; then
       die "bad slurm setup - check jobname and nodelist"
@@ -212,16 +252,18 @@ common_init() {
     if [ ! `which generate_pbs_nodefile 2>/dev/null` ]; then
       die "slurm helper script generate_pbs_nodefile not found in path"
     fi
-  elif [ $JOBENV = cobalt ]; then
+  elif [ $jobenv = cobalt ]; then
     # cobalt does not give us job name...
     # make one up and ensure it is always in the env at COBALT_XJOBNAME
     if [ x${COBALT_XJOBNAME-} = x ]; then
       export COBALT_XJOBNAME=`basename $0`
-      message "-INFO- common_init: cobalt: xjobname=${COBALT_XJOBNAME}"
+      message "-INFO- common_init: cobalt: set xjobname=${COBALT_XJOBNAME}"
     fi
-    if [ x${COBALT_JOBID-} = x -o \
-         x${COBALT_PARTNAME-} = x ]; then
-      die "bad cobalt setup - check jobid and partname"
+    if [ x${COBALT_JOBID-} = x ]; then
+      die "bad cobalt setup - check jobid"
+    fi
+    if [ x${COBALT_PARTNAME-} = x -o x${COBALT_NODEFILE-} = x ]; then
+      die "bad cobalt setup - check partname/nodefile"
     fi
   fi
 }
@@ -261,7 +303,7 @@ loadargs() {
 # jobdir  ## Lustre
 #
 # get_jobdir: setup $jobdir var and makes sure $jobdir is present
-# uses: $JOBENV, $MOAB_JOBNAME, $PBS_JOBID, $SLURM_JOB_NAME, $SLURM_JOBID,
+# uses: $jobenv, $MOAB_JOBNAME, $PBS_JOBID, $SLURM_JOB_NAME, $SLURM_JOBID,
 #       $COBALT_XJOBNAME, $COBALT_JOBID, $JOBDIRHOME
 # sets: $jobdir  (XXX: also $logfile)
 #
@@ -272,11 +314,11 @@ get_jobdir() {
         jobdirhome=${HOME}/jobs
     fi
 
-    if [ $JOBENV = moab ]; then
+    if [ $jobenv = moab ]; then
         jobdir=${jobdirhome}/${MOAB_JOBNAME}.${PBS_JOBID}
-    elif [ $JOBENV = slurm ]; then
+    elif [ $jobenv = slurm ]; then
         jobdir=${jobdirhome}/${SLURM_JOB_NAME}.${SLURM_JOBID}
-    elif [ $JOBENV = cobalt ]; then
+    elif [ $jobenv = cobalt ]; then
         jobdir=${jobdirhome}/${COBALT_XJOBNAME}.${COBALT_JOBID}
     elif [ x${MPIJOBNAME-} != x ]; then
         jobdir=${jobdirhome}/${MPIJOBNAME}.${MPIJOBID-$$}
@@ -382,7 +424,7 @@ bb_stageoutwait() {
 #
 # gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
 # one host per line.
-# uses: $JOBENV, $PBS_NODEFILE
+# uses: $jobenv, $PBS_NODEFILE
 #       $SLURMJOB_NODELIST/generate_pbs_nodefile,
 #       $COBALT_PARTNAME/cobalt_pbs_nodefile,
 #       $jobdir
@@ -392,13 +434,13 @@ bb_stageoutwait() {
 gen_hostfile() {
     message "-INFO- generating hostfile ${jobdir}/hosts.txt..."
 
-    if [ $JOBENV = moab ]; then
+    if [ $jobenv = moab ]; then
 
         # Generate hostfile on CRAY and store on disk
         cat $PBS_NODEFILE | uniq | sort > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
 
-    elif [ $JOBENV = slurm ]; then
+    elif [ $jobenv = slurm ]; then
 
         # Generate hostfile on CRAY and store on disk
         tmp_nodefile=`generate_pbs_nodefile`
@@ -406,9 +448,9 @@ gen_hostfile() {
             die "failed to create hosts.txt file"
         rm -f $tmp_nodefile
 
-    elif [ $JOBENV = cobalt ]; then
+    elif [ $jobenv = cobalt ]; then
 
-        # generate hostfile on CRAY
+        # generates hostfile from PARTNAME or NODEFILE
         $dfsu_prefix/scripts/cobalt_pbs_nodefile $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
 
@@ -473,12 +515,12 @@ gen_hosts() {
 
 #
 # clear_caches: clear node caches on vpic nodes
-# uses: $JOBENV, $vpic_nodes, $cores, $nodes
+# uses: $jobenv, $vpic_nodes, $cores, $nodes
 #
 clear_caches() {
     message "-INFO- clearing node caches..."
 
-    if [ $JOBENV = moab -o $JOBENV = slurm -o $JOBENV = cobalt ]; then
+    if [ $jobenv = moab -o $jobenv = slurm -o $jobenv = cobalt ]; then
         message "!!! NOTICE !!! skipping cache clear ... no hpc sudo access"
     elif [ -f "/share/testbed/bin/emulab-mpirunall" -a "${DROP_CACHE-}x" != "x" ]; then
         # this does more than just $vpic_nodes (does them all)
@@ -493,7 +535,7 @@ clear_caches() {
 }
 
 #
-# do_mpirun: Run CRAY MPICH/slurm/cobalt, ANL MPICH, or OpenMPI run command
+# do_mpirun: Run slurm/cobalt/mpich/openmpi command
 #
 # Arguments:
 # @1 number of processes
@@ -522,7 +564,7 @@ do_mpirun() {
 
     envstr=""; npstr=""; hstr=""
 
-    if [ $JOBRUNCMD = aprun ]; then
+    if [ $jobruncli = aprun ]; then
 
         # CRAY with aprun (could be moab or cobalt)
         if [ ${#envs[@]} -gt 0 ]; then
@@ -537,13 +579,13 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
-        message "[MPIEXEC]" "aprun -q -n $procs" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "$jobruncmd -q -n $procs" $npstr $hstr $envstr \
                 $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        aprun -q -n $procs $npstr $hstr $envstr $extra_opts \
+        $jobruncmd -q -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ $JOBRUNCMD = srun ]; then
+    elif [ $jobruncli = srun ]; then
 
         # we are running slurm....
         if [ ${#envs[@]} -gt 0 ]; then
@@ -563,13 +605,13 @@ do_mpirun() {
             hstr="-w $hosts"
         fi
 
-        message "[MPIEXEC]" "srun -n $procs" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "$jobruncmd -n $procs" $npstr $hstr $envstr \
             $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        srun -n $procs $npstr $hstr $envstr $extra_opts \
+        $jobruncmd -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ $JOBENV = mpich ]; then   # XXX: convert to JOBRUNCMD
+    elif [ $jobruncli = mpich ]; then
 
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-env %s %s " ${envs[@]}`
@@ -583,13 +625,13 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
-        message "[MPIEXEC]" "mpirun.mpich -np $procs" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "$jobruncmd -np $procs" $npstr $hstr $envstr \
             $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        mpirun.mpich -np $procs $npstr $hstr $envstr $extra_opts \
+        $jobruncmd -np $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
-    elif [ $JOBENV = openmpi ]; then
+    elif [ $jobruncli = openmpi ]; then
 
         if [ ${#envs[@]} -gt 0 ]; then
             envstr=`printf -- "-x %s=%s " ${envs[@]}`
@@ -609,9 +651,9 @@ do_mpirun() {
             fi
         fi
 
-        message "[MPIEXEC]" "mpirun.openmpi -n $procs" $npstr $hstr $envstr \
+        message "[MPIEXEC]" "$jobruncmd -n $procs" $npstr $hstr $envstr \
             $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        mpirun.openmpi -n $procs $npstr $hstr $envstr $extra_opts \
+        $jobruncmd -n $procs $npstr $hstr $envstr $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
