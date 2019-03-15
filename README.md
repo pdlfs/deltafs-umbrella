@@ -3,6 +3,7 @@
 [[README for Cray]](README.cray.md) | [[README for PDL]](README.pdl.md)
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
+[![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](LICENSE.txt)
 
 # deltafs-umbrella
 
