@@ -262,7 +262,7 @@ common_init() {
     if [ x${COBALT_JOBID-} = x ]; then
       die "bad cobalt setup - check jobid"
     fi
-    if [ x${COBALT_PARTNAME-} = x -o x${COBALT_NODEFILE-} = x ]; then
+    if [ x${COBALT_PARTNAME-} = x -a x${COBALT_NODEFILE-} = x ]; then
       die "bad cobalt setup - check partname/nodefile"
     fi
   fi
