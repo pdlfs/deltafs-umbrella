@@ -24,7 +24,7 @@ cmake_minimum_required (VERSION 3.0)
 project (deltafs-umbrella-scripts NONE)
 
 # data files to install  (non-executable)
-set (install-files README.md vpic_plots.R)
+set (install-files vpic_plots.R)
 
 # executable scripts to install
 set (install-programs basic-bb.sh cbatch cobalt_pbs_nodefile ethq.pl
