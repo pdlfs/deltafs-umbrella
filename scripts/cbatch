@@ -1,4 +1,16 @@
 #!/usr/bin/env perl
+
+#
+# Copyright (c) 2019 Carnegie Mellon University,
+# Copyright (c) 2019 Triad National Security, LLC, as operator of
+#     Los Alamos National Laboratory.
+#
+# All rights reserved.
+#
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file. See the AUTHORS file for names of contributors.
+#
+
 #
 # cbatch  submit batch job script to cobalt (cobalt qsub wrapper)
 # 20-Feb-2019  chuck@ece.cmu.edu
@@ -49,7 +61,7 @@ sub savefile {
         rename("$file.new.$$", $file) ) {
         return(1);
     }
- 
+
     # failure
     undef($hand);                               # will close, if open
     unlink("$file.new.$$");
@@ -72,7 +84,7 @@ my($base, @lt, $tag, $wrapper, $wrapped, @wrap, @cmd);
 die "usage: cbatch [qsub-args] batch-file" if ($#ARGV < 0);
 $script = pop(@ARGV);
 $argstring = join(" ", @ARGV);
-die "error: $script is not a executable file" 
+die "error: $script is not a executable file"
     unless (-f $script && -x $script);
 open(SCRIPT, "$script") || die "Cannot open $script - $!";
 die "error: script $script does not start with #!"

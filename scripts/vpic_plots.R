@@ -1,3 +1,14 @@
+#
+# Copyright (c) 2019 Carnegie Mellon University,
+# Copyright (c) 2019 Triad National Security, LLC, as operator of
+#     Los Alamos National Laboratory.
+#
+# All rights reserved.
+#
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file. See the AUTHORS file for names of contributors.
+#
+
 # Script to produce VPIC plots
 require(data.table)
 
@@ -15,7 +26,7 @@ plot_pair <- function(dt, varX, varY, xs = NaN, xl = NaN, ys = NaN, yl = NaN)
         ys <- min(dty)
         yl <- max(dty)
     }
-    
+
     pdf(file=paste0("./vpic-", varX, "-by-", varY, ".pdf"),
         width=8, height=4, pointsize=10)
     par(mar=c(3, 3.5, .5, .5))
@@ -55,25 +66,25 @@ plot_triple <- function(dt, varX, varY, varZ,
         zs <- min(dtz)
         zl <- max(dtz)
     }
-    
+
     pdf(file=paste0("./vpic-", varX, "-by-", varY, "-and-", varZ, ".pdf"),
         width=8, height=4, pointsize=10)
     par(mar=c(3, 3.5, .5, .5))
     plot(NULL, xlim = c(xs, xl), ylim = c(ys, yl), xlab = "", ylab = "",
          lwd=2.0, log="x") #axes = 'F'
-    
+
     #axis(1, las = 1, at = seq(xs, xl, by = (xl-xs)/10), cex.axis = .7)
     #axis(2, las = 1, at = seq(ys, yl, by = (yl-ys)/10), cex.axis = .7)
     mtext(text = varX, side = 1, line = 2)
     #mtext(text = varY, side = 2, line = 2)
     #abline(v = seq(xs, xl, by = (xl-xs)/10), col = "gray40", lty = 3, lwd = 0.8)
     abline(h = seq(ys, yl, by = (yl-ys)/10), col = "gray40", lty = 3, lwd = 0.8)
-    
+
     points(x = dtx, y = dty, type = "o", lty = "solid", lwd = 1.5,
            col = "dodgerblue2", pch = 4)
     points(x = dtx, y = dtz, type = "o", lty = "solid", lwd = 1.5,
            col = "springgreen4", pch = 8)
-    
+
     legend("topleft", c(varY, varZ), cex=0.75,
            col=c("dodgerblue2", "springgreen4"),
            lty=c("solid"), lwd=c(1.5), bg = c("white"), #bty="n",

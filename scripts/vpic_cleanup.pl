@@ -1,4 +1,16 @@
 #!/usr/bin/env perl
+
+#
+# Copyright (c) 2019 Carnegie Mellon University,
+# Copyright (c) 2019 Triad National Security, LLC, as operator of
+#     Los Alamos National Laboratory.
+#
+# All rights reserved.
+#
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file. See the AUTHORS file for names of contributors.
+#
+
 #
 # vpic_cleanup.pl  clean up after a vpic experiment
 # 26-Jan-2018  chuck@ece.cmu.edu
@@ -64,5 +76,5 @@ sub logstats_file {
     $rv2 = close($fh);
     return if ($rv1 && $rv2 && rename("$in.new", "$in"));
     print "logstats_file: I/O error with $in\n";
-    unlink("$in.new"); 
+    unlink("$in.new");
 }
