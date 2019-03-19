@@ -28,10 +28,9 @@ addons:
       - libboost-dev
       - libibverbs-dev
       - librdmacm-dev
-      - libmpich-dev
+      - libopenmpi-dev
       - libpapi-dev
       - libnuma-dev
-      - mpich
       - g++-4.6
       - g++-4.8
       - g++-5
