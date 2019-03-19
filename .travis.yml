@@ -71,7 +71,8 @@ script:
   - mkdir -p /tmp/deltafs
   - git lfs pull --include "cache.0/ch-placement*"
   - cd cache
-  - ln -fs ../cache.0/* .
+  - ln -fs ../cache.0/ch-placement* .
+  - ls -l
   - cd ..
   - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON .
   - make
