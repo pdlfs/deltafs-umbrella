@@ -69,7 +69,14 @@ script:
   - ln -fs ../cache.0/ch-placement* .
   - ls -l
   - cd ..
-  - cmake --verbose=1 -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON .
+  - >
+    cmake --verbose=1 -DCMAKE_C_COMPILER=`which $CC` -DCMAKE_CXX_COMPILER=`which $CXX` \
+          -DMPI_C_COMPILER=`which mpicc` -DMPI_CXX_COMPILER=`which mpicxx` \
+          -DCMAKE_INSTALL_PREFIX=/tmp/deltafs \
+          -DMERCURY_OPA=TRUE \
+          -DUMBRELLA_BUILD_TESTS=OFF \
+          -DUMBRELLA_SKIP_TESTS=ON \
+          .
   - make
   - date
 
