@@ -11,7 +11,7 @@
 
 language: cpp
 sudo: required
-dist: trusty
+dist: xenial
 
 compiler:
   - gcc
@@ -22,8 +22,6 @@ os:
 addons:
   apt:
     sources:
-      - sourceline: 'ppa:git-core/ppa'
-      - sourceline: 'ppa:george-edison55/cmake-3.x'
       - ubuntu-toolchain-r-test
     packages:
       - automake
@@ -34,9 +32,6 @@ addons:
       - libpapi-dev
       - libnuma-dev
       - mpich
-      - git
-      - cmake-data
-      - cmake
       - g++-4.6
       - g++-4.8
       - g++-5
