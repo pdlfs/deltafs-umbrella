@@ -69,7 +69,7 @@ script:
   - ln -fs ../cache.0/ch-placement* .
   - ls -l
   - cd ..
-  - cmake -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON .
+  - cmake --verbose=1 -DCMAKE_INSTALL_PREFIX=/tmp/deltafs -DMERCURY_OPA=TRUE -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON .
   - make
   - date
 
