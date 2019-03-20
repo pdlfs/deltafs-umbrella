@@ -102,8 +102,8 @@ else
     do_mpirun 1 1 "" $host1 "ifconfig -a" "" $logfile $jobdir/host1-ifc.txt
     host1_ip=$(grep 'inet addr:' $jobdir/host1-ifc.txt | \
                sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
-               fgrep $subnet || true)
-    if [ -z $host1_ip ]; then die "wrong subnet"; fi
+               fgrep $subnet | head -1 || true)
+    if [ -z "$host1_ip" ]; then die "wrong subnet"; fi
 fi
 
 if [ $islocal = 0 ]; then
@@ -115,8 +115,8 @@ if [ $islocal = 0 ]; then
         do_mpirun 1 1 "" $host2 "ifconfig -a" "" $logfile $jobdir/host2-ifc.txt
         host2_ip=$(grep 'inet addr:' $jobdir/host2-ifc.txt | \
                    sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
-                   fgrep $subnet || true)
-        if [ -z $host2_ip ]; then die "wrong subnet"; fi
+                   fgrep $subnet | head -1 || true)
+        if [ -z "$host2_ip" ]; then die "wrong subnet"; fi
     fi
 fi
 
