@@ -17,33 +17,36 @@
 #
 # general command line config:
 #
-#   -DCMAKE_INSTALL_PREFIX=/usr/local      # installation prefix
-#   -DCMAKE_BUILD_TYPE=RelWithDebInfo      # or Release, Debug, etc.
+#   -DCMAKE_INSTALL_PREFIX=/usr/local     # installation prefix
+#   -DCMAKE_BUILD_TYPE=RelWithDebInfo     # or Release, Debug, etc.
 #      (XXX: currently only applied to cmake-based builds)
 #
-#   -DUMBRELLA_BUILD_TESTS=ON              # build unit tests?
-#   -DUMBRELLA_SKIP_TESTS=OFF              # skip running unit tests?
+#   -DUMBRELLA_BUILD_TESTS=ON             # build unit tests?
+#   -DUMBRELLA_SKIP_TESTS=OFF             # skip running unit tests?
 #
 # finding dependencies:
 #
-# -DCMAKE_PREFIX_PATH='/pkg'              # look for additional installs here
+#   -DCMAKE_PREFIX_PATH='/pkg'            # look for additional installs here
 #
 # the following also applies for configure scripts:
-# -DCMAKE_INCLUDE_PATH='/pkg/include'     # extra include directories
-# -DCMAKE_LIBRARY_PATH='/pkg/lib'         # extra library path
+#   -DCMAKE_INCLUDE_PATH='/pkg/include'   # extra include directories
+#   -DCMAKE_LIBRARY_PATH='/pkg/lib'       # extra library path
 #
 # note these are all cmake lists (so more than one directory can
 # be specified using a semicolon to create a path).
 #
 # specifying alternate compilers (overrides CC/CXX environment variables):
-# -DCC=/bin/cc
-# -DCXX=/bin/cxx
-#  (you can also use the long form names CMAKE_C_COMPILER/CMAKE_CXX_COMPILER)
+#   -DCC=/bin/cc
+#   -DCXX=/bin/cxx
+#
+#   you may also use the longer names
+#     -DCMAKE_C_COMPILER
+#     -DCMAKE_CXX_COMPILER
 #
 # specifying which mpi to use by pointing at the wrappers:
-# -DMPI_C_COMPILER=/usr/bin/mpicc
-# -DMPI_CXX_COMPILER=/usr/bin/mpicxx
-# -DMPIEXEC=/usr/bin/mpiexec
+#   -DMPI_C_COMPILER=/usr/bin/mpicc
+#   -DMPI_CXX_COMPILER=/usr/bin/mpicxx
+#   -DMPIEXEC=/usr/bin/mpiexec
 #
 
 cmake_minimum_required (VERSION 3.0)
@@ -54,6 +57,12 @@ cmake_minimum_required (VERSION 3.0)
 #
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/umbrella")
 include (umbrella-init)
+
+#
+# we don't really use mpicxx.h for now
+# (can be overridden with -DMPI_CXX_SKIP_MPICXX=Off)
+#
+set (MPI_CXX_SKIP_MPICXX ON CACHE BOOL "True if MPICXX should be skipped")
 
 #
 # need to mark project as using C/CXX so we can probe for MPI
@@ -67,6 +76,12 @@ project (deltafs-umbrella C CXX)
 #
 set (UMBRELLA_MPI 1)
 include (umbrella-main)
+
+#
+# propagate to all cmake subprojects
+#
+list(APPEND UMBRELLA_CMAKECACHE -DMPI_CXX_SKIP_MPICXX:BOOL=${MPI_CXX_SKIP_MPICXX})
+
 
 #
 # set git tags to the versions we want to stick to by default...
