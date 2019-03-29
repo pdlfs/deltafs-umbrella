@@ -6,6 +6,7 @@
 [subrepo]
 	remote = git@dev.pdl.cmu.edu:pdlfs/umbrella
 	branch = master
-	commit = 4b244de5f45df57796c28706b52bde0eeebff516
+	commit = 021d0f41d102364bea8030d3d3697f29b395eb71
 	parent = 860e82844abff27c45f4ce968bfc75a9dbaab18c
-	cmdver = 0.3.1
+	cmdver = 0.4.0
+	method = merge
