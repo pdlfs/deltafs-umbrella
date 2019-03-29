@@ -37,19 +37,18 @@ umbrella_testcommand (DELTAFS_TESTCMD TEST_COMMAND
 #
 include (umbrella/mercury)
 include (umbrella/deltafs-common)
-include (umbrella/deltafs-bb)
 
 #
 # create deltafs target
 #
-ExternalProject_Add (deltafs DEPENDS mercury deltafs-common deltafs-bb
+ExternalProject_Add (deltafs DEPENDS mercury deltafs-common
     ${DELTAFS_DOWNLOAD} ${DELTAFS_PATCHCMD}
     CMAKE_ARGS ${PDLFS_OPTIONS} -DBUILD_SHARED_LIBS=ON
         -DBUILD_TESTS=${UMBRELLA_BUILD_TESTS}
         -DDELTAFS_COMMON_INTREE=OFF
         -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
         -DMPI_C_COMPILER=${MPI_C_COMPILER}
-        -DDELTAFS_BBOS:BOOL=ON -DDELTAFS_MPI:BOOL=ON
+        -DDELTAFS_MPI:BOOL=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
     ${DELTAFS_TESTCMD}
