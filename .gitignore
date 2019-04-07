@@ -1,3 +1,9 @@
+/cache/*tar.gz
+/nbproject/
 /cmake-bu*/
 /bu*/
-/cache/*tar.gz
+/.idea/
+*.dylib
+*.so
+*.a
+*.o
