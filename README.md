@@ -44,7 +44,7 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
   * cci (https://github.com/CCI/cci.git)
 * deltafs
   * deltafs (https://github.com/pdlfs/deltafs.git)
-  * deltafs-common (https://github.com/pdlfs/pdlfs-common.git_
+  * deltafs-common (https://github.com/pdlfs/pdlfs-common.git)
   * deltafs-nexus (https://github.com/pdlfs/deltafs-nexus.git)
   * deltafs-bb (https://github.com/pdlfs/deltafs-bb.git)
 * vpic
