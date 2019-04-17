@@ -86,7 +86,7 @@ list(APPEND UMBRELLA_CMAKECACHE -DMPI_CXX_SKIP_MPICXX:BOOL=${MPI_CXX_SKIP_MPICXX
 #
 # set git tags to the versions we want to stick to by default...
 #
-umbrella_opt_default (BMI_TAG "2abbe991")             # Aug 2017
+umbrella_opt_default (BMI_TAG "11ac9e74")             # Apr 2019
 umbrella_opt_default (CCI_TAG "3ab663e0")
 umbrella_opt_default (CH_PLACEMENT_TAG "e7c0b39818")  # Sep 2017
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
