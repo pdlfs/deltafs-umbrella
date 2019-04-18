@@ -28,8 +28,8 @@ set (install-files vpic_plots.R)
 
 # executable scripts to install
 set (install-programs basic-bb.sh cbatch cobalt_pbs_nodefile ethq.pl
-     process_logs.sh process_runner.pl report_runner.pl vpic_report.sh
-     vpic_cleanup.pl)
+     process_logs.sh process_runner.pl report_runner.pl
+     vpic_common.sh vpic_report.sh vpic_cleanup.pl)
 
 # executable scripts to @-expand and then install
 set (install-programs-in anl_do_combo_mercrunner.sh.in common.sh.in

@@ -45,6 +45,7 @@ arg_emu_opts="${VPIC_EMU_OPTS-}"
 ###############
 
 source @CMAKE_INSTALL_PREFIX@/scripts/common.sh
+source ${dfsu_prefix}/scripts/vpic_common.sh
 
 # load command line args into $arg_* vars (overwrites default values)
 loadargs "$@"
@@ -71,9 +72,9 @@ gen_hosts
 last=$arg_should_do_multipass_query
 if [ $arg_should_skip_query -ne 0 ]
 then
-do_querying=0
+vpic_do_querying=0
 else
-do_querying=1
+vpic_do_querying=1
 fi
 
 cores=$((arg_procs_per_node * nodes))
@@ -99,9 +100,9 @@ case $arg_test_type in
 
 esac
 
-if [ ${XX_BYPASS_WRITE:-0} -ne 0 -a $do_querying -ne 0 ]; then
+if [ ${XX_BYPASS_WRITE:-0} -ne 0 -a $vpic_do_querying -ne 0 ]; then
     message "!!! WRITE BYPASSED MUST SKIP QUERIES"
-    do_querying=0
+    vpic_do_querying=0
 fi
 
 # prepare the job input deck or use an io emulator
@@ -110,8 +111,8 @@ if [ x"$arg_emu" != x ]; then
         $arg_px $arg_py $arg_pz $arg_tx $arg_ty $arg_tz \
         $arg_num_vpic_dumps $arg_num_vpic_steps"
 else
-    build_deck $deck $arg_deckid $arg_px $arg_py $arg_pz \
-        $arg_tx $arg_ty $arg_tz $arg_num_vpic_dumps $arg_num_vpic_steps
+    vpic_build_deck $deck $arg_deckid $arg_px $arg_py $arg_pz \
+             $arg_tx $arg_ty $arg_tz $arg_num_vpic_dumps $arg_num_vpic_steps
     prog="${jobdir}/current-deck.op"
 fi
 
@@ -125,7 +126,7 @@ fi
 message ""
 message ""
 
-do_run $arg_test_type $parts $arg_procs_per_node "$prog" "$prog_pre"
+vpic_do_run $arg_test_type $parts $arg_procs_per_node "$prog" "$prog_pre"
 
 # overall time
 timeout=`date`
