@@ -61,10 +61,8 @@
 #  Env running slurm:
 #    $SLURM_JOB_NAME - jobname
 #    $SLURM_JOBID - job id
-#    $SLURM_JOB_NODELIST - list of all nodes
-#       XXX: this node list is in compact form, we need to expand it
-#            to get a full list of nodes.  there is a helper perl script
-#            called "generate_pbs_nodefile" that will do this for us
+#    $SLURM_JOB_NODELIST - list of all nodes (in compat form)
+#       XXX: we use the slurm_nodefile script to expand the node list
 #
 #  Env running cobalt:
 #    $COBALT_JOBID - job id
@@ -206,9 +204,6 @@ common_init() {
     if [ x${SLURM_JOBID-} = x -o x${SLURM_JOB_NAME-} = x -o \
          x${SLURM_JOB_NODELIST-} = x ]; then
       die "bad slurm setup - check jobname and nodelist"
-    fi
-    if [ ! `which generate_pbs_nodefile 2>/dev/null` ]; then
-      die "slurm helper script generate_pbs_nodefile not found in path"
     fi
   elif [ $jobenv = cobalt ]; then
     # cobalt does not give us job name...
@@ -383,7 +378,7 @@ bb_stageoutwait() {
 # gen_hostfile: generate a list of hosts we have in $jobdir/hosts.txt
 # one host per line.
 # uses: $jobenv, $PBS_NODEFILE
-#       $SLURMJOB_NODELIST/generate_pbs_nodefile,
+#       $SLURMJOB_NODELIST/slurm_nodefile,
 #       $COBALT_PARTNAME/cobalt_nodefile,
 #       $jobdir
 # sets: $all_nodes, $num_all_nodes
@@ -400,11 +395,9 @@ gen_hostfile() {
 
     elif [ $jobenv = slurm ]; then
 
-        # Generate hostfile on CRAY and store on disk
-        tmp_nodefile=`generate_pbs_nodefile`
-        cat $tmp_nodefile | uniq | sort > $jobdir/hosts.txt || \
+        # generate hostfile under slurm with helper script
+        $dfsu_prefix/scripts/slurm_nodefile $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
-        rm -f $tmp_nodefile
 
     elif [ $jobenv = cobalt ]; then
 
