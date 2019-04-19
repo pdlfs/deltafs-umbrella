@@ -12,7 +12,7 @@
 #
 
 #
-# cobalt_pbs_nodefile  a uniform way to generate a nodefile under cobalt
+# cobalt_nodefile  a uniform way to generate a nodefile under cobalt
 # 15-Feb-2019  chuck@ece.cmu.edu
 #
 # XXX: some cobalts use NODEFILE, others use PARTNAME.  handle both.
@@ -20,7 +20,7 @@
 use strict;
 
 my($outfile) = @ARGV;
-die "usage: cobalt_pbs_nodefile [output-file]" unless ($outfile ne "");
+die "usage: cobalt_nodefile [output-file]" unless ($outfile ne "");
 
 #
 # strategy #1: use COBALT_NODEFILE if present

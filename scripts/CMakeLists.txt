@@ -27,8 +27,8 @@ project (deltafs-umbrella-scripts NONE)
 set (install-files vpic_plots.R)
 
 # executable scripts to install
-set (install-programs basic-bb.sh cbatch cobalt_pbs_nodefile ethq.pl
-     process_logs.sh process_runner.pl report_runner.pl
+set (install-programs basic-bb.sh cbatch cobalt_nodefile ethq.pl
+     process_logs.sh process_runner.pl report_runner.pl slurm_nodefile
      vpic_common.sh vpic_report.sh vpic_cleanup.pl)
 
 # executable scripts to @-expand and then install

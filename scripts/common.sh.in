@@ -384,7 +384,7 @@ bb_stageoutwait() {
 # one host per line.
 # uses: $jobenv, $PBS_NODEFILE
 #       $SLURMJOB_NODELIST/generate_pbs_nodefile,
-#       $COBALT_PARTNAME/cobalt_pbs_nodefile,
+#       $COBALT_PARTNAME/cobalt_nodefile,
 #       $jobdir
 # sets: $all_nodes, $num_all_nodes
 # creates: $jobdir/hosts.txt
@@ -409,7 +409,7 @@ gen_hostfile() {
     elif [ $jobenv = cobalt ]; then
 
         # generates hostfile from PARTNAME or NODEFILE
-        $dfsu_prefix/scripts/cobalt_pbs_nodefile $jobdir/hosts.txt || \
+        $dfsu_prefix/scripts/cobalt_nodefile $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
 
     elif [ -f "/share/testbed/bin/emulab-listall" ]; then
