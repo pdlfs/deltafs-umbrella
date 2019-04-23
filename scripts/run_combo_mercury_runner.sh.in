@@ -100,9 +100,11 @@ if [ -z "$subnet" ]; then
     host1_ip=$(head -1 $jobdir/host1-ips.txt)
 else
     do_mpirun 1 1 "" $host1 "ifconfig -a" "" $logfile $jobdir/host1-ifc.txt
-    host1_ip=$(grep 'inet addr:' $jobdir/host1-ifc.txt | \
-               sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
-               fgrep $subnet | head -1 || true)
+    # XXX: ifconfig output varies between linux versions
+    host1_ip=$(egrep '^ +inet ' $jobdir/host1-ifc.txt | \
+                   sed -e 's/inet addr:/inet /' | \
+                   sed -n -e 's/.*inet \([0-9.]\+\).*/\1/p' | \
+                   fgrep $subnet | head -1 || true)
     if [ -z "$host1_ip" ]; then die "wrong subnet"; fi
 fi
 
@@ -113,9 +115,11 @@ if [ $islocal = 0 ]; then
         host2_ip=$(head -1 $jobdir/host2-ips.txt)
     else
         do_mpirun 1 1 "" $host2 "ifconfig -a" "" $logfile $jobdir/host2-ifc.txt
-        host2_ip=$(grep 'inet addr:' $jobdir/host2-ifc.txt | \
-                   sed -e 's/.*inet addr:\([0-9.]\+\).*/\1/' | \
-                   fgrep $subnet | head -1 || true)
+        # XXX: ifconfig output varies between linux versions
+        host2_ip=$(egrep '^ +inet ' $jobdir/host2-ifc.txt | \
+                       sed -e 's/inet addr:/inet /' | \
+                       sed -n -e 's/.*inet \([0-9.]\+\).*/\1/p' | \
+                       fgrep $subnet | head -1 || true)
         if [ -z "$host2_ip" ]; then die "wrong subnet"; fi
     fi
 fi
