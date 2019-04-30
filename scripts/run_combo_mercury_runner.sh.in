@@ -50,6 +50,7 @@ n_limits=(${MR_NLIMITS:-1 2 4 8 16})          # outstanding RPCs ("-l" flag)
 n_repeats=${MR_NREPEATS:-2}                   # repeat runs
 n_nrpcs=${MR_NRPCS:-100000}                   # nrpcs in 1 run ("-c" flag)
 n_timeout=${MR_NTIMEOUT:-120}                 # timeout  ("-t" flag)
+n_clistatus=${MR_NCLISTATUS:-0}               # client status ("-D" flag)
 
 # "b" - bulk read run: RPC, vary bulk read size and limit
 b_protos=(${MR_BPROTOS:-bmi+tcp})             # protocols to test
@@ -58,6 +59,7 @@ b_limits=(${MR_BLIMITS:-1 2})                 # outstanding RPCs ("-l" flag)
 b_repeats=${MR_BREPEATS:-2}                   # repeat runs
 b_nrpcs=${MR_BRPCS:-10000}                    # nrpcs in 1 run ("-c" flag)
 b_timeout=${MR_BTIMEOUT:-300}                 # timeout  ("-t" flag)
+b_clistatus=${MR_BCLISTATUS:-0}               # client status ("-D" flag)
 
 dryrun=0                                        # set to 1 for script debug
 
@@ -220,6 +222,15 @@ run_one() {
     fi
     if [ "${nb_pollspin}" != 0 ]; then
         cmd="$cmd -P"
+    fi
+    if [ x$bulksz != x ]; then
+        if [ "${b_clistatus}" != "0" ]; then
+            cmd="$cmd -D ${b_clistatus}"
+        fi
+    else
+        if [ "${n_clistatus}" != "0" ]; then
+            cmd="$cmd -D ${n_clistatus}"
+        fi
     fi
 
     the_cmd="$cmd -m ${nb_mode} $num $saddress $caddress"
