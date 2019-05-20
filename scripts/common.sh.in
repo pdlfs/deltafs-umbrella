@@ -20,6 +20,7 @@
 #  $jobenv - job environment (moab, slurm, etc.) (string)
 #  $jobruncli - interface to job run command (string)
 #  $jobruncmd - job run command (string)
+#  $openmpi_newbind - 1 if openmpi mpirun supports "--bind-to"
 #  $logfile - log shared by all exp runs (abspath)
 #  $exp_logfile - log used by one specific exp run (abspath)
 #  $nodes - number of nodes for vpic (int)
@@ -193,6 +194,19 @@ common_init() {
   message "-INFO- common_init: JOBENV=$jobenv, CLI=$jobruncli, CMD=$jobruncmd"
 
   #
+  # check for newer cpu binding flag for openmpi
+  #
+  if [ $jobruncli = openmpi ]; then
+    if [ "`$jobruncmd --help 2>&1 | fgrep -e '--bind-to '`" ]; then
+      message "-INFO- common_init: openmpi supports new --bind-to flag"
+      openmpi_newbind=1
+    else
+      message "-INFO- common_init: openmpi does not support new --bind-to flag"
+      openmpi_newbind=0
+    fi
+  fi
+
+  #
   # do some sanity checks
   #
   if [ $jobenv = moab ]; then
@@ -330,8 +344,8 @@ get_bbdir() {
       jobdir_last_component=$(basename $jobdir)
       bbdir="${DW_JOB_STRIPED}/$jobdir_last_component"
       message "-INFO- creating bbdir..."
-      do_mpirun 1 1 "" "" "mkdir -p ${bbdir}"
-      do_mpirun 1 1 "" "" "ls ${bbdir}"
+      do_mpirun 1 1 "none" "" "" "mkdir -p ${bbdir}"
+      do_mpirun 1 1 "none" "" "" "ls ${bbdir}"
       message "-INFO- bbdir = ${bbdir}"
     fi
 }
@@ -345,9 +359,9 @@ reset_bbdir() {
       message "-INFO- skipping reset of bbdir (bb disabled)..."
     else
       message "-INFO- reset bbdir..."
-      do_mpirun 1 1 "" "" "rm -r ${bbdir}"
-      do_mpirun 1 1 "" "" "mkdir -p ${bbdir}"
-      do_mpirun 1 1 "" "" "ls ${bbdir}"
+      do_mpirun 1 1 "none" "" "" "rm -r ${bbdir}"
+      do_mpirun 1 1 "none" "" "" "mkdir -p ${bbdir}"
+      do_mpirun 1 1 "none" "" "" "ls ${bbdir}"
       message "-INFO- bbdir = ${bbdir}"
     fi
 }
@@ -491,27 +505,29 @@ clear_caches() {
 # Arguments:
 # @1 number of processes
 # @2 number of processes per node
-# @3 array of env vars: ("name1", "val1", "name2", ... )
-# @4 host list (comma-separated)
-# @5 executable (and any options that don't fit elsewhere)
-# @6 extra_opts: extra options to mpiexec (optional)
-# @7 log1: primary log file for mpi stdout (optional)
-# @8 log2: secondary log file for mpi stdout (optional)
+# @3 cpu binding mode (thread, core, external, none, ...)
+# @4 array of env vars: ("name1", "val1", "name2", ... )
+# @5 host list (comma-separated)
+# @6 executable (and any options that don't fit elsewhere)
+# @7 extra_opts: extra options to mpiexec (optional)
+# @8 log1: primary log file for mpi stdout (optional)
+# @9 log2: secondary log file for mpi stdout (optional)
 do_mpirun() {
     procs=$1
     ppnode=$2
-    if [ ! -z "$3" ]; then
-        declare -a envs=("${!3}")
+    bind_opt="$3"
+    if [ ! -z "$4" ]; then
+        declare -a envs=("${!4}")
     else
         envs=()
     fi
-    hosts="$4"
-    exe="$5"
+    hosts="$5"
+    exe="$6"
     ### extra options to mpiexec ###
-    extra_opts=${6-}
+    extra_opts=${7-}
     ### log files ###
-    log1=${7-$logfile}
-    log2=${8-$exp_logfile}
+    log1=${8-$logfile}
+    log2=${9-$exp_logfile}
 
     envstr=""; npstr=""; hstr=""
 
@@ -530,9 +546,22 @@ do_mpirun() {
             hstr="-L $hosts"
         fi
 
+        if [ x$bind_opt = xthread ]; then
+          bind_opt="-cc cpu"
+        elif [ x$bind_opt = xcore ]; then
+          message "do_mpirun: aprun: converted core CPU binding to thread"
+          bind_opt="-cc cpu"
+        elif [ x$bind_opt = xexternal ]; then
+          bind_opt=""
+        elif [ x$bind_opt = xnone -o x$bind_opt = x ]; then
+          bind_opt="-cc none"
+        else
+          die "do_mpirun: bad bind ops $bind_opt"
+        fi
+
         message "[MPIEXEC]" "$jobruncmd -q -n $procs" $npstr $hstr $envstr \
-                $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        $jobruncmd -q -n $procs $npstr $hstr $envstr $extra_opts \
+                $bind_opt $extra_opts ${DEFAULT_MPIOPTS-} $exe
+        $jobruncmd -q -n $procs $npstr $hstr $envstr $bind_opt $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
@@ -556,9 +585,21 @@ do_mpirun() {
             hstr="-w $hosts"
         fi
 
+        if [ x$bind_opt = xthread ]; then
+          bind_opt="--cpu-bind=threads"
+        elif [ x$bind_opt = xcore ]; then
+          bind_opt="--cpu-bind=cores"
+        elif [ x$bind_opt = xexternal ]; then
+          bind_opt=""
+        elif [ x$bind_opt = xnone -o x$bind_opt = x ]; then
+          bind_opt="--cpu-bind=none"
+        else
+          die "do_mpirun: bad bind ops $bind_opt"
+        fi
+
         message "[MPIEXEC]" "$jobruncmd -n $procs" $npstr $hstr $envstr \
-            $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        $jobruncmd -n $procs $npstr $hstr $envstr $extra_opts \
+            $bind_opt $extra_opts ${DEFAULT_MPIOPTS-} $exe
+        $jobruncmd -n $procs $npstr $hstr $envstr $bind_opt $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
@@ -576,9 +617,21 @@ do_mpirun() {
             hstr="--host $hosts"
         fi
 
+        if [ x$bind_opt = xthread ]; then
+          bind_opt="-bind-to=hwthread"
+        elif [ x$bind_opt = xcore ]; then
+          bind_opt="-bind-to=core"
+        elif [ x$bind_opt = xexternal ]; then
+          bind_opt=""
+        elif [ x$bind_opt = xnone -o x$bind_opt = x ]; then
+          bind_opt="-bind-to=none"
+        else
+          die "do_mpirun: bad bind ops $bind_opt"
+        fi
+
         message "[MPIEXEC]" "$jobruncmd -np $procs" $npstr $hstr $envstr \
-            $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        $jobruncmd -np $procs $npstr $hstr $envstr $extra_opts \
+            $bind_opt $extra_opts ${DEFAULT_MPIOPTS-} $exe
+        $jobruncmd -np $procs $npstr $hstr $envstr $bind_opt $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 
@@ -602,9 +655,36 @@ do_mpirun() {
             fi
         fi
 
+        if [ x$openmpi_newbind = x1 ]; then
+            if [ x$bind_opt = xthread ]; then
+              bind_opt="--bind-to hwthread"
+            elif [ x$bind_opt = xcore ]; then
+              bind_opt="--bind-to core"
+            elif [ x$bind_opt = xexternal ]; then
+              bind_opt=""
+            elif [ x$bind_opt = xnone -o x$bind_opt = x ]; then
+              bind_opt="--bind-to none"
+            else
+              die "do_mpirun: bad bind ops $bind_opt"
+            fi
+        else
+            if [ x$bind_opt = xthread ]; then
+              message "do_mpirun: aprun: converted thread CPU binding to core"
+              bind_opt="-bind-to-core"
+            elif [ x$bind_opt = xcore ]; then
+              bind_opt="-bind-to-core"
+            elif [ x$bind_opt = xexternal ]; then
+              bind_opt=""
+            elif [ x$bind_opt = xnone -o x$bind_opt = x ]; then
+              bind_opt="-bind-to-none"
+            else
+              die "do_mpirun: bad bind ops $bind_opt"
+            fi
+        fi
+
         message "[MPIEXEC]" "$jobruncmd -n $procs" $npstr $hstr $envstr \
-            $extra_opts ${DEFAULT_MPIOPTS-} $exe
-        $jobruncmd -n $procs $npstr $hstr $envstr $extra_opts \
+            $bind_opt $extra_opts ${DEFAULT_MPIOPTS-} $exe
+        $jobruncmd -n $procs $npstr $hstr $envstr $bind_opt $extra_opts \
             ${DEFAULT_MPIOPTS-} $exe 2>&1 | \
             tee -a $log2 | tee -a $log1
 

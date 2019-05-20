@@ -123,7 +123,7 @@ for ($lcv = 0 ; $lcv <= $#ARGV ; $lcv++) {
     print $outhand "echo starting $in...\n";
     print $outhand "export JOBDIRHOME=\$jobdir/$subdir\n";
     print $outhand "get_bbdir    # update bbdir\n" if ($state{'dw'} ne '');
-    print $outhand 'do_mpirun 1 1 "" "" "rm -rf ${bbdir}"' . "\n"
+    print $outhand 'do_mpirun 1 1 "none" "" "" "rm -rf ${bbdir}"' . "\n"
         if ($state{'dw'} ne '');
     print $outhand "$in 2>&1 | \\\n";
     print $outhand "    tee \${origjobdir}/${subdir}.out\n";

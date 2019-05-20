@@ -22,6 +22,7 @@
 
 #
 # variables:
+#  $vpic_cpubind - cpu binding for vpic run (arg 3 to do_mpirun)
 #  $vpic_epochs - number of frames/epochs for VPIC runs (int)
 #  $vpic_steps - number of time steps for VPIC runs (int)
 #  $vpic_do_querying - whether we will perform particle queries (bool - 0 or 1)
@@ -192,7 +193,7 @@ vpic_do_run() {
     ### ATTENTION: data may or may not goto DW ###
     exp_dir="$bbdir/$exp_tag"  ### when DW is OFF, bbdir == jobdir
     message "-INFO- creating exp dir..."
-    do_mpirun 1 1 "" "" "mkdir -p ${exp_dir}"
+    do_mpirun 1 1 "none" "" "" "mkdir -p ${exp_dir}"
     message "-INFO- done"
 
     ### NOTE: cannot cd to $exp_dir since it may land in bb ###
@@ -222,7 +223,7 @@ vpic_do_run() {
 
         ### BOOTSTRAPING ###
         message "-INFO- creating more exp dirs..."
-        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
+        do_mpirun 1 1 "none" "" "" "mkdir -p $vpic_dir"
         message "-INFO- done"
 
         ### WRITE PATH ###
@@ -234,16 +235,16 @@ vpic_do_run() {
             "PRELOAD_Enable_verbose_error" ${XX_VERBOSE:-"1"}
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdeck}" \
-            "${EXTRA_MPIOPTS-}"
+        do_mpirun $cores $ppn "$vpic_cpubind" env_vars[@] "$vpic_nodes" \
+            "${jobdeck}" "${EXTRA_MPIOPTS-}"
 
         message ""
         message "-INFO- checking output size..."
-        do_mpirun 1 1 "" "" "du -sb $vpic_dir/particle" | tee -a $exp_jobdir/outsize.txt
+        do_mpirun 1 1 "none" "" "" "du -sb $vpic_dir/particle" | tee -a $exp_jobdir/outsize.txt
         echo "Output size:" `cat $exp_jobdir/outsize.txt | \
             grep -F -v "[MPIEXEC]" | head -1 | cut -f1` "bytes" | \
                 tee -a $exp_logfile | tee -a $logfile
-        do_mpirun 1 1 "" "" "du -h $vpic_dir/particle"
+        do_mpirun 1 1 "none" "" "" "du -h $vpic_dir/particle"
         message "-INFO- done"
 
         ### STAGE DATA OUT ###
@@ -284,8 +285,8 @@ vpic_do_run() {
 
         ### BOOTSTRAPING ###
         message "-INFO- creating more exp dirs..."
-        do_mpirun 1 1 "" "" "mkdir -p $plfs_dir/particle"
-        do_mpirun 1 1 "" "" "mkdir -p $vpic_dir"
+        do_mpirun 1 1 "none" "" "" "mkdir -p $plfs_dir/particle"
+        do_mpirun 1 1 "none" "" "" "mkdir -p $vpic_dir"
         message "-INFO- done"
 
         ### WRITE PATH ###
@@ -389,16 +390,16 @@ vpic_do_run() {
             "DELTAFS_TC_DROPDATA" ${XX_IMD_DROPDATA:-"0"}
         )
 
-        do_mpirun $cores $ppn env_vars[@] "$vpic_nodes" "${jobdeck}" \
-            "${EXTRA_MPIOPTS-}"
+        do_mpirun $cores $ppn "$vpic_cpubind" env_vars[@] \
+            "$vpic_nodes" "${jobdeck}" "${EXTRA_MPIOPTS-}"
 
         message ""
         message "-INFO- checking output size..."
-        do_mpirun 1 1 "" "" "du -sb $plfs_dir/particle" | tee -a $exp_jobdir/outsize.txt
+        do_mpirun 1 1 "none" "" "" "du -sb $plfs_dir/particle" | tee -a $exp_jobdir/outsize.txt
         echo "Output size:" `cat $exp_jobdir/outsize.txt | \
             grep -F -v "[MPIEXEC]" | head -1 | cut -f1` "bytes" | \
                 tee -a $exp_logfile | tee -a $logfile
-        do_mpirun 1 1 "" "" "du -h $plfs_dir/particle"
+        do_mpirun 1 1 "none" "" "" "du -h $plfs_dir/particle"
         message "-INFO- done"
 
         ### STAGE DATA OUT ###
@@ -494,8 +495,10 @@ vpic_query_particles() {
     # single-pass approach. Otherwise query 100 particles to get a dependable
     # confidence interval.
     if [ $last -eq 1 ]; then
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin $reader_conf"
+        do_mpirun $nnum $qppn "$vpic_cpubind" "" $vpic_nodes \
+            "$reader_bin $reader_conf" "${EXTRA_MPIOPTS-}"
     else
-        do_mpirun $nnum $qppn "" $vpic_nodes "$reader_bin $reader_conf"
+        do_mpirun $nnum $qppn "$vpic_cpubind" "" $vpic_nodes \
+            "$reader_bin $reader_conf" "${EXTRA_MPIOPTS-}"
     fi
 }

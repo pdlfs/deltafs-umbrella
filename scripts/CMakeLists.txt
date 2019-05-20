@@ -35,8 +35,7 @@ set (install-programs basic-bb.sh cbatch cobalt_nodefile ethq.pl
 set (install-programs-in anl_do_combo_mercrunner.sh.in common.sh.in
      lanl_do_combo_mercrunner.sh.in
      run_bbos_test.sh.in run_combo_mercury_runner.sh.in
-     run_sndrcv_test.sh.in run_vpic_test.sh.in vpic_mkcombo.pl.in
-     vpicexpt_gen.pl.in)
+     run_vpic_test.sh.in vpic_mkcombo.pl.in vpicexpt_gen.pl.in)
 
 #
 # expand ${install-programs-in} and build a list of output files for install

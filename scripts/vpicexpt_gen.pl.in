@@ -778,13 +778,14 @@ sub savefile {
 
 my($cmd) = join(" ", @ARGV);
 my($rv, $account, $addrunopts, $bbosbuddies, $constraints, $core_spec,
-   $deckid, $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet,
+   $cpubind, $deckid, $dryrun, $dw, @envs, $experiment, $extraopts, $ipsubnet,
    $iterations, $overcommit, $queue, $partition, $platform, $postruncmd,
    $prefix, $run, $scaletime, $script, $skipreads, $tag, $tests);
 my($defplatform);
 
 # non-undef defaults
 $bbosbuddies = 0;
+$cpubind = 'none';
 $deckid = 'trecon-part/turbulence';
 $dw = 'off';
 $ipsubnet = guess_subnet();
@@ -803,7 +804,8 @@ $rv = GetOptions(
     "bbosbuddies=i"  =>  \$bbosbuddies,
     "constraints=s"  =>  \$constraints,
     "core-spec=i"    =>  \$core_spec,
-    "deckid=s"      =>  \$deckid,
+    "cpubind=s"      =>  \$cpubind,
+    "deckid=s"       =>  \$deckid,
     "dryrun"         =>  \$dryrun,
     "dw=s"           =>  \$dw,
     "env=s"          =>  \@envs,
@@ -837,6 +839,7 @@ sub usage {
     print STDERR "\t--bbosbuddies I   #of bbos buddy nodes to use\n";
     print STDERR "\t--constraints S   workload mgr constraints (haswell)\n";
     print STDERR "\t--core-spec I     specialized core cnt (slurm only)\n";
+    print STDERR "\t--cpubind S       binding (none, core, thread, external)\n";
     print STDERR "\t--deckid S        vpic deck id (in decks directory)\n";
     print STDERR "\t--dryrun          just print run info and exit\n";
     print STDERR "\t--dw state        datawarp state (off, bw, int)\n";
@@ -861,6 +864,7 @@ sub usage {
     print STDERR "using a comma to sep (e.g. '--tests=baseline,deltafs').\n";
     print STDERR "* --constraints, --partition, and --dw is only supported\n";
     print STDERR "on the cray platform with slurm/moab.\n";
+    print STDERR "* --cpubind default binding is 'none'\n";
     print STDERR "dw state: 'bw' = bandwidth, 'int' = inteference\n";
     print STDERR "bw=spread on all dw nodes, int=avoid interference\n";
     print STDERR "* --core-spec is only supported on slurm\n";
@@ -893,6 +897,9 @@ usage("missing output dir") if ($#ARGV != 0);
 usage("bbosbuddies must be >= 0") if ($bbosbuddies < 0);
 usage("--core-spec only on slurm platform")
     if ($platform ne 'slurm' && defined($core_spec));
+usage("bad --cpubind value - use none, core, thread, or external")
+    if ($cpubind ne 'none' && $cpubind ne 'core' && $cpubind ne 'thread' &&
+        $cpubind ne 'external');
 usage("--partition only on slurm platform")
     if ($platform ne 'slurm' && defined($partition));
 usage("dw must be 'off', 'bw'  or  'int'")
@@ -966,6 +973,7 @@ foreach (@envs) {
     "bbosbuddies" => $bbosbuddies,
     "constraints" => $constraints,
     "core-spec"   => $core_spec,
+    "cpubind"     => $cpubind,
     "deckid"      => $deckid,
     "dw"          => $dw,
     "env"         => join(" ", @ekeys),
@@ -991,7 +999,7 @@ foreach (@envs) {
 
 # don't put these in VPICGENOPTS, since they are in EXPPARAMS because
 # they are CLI args to the script (don't need duplicate value)
-%opts_skipgen = ( "bbosbuddies" => 1, "deckid" => 1,
+%opts_skipgen = ( "bbosbuddies" => 1, "cpubind" => 1, "deckid" => 1,
                   "ipsubnet" => 1, "skipreads" => 1);
 
 print "vpicexpt_gen settings:\n";
@@ -1024,7 +1032,7 @@ if ($addrunopts ne '') {
 #
 # regular expression to use to build EXPPARAMS
 #
-$EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|' .
+$EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^cpubind=|' .
                    '^vpicsteps=|^px=|^py=|^pz=|^tx=|^ty=|^tz=|^deckid=|' .
                    '^bbosbuddies=|^skipreads=|^maxtime=|^basextra=|^dwsize=';
 
@@ -1169,6 +1177,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
 # flags to $script
 #
 test=$t
+cpubind=$cpubind
 ipsubnet=$ipsubnet
 nodes=$nodes
 ppn=$ppn
@@ -1243,7 +1252,7 @@ do
     echo running iteration \$it
     # XXX: should reset logfile name here
     $prefix/scripts/$script test_type=\$test \\
-        ip_subnet="\$ipsubnet" nodes=\$nodes \\
+        ip_subnet="\$ipsubnet" nodes=\$nodes cpubind=\$cpubind \\
         procs_per_node=\$ppn num_vpic_dumps=\$vpicdumps \\
         num_vpic_steps=\$vpicsteps px=\$px py=\$py pz=\$pz \\
         tx=\$tx ty=\$ty tz=\$tz deckid=\$deckid \\

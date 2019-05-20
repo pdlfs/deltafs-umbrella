@@ -43,6 +43,12 @@ else
   nb_pollspin="1"      # yes, poll/spin!
 fi
 
+# cpubind
+nb_cpubind=${MR_CPUBIND:-"none"}
+
+# extra mpirun opts
+nb_extraopts=${MR_EXTRAOPTS:-""}
+
 # "n" - normal send run: RPC, vary request size and limit
 n_protos=(${MR_NPROTOS:-bmi+tcp})             # protocols to test
 n_sizes=(${MR_NSIZES:-64 1024 4096 32768 65536}) # RPC snd size ("-i" flag)
@@ -98,10 +104,12 @@ fi
 #
 host1=$(echo "$all_nodes" | sort | head -n 1)
 if [ -z "$subnet" ]; then
-    do_mpirun 1 1 "" $host1 "hostname -i" "" $logfile $jobdir/host1-ips.txt
+    do_mpirun 1 1 "none" "" $host1 "hostname -i" "" \
+        $logfile $jobdir/host1-ips.txt
     host1_ip=$(head -1 $jobdir/host1-ips.txt)
 else
-    do_mpirun 1 1 "" $host1 "ifconfig -a" "" $logfile $jobdir/host1-ifc.txt
+    do_mpirun 1 1 "none" "" $host1 "ifconfig -a" "" \
+        $logfile $jobdir/host1-ifc.txt
     # XXX: ifconfig output varies between linux versions
     host1_ip=$(egrep '^ +inet ' $jobdir/host1-ifc.txt | \
                    sed -e 's/inet addr:/inet /' | \
@@ -113,10 +121,12 @@ fi
 if [ $islocal = 0 ]; then
     host2=$(echo "$all_nodes" | sort | head -n 2 | tail -n 1)
     if [ -z "$subnet" ]; then
-        do_mpirun 1 1 "" $host2 "hostname -i" "" $logfile $jobdir/host2-ips.txt
+        do_mpirun 1 1 "none" "" $host2 "hostname -i" "" \
+            $logfile $jobdir/host2-ips.txt
         host2_ip=$(head -1 $jobdir/host2-ips.txt)
     else
-        do_mpirun 1 1 "" $host2 "ifconfig -a" "" $logfile $jobdir/host2-ifc.txt
+        do_mpirun 1 1 "none" "" $host2 "ifconfig -a" "" \
+            $logfile $jobdir/host2-ifc.txt
         # XXX: ifconfig output varies between linux versions
         host2_ip=$(egrep '^ +inet ' $jobdir/host2-ifc.txt | \
                        sed -e 's/inet addr:/inet /' | \
@@ -163,7 +173,7 @@ run_one() {
     message "Starting new test at: ${now}"
     message "Testing protocol '$proto' with $num Mercury instances"
     message "reqsz=${reqsz:-'n/a'}, bulksz=${bulksz:-'n/a'}, limit=$limit, nrpcs=$nrpcs"
-    message "Iteration $iter out of $repeats, mode ${nb_mode}, poll ${nb_pollspin}"
+    message "Iteration $iter out of $repeats, mode ${nb_mode}, poll ${nb_pollspin}, cpubind ${nb_cpubind}"
     message "====================================================="
     message ""
 
@@ -240,10 +250,12 @@ run_one() {
         message "DRYRUN CMD = $the_cmd"
     else
         if [ $islocal = 1 ]; then
-            do_mpirun 2 2 "" "$host1,$host1" "$the_cmd" "" "$logfile" || \
+            do_mpirun 2 2 "$nb_cpubind" "" "$host1,$host1" "$the_cmd" \
+              "$nb_extraopts" "$logfile" || \
               message "!!! NOTICE !!! app exited with error code"
         else
-            do_mpirun 2 1 "" "$host1,$host2" "$the_cmd" "" "$logfile" || \
+            do_mpirun 2 1 "$nb_cpubind" "" "$host1,$host2" "$the_cmd" \
+              "$nb_extraopts" "$logfile" || \
               message "!!! NOTICE !!! app exited with error code"
         fi
     fi
