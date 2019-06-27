@@ -59,8 +59,10 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/umbrella")
 include (umbrella-init)
 
 #
-# we don't really use mpicxx.h for now
-# (can be overridden with -DMPI_CXX_SKIP_MPICXX=Off)
+# we don't really use MPICXX for now. The difference between CXX and MPICXX
+# is that CXX refers to the MPI C API being usable from C++, whereas MPICXX
+# refers to the MPI-2 C++ API that was removed again in MPI-3.
+# To enable MPICXX, run umbrella with -DMPI_CXX_SKIP_MPICXX=Off.
 #
 set (MPI_CXX_SKIP_MPICXX ON CACHE BOOL "True if MPICXX should be skipped")
 
@@ -78,7 +80,7 @@ set (UMBRELLA_MPI 1)
 include (umbrella-main)
 
 #
-# propagate to all cmake subprojects
+# propagate the MPICXX setting to all cmake subprojects
 #
 list(APPEND UMBRELLA_CMAKECACHE -DMPI_CXX_SKIP_MPICXX:BOOL=${MPI_CXX_SKIP_MPICXX})
 
