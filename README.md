@@ -56,25 +56,18 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
 
 ### Installation
 
-A recent CXX compiler with standard building tools including make, cmake (used by deltafs), and automake (used by some of our dependencies), as well as a few other common library packages including libboost (used by mercury rpc) and libltdl (used by cci).
+A recent CXX compiler (e.g., gcc 5 or later) with standard building tools including make, cmake (used by deltafs), and automake (used by some of our dependencies), as well as a few other common library packages such as libpapi and libnuma (for debugging and performance montoring).
 
-On Ubuntu 16.04.2, these requirements could be obtained by:
+On Ubuntu systems, these software requirements can be met by:
 
-```
-sudo apt-get update
-
-sudo apt-get install gcc g++ make cmake
-sudo apt-get install autoconf automake libtool pkg-config
-sudo apt-get install libpapi-dev libnuma-dev libboost-dev libltdl-dev libmpich-dev
-sudo apt-get install libibverbs-dev librdmacm-dev  # Optional, needed by cci in order to enable ibverbs
-
-sudo apt-get install git
+```bash
+sudo apt-get install gcc g++ make cmake autoconf automake libtool pkg-config libpapi-dev libnuma-dev git
 ```
 
-To build deltafs and install it under a specific prefix (e.g. $HOME/deltafs):
+To build deltafs and install it under a specific prefix (e.g., $HOME/deltafs):
 
-```
-export GIT_SSL_NO_VERIFY=true  # Assuming bash
+```bash
+export GIT_SSL_NO_VERIFY=true
 
 mkdir -p $HOME/deltafs
 cd $HOME/deltafs
@@ -94,8 +87,13 @@ cd src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
 mkdir -p deltafs-umbrella-build
 cd deltafs-umbrella-build
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
-    ../deltafs-umbrella
+
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON \
+  -DMERCURY_NA_INITIALLY_ON="bmi;sm" \
+  -DMERCURY_POST_LIMIT=OFF \
+  -DMERCURY_CHECKSUM=OFF \
+  ../deltafs-umbrella
 make
 ```
 
