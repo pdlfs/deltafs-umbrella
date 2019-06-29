@@ -27,13 +27,13 @@ XXXXXXXXX        XXXXXXX   XX    XX        XX  XX      XX
 
 DeltaFS was developed, in part, under U.S. Government contract 89233218CNA000001 for Los Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC for the U.S. Department of Energy/National Nuclear Security Administration. Please see the accompanying [LICENSE.txt](LICENSE.txt) for further information. 
 
-### Overview
+## Overview
 
-This package is designed to help our collaborators to quickly setup deltafs on various computing platforms ranging from commodity NFS PRObE clusters to highly-specialized Cray systems customized by different national labs. The package features a highly-automated process that downloads, builds, and installs deltafs (including many of its friends and all their dependencies) along with a demo application (VPIC) that has been preloaded to use deltafs to perform file system activities.
+This package is designed for quickly setting up deltafs on various computing platforms ranging from commodity NFS PRObE clusters to highly-optimized HPC systems used in national labs. The package features an automated process that downloads, builds, and installs deltafs (including its software dependencies) in a single step. A demo application (VPIC) is also included in this package for showcasing the filesystem's in-situ capabilities.
 
-Written on top of cmake, deltafs-umbrella is expected to work with most major computing platforms. We have successfully tested deltafs-umbrella on CMU PDL Narwhal, NERSC Edison, as well as NERSC Cori.
+Written atop cmake, deltafs-umbrella is expected to work with major computing platforms. We have successfully tested deltafs-umbrella on CMU PDL Narwhal, LANL Trinity, NERSC Edison, and NERSC Cori.
 
-### Modules
+## Modules
 
 * deltafs dependencies
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
@@ -54,9 +54,11 @@ Written on top of cmake, deltafs-umbrella is expected to work with most major co
   * mercury-runner (https://github.com/pdlfs/mercury-runner.git)
   * nexus-runner (https://github.com/pdlfs/nexus-runner.git)
 
-### Installation
+## Installation
 
 A recent CXX compiler (e.g., gcc 5 or later) with standard building tools including make, cmake (used by deltafs), and automake (used by some of our dependencies), as well as a few other common library packages such as libpapi and libnuma (for debugging and performance montoring).
+
+### Ubuntu
 
 On Ubuntu systems, these software requirements can be met by:
 
@@ -67,11 +69,12 @@ sudo apt-get install gcc g++ make cmake autoconf automake libtool pkg-config lib
 To build deltafs and install it under a specific prefix (e.g., $HOME/deltafs):
 
 ```bash
-export GIT_SSL_NO_VERIFY=true
+export GIT_SSL_NO_VERIFY=true  # May be needed on some computing environments
 
 mkdir -p $HOME/deltafs
 cd $HOME/deltafs
 
+# After installation, we will have the following:
 #
 # $HOME/deltafs
 #  -- bin
@@ -82,6 +85,7 @@ cd $HOME/deltafs
 #      -- deltafs-umbrella-build
 #  -- share
 #
+
 mkdir -p src
 cd src
 git clone https://github.com/pdlfs/deltafs-umbrella.git
@@ -90,14 +94,86 @@ cd deltafs-umbrella-build
 
 cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON \
-  -DMERCURY_NA_INITIALLY_ON="bmi;sm" \
-  -DMERCURY_POST_LIMIT=OFF \
+  -DMERCURY_NA_INITIALLY_ON="bmi;sm" -DMERCURY_POST_LIMIT=OFF \
   -DMERCURY_CHECKSUM=OFF \
-  ../deltafs-umbrella
+../deltafs-umbrella
+
 make
+
+make install
+
 ```
 
-### Run vpic with mpi on top of deltafs
+### LANL Trinity/Trinitite
+
+LANL Trinity is a Cray machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM. MPI jobs should be launched using `srun`. Batch jobs directly run on compute nodes (no "mon" nodes). Trinity features two types of compute nodes: Haswell and KNL.
+
+#### Haswell
+
+Each Trinity/Trinitite Haswell node has 32 CPU cores, 64 hardware threads, and 128GB RAM.
+
+To build deltafs on such nodes:
+
+```bash
+export CRAYPE_LINK_TYPE="dynamic"
+export CRAYOS_VERSION=6
+
+module unload craype-hugepages2M
+
+module load craype-haswell
+module load PrgEnv-gnu
+module load cmake
+
+mkdir -p $HOME/deltafs
+cd $HOME/deltafs
+
+# After installation, we will have the following:
+#
+# $HOME/deltafs
+#  -- bin
+#  -- include
+#  -- lib
+#  -- src
+#      -- deltafs-umbrella
+#         -- cache
+#         -- cache.0
+#      -- deltafs-umbrella-build
+#  -- share
+#
+
+mkdir -p src
+cd src
+
+git clone https://github.com/pdlfs/deltafs-umbrella.git
+cd deltafs-umbrella
+cd cache
+ln -fs ../cache.0/* .
+cd ..
+cd ..
+
+mkdir -p deltafs-umbrella-build
+cd deltafs-umbrella-build
+
+env CC=cc CXX=CC cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH="$PAT_BUILD_PAPI_BASEDIR" \
+  -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON \
+  -DMERCURY_NA_INITIALLY_ON="bmi;ofi;sm" -DMERCURY_POST_LIMIT=OFF \
+  -DMERCURY_CHECKSUM=OFF \
+../deltafs-umbrella
+
+make
+
+make install
+
+```
+
+Note: we could use `PrgEnv-intel` instead of `PrgEnv-gnu` but the former currently does not provide `<stdatomic.h>`, which is used by a few of our software dependencies.
+
+#### KNL
+
+Each Trinity/Trinitite KNL node has 68 CPU cores, 272 hardware threads, and 96GB RAM. To build deltafs on such nodes, change `module load craype-haswell` to `module load craype-mic-knl`.
+
+## Run vpic with mpi on top of deltafs
 
 Running vpic is a two step process.  First you run vpicexpt_gen.pl to generate a set of one or more vpic run scripts, then you can run vpic with the generated scripts.
 
