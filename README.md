@@ -106,7 +106,9 @@ make install
 
 ### LANL Trinity/Trinitite
 
-LANL Trinity/Trinitite is a Cray machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Trinity/Trinitite features two types of compute nodes: Haswell and KNL. All Trinity/Trinitite nodes are interconnected via Cray Aries. 
+**High-level summary: module/slurm/srun/gni**
+
+LANL Trinity/Trinitite is a Cray machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "MOM" nodes). MPI jobs should be launched using `srun`. Trinity/Trinitite features two types of compute nodes: Haswell and KNL. All Trinity/Trinitite nodes are interconnected via Cray Aries. 
 
 #### Haswell
 
@@ -175,7 +177,9 @@ Each Trinity/Trinitite KNL node has 68 CPU cores, 272 hardware threads, and 96GB
 
 ### LANL Grizzly
 
-LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores, 36 hardware threads, and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
+**High-level summary: module/slurm/srun/psm2**
+
+LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "MON" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores, 36 hardware threads, and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
 
 To build deltafs on LANL Grizzly:
 
@@ -223,6 +227,18 @@ make
 make install
 
 ```
+
+### Notes on C++ Compilers
+
+deltafs code is written in C++ 98 and can be compiled with g++ 4.4 or later. A few deltafs dependencies use atomic operations and may require a more recent C/C++ compiler.
+
+#### stdatomic.h
+
+Mercury RPC, one critical deltafs dependency, implements atomic counters using whatever is available on the current system (e.g., OPA library, stdatomic.h, OSX's OSAtomic.h, the windows API). On Linux, when the C compiler (such as gcc 4.8 or eariler) cannot provide stdatomic.h, the OPA (Open Portable Atomics) library must be installed in order to compile mercury. There are at least 3 ways to install this library. The easiest way is to install CCI along with mercury since CCI uses and will install OPA alongside itself. In addition, MPICH also ships with OPA so installing MPICH will install OPA too. Finally, one can always compile and install OPA as a standalone library: https://github.com/pmodels/openpa.
+
+#### _Atomic
+
+Some subcomponents in the libfabric codebase make use of the "_Atomic" qualifier defined in c11: https://en.cppreference.com/w/c/atomic. Eariler C compilers (such as gcc 4.8 or eariler, and Intel icc 17.0 or eariler) may not recognize it, and may not even have stdatomic.h. To work around this issue, one simply has to use a compiler that understands _Atomic.
 
 ## Run vpic with mpi on top of deltafs
 
