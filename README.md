@@ -106,7 +106,7 @@ make install
 
 ### LANL Trinity/Trinitite
 
-LANL Trinity is a Cray machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM. MPI jobs should be launched using `srun`. Batch jobs directly run on compute nodes (no "mon" nodes). Trinity features two types of compute nodes: Haswell and KNL.
+LANL Trinity/Trinitite is a Cray machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Trinity/Trinitite features two types of compute nodes: Haswell and KNL. All Trinity/Trinitite nodes are interconnected via Cray Aries. 
 
 #### Haswell
 
@@ -172,6 +172,57 @@ Note: we could use `PrgEnv-intel` instead of `PrgEnv-gnu` but the former current
 #### KNL
 
 Each Trinity/Trinitite KNL node has 68 CPU cores, 272 hardware threads, and 96GB RAM. To build deltafs on such nodes, change `module load craype-haswell` to `module load craype-mic-knl`.
+
+### LANL Grizzly
+
+LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
+
+To build deltafs on LANL Grizzly:
+
+```bash
+module add cmake gcc intel-mpi
+
+mkdir -p $HOME/deltafs
+cd $HOME/deltafs
+
+# After installation, we will have the following:
+#
+# $HOME/deltafs
+#  -- bin
+#  -- include
+#  -- lib
+#  -- src
+#      -- deltafs-umbrella
+#         -- cache
+#         -- cache.0
+#      -- deltafs-umbrella-build
+#  -- share
+#
+
+mkdir -p src
+cd src
+
+git clone https://github.com/pdlfs/deltafs-umbrella.git
+cd deltafs-umbrella
+cd cache
+ln -fs ../cache.0/* .
+cd ..
+cd ..
+
+mkdir -p deltafs-umbrella-build
+cd deltafs-umbrella-build
+
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON \
+  -DMERCURY_NA_INITIALLY_ON="bmi;ofi;sm" -DMERCURY_POST_LIMIT=OFF \
+  -DMERCURY_CHECKSUM=OFF \
+../deltafs-umbrella
+
+make
+
+make install
+
+```
 
 ## Run vpic with mpi on top of deltafs
 
