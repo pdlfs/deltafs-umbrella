@@ -31,7 +31,7 @@ DeltaFS was developed, in part, under U.S. Government contract 89233218CNA000001
 
 This package is designed for quickly setting up deltafs on various computing platforms ranging from commodity NFS PRObE clusters to highly-optimized HPC systems used in national labs. The package features an automated process that downloads, builds, and installs deltafs (including its software dependencies) in a single step. A demo application (VPIC) is also included in this package for showcasing the filesystem's in-situ capabilities.
 
-Written atop cmake, deltafs-umbrella is expected to work with major computing platforms. We have successfully tested deltafs-umbrella on CMU PDL Narwhal, LANL Trinity, NERSC Edison, and NERSC Cori.
+Written atop cmake, deltafs-umbrella is expected to work with major computing platforms. We have successfully tested deltafs-umbrella on CMU PDL Narwhal, LANL Trinity, LANL Grizzly, NERSC Edison, and NERSC Cori.
 
 ## Modules
 
@@ -175,7 +175,7 @@ Each Trinity/Trinitite KNL node has 68 CPU cores, 272 hardware threads, and 96GB
 
 ### LANL Grizzly
 
-LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
+LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "mon" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores, 36 hardware threads, and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
 
 To build deltafs on LANL Grizzly:
 
