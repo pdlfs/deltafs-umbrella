@@ -1,6 +1,6 @@
 **Download, build, and install deltafs, its friends, and their minimum dependencies in a single step.**
 
-[[README for Cray]](README.cray.md) | [[README for PDL]](README.pdl.md)
+[[README for LANL Trinity]](#lanl-trinitytrinitite) | [[README for LANL Grizzly]](#lanl-grizzly)
 
 [![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
 [![GitHub (pre-)release](https://img.shields.io/github/release-pre/pdlfs/deltafs-umbrella.svg)](https://github.com/pdlfs/deltafs-umbrella/releases)
