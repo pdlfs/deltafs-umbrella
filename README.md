@@ -216,7 +216,7 @@ cd ..
 mkdir -p deltafs-umbrella-build
 cd deltafs-umbrella-build
 
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/deltafs -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DUMBRELLA_BUILD_TESTS=OFF -DUMBRELLA_SKIP_TESTS=ON \
   -DMERCURY_NA_INITIALLY_ON="bmi;ofi;sm" -DMERCURY_POST_LIMIT=OFF \
   -DMERCURY_CHECKSUM=OFF \
@@ -230,7 +230,7 @@ make install
 
 ### Notes on C++ Compilers
 
-deltafs code is written in C++ 98 and can be compiled with g++ 4.4 or later. A few deltafs dependencies use atomic operations and may require a more recent C/C++ compiler.
+Deltafs code is written in C++ 98 and can be compiled with g++ 4.4 or later. A few deltafs dependencies need atomic primitives and may require a more recent C/C++ compiler.
 
 #### stdatomic.h
 
@@ -238,7 +238,7 @@ Mercury RPC, one critical deltafs dependency, implements atomic counters using w
 
 #### _Atomic
 
-Some subcomponents in the libfabric codebase make use of the "_Atomic" qualifier defined in c11: https://en.cppreference.com/w/c/atomic. Eariler C compilers (such as gcc 4.8 or eariler, and Intel icc 17.0 or eariler) may not recognize it, and may not even have stdatomic.h. To work around this issue, one simply has to use a compiler that understands _Atomic.
+Some components in the libfabric codebase make use of the "_Atomic" qualifier defined in c11: https://en.cppreference.com/w/c/atomic. Eariler C compilers (such as gcc 4.8 or eariler, and Intel icc 17.0 or eariler) may not recognize it, and may not even have stdatomic.h. To work around this issue, one simply has to use a compiler that understands _Atomic.
 
 ## Run vpic with mpi on top of deltafs
 
