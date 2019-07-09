@@ -364,7 +364,15 @@ endforeach()
 set(UMBRELLA_LDFLAGS "LDFLAGS=${UMBRELLA_LDFLAGS}")
 
 # compiler settings, the second one is to force an mpi wrapper based compile.
-set (UMBRELLA_COMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
+if (DEFINED CMAKE_OSX_SYSROOT)
+    # OSX with CMAKE_OSX_SYSROOT set requires additional flags
+    set (UMBRELLA_COMP
+      "CC=${CMAKE_C_COMPILER} ${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT}"
+      "CXX=${CMAKE_CXX_COMPILER} ${CMAKE_CXX_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT}"
+      )
+else()
+    set (UMBRELLA_COMP CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER})
+endif()
 if (UMBRELLA_MPI)
     set (UMBRELLA_MPICOMP CC=${MPI_C_COMPILER} CXX=${MPI_CXX_COMPILER})
 else ()
