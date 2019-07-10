@@ -179,7 +179,7 @@ Each Trinity/Trinitite KNL node has 68 CPU cores, 272 hardware threads, and 96GB
 
 **High-level summary: module/slurm/srun/psm2**
 
-LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "MON" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 18 CPU cores, 36 hardware threads, and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
+LANL Grizzly is a Penguin machine. User-level software packages can be configured via a `module` command. Jobs are scheduled through SLURM and jobs directly run on compute nodes (no "MON" nodes). MPI jobs should be launched using `srun`. Each Grizzly node has 36 CPU cores and 64GB RAM. Grizzly compute nodes are interconnected via Intel Omni-Path.
 
 To build deltafs on LANL Grizzly:
 
