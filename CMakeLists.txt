@@ -101,7 +101,7 @@ umbrella_opt_default (MERCURY_TAG "9906f25b")         # May 2019
 umbrella_opt_default (MSSG_TAG "v1.4")
 umbrella_opt_default (NEXUS_RUNNER_TAG "4450339b")    # Mar 2018
 umbrella_opt_default (OFI_TAG "a593d160")             # Jun 2019
-umbrella_opt_default (VPIC_TAG "9a64531e")            # Dec 2018
+umbrella_opt_default (VPIC407_TAG "9a64531e")         # Jul 2019
 
 #
 # any additional cache variables we want to add that are not already
@@ -135,7 +135,7 @@ include (umbrella/mercury-runner)
 include (umbrella/mssg)
 include (umbrella/nexus-runner)
 include (umbrella/trecon-reader)
-include (umbrella/vpic)
+include (umbrella/vpic407)
 
 #
 # scripts -- live here in deltafs-umbrella
