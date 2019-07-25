@@ -49,6 +49,7 @@ Written atop cmake, deltafs-umbrella is expected to work with major computing pl
   * deltafs-bb (https://github.com/pdlfs/deltafs-bb.git)
 * vpic
   * deltafs-vpic-preload (https://github.com/pdlfs/deltafs-vpic-preload.git)
+  * vpic v407 (https://github.com/pdlfs/vpic407.git)
   * vpic (https://github.com/pdlfs/vpic.git)
 * support
   * mercury-runner (https://github.com/pdlfs/mercury-runner.git)
