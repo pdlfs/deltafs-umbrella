@@ -64,8 +64,10 @@ script:
   - date
   - mkdir -p /tmp/deltafs
   - git lfs pull --include "cache.0/ch-placement*"
+  - git lfs pull --include "cache.0/bmi*"
   - cd cache
   - ln -fs ../cache.0/ch-placement* .
+  - ln -fs ../cache.0/bmi* .
   - ls -l
   - cd ..
   - >
