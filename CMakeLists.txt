@@ -101,6 +101,10 @@ umbrella_opt_default (MERCURY_TAG "9906f25b")         # May 2019
 umbrella_opt_default (MSSG_TAG "v1.4")
 umbrella_opt_default (NEXUS_RUNNER_TAG "4450339b")    # Mar 2018
 umbrella_opt_default (OFI_TAG "a593d160")             # Jun 2019
+umbrella_opt_default (OSU_MICRO_BENCHMARKS_REPO
+          "https://github.com/pdlfs/osu-micro-benchmarks.git")
+          # forces a load from git repo
+umbrella_opt_default (OSU_MICRO_BENCHMARKS_TAG "v5.6.1")
 umbrella_opt_default (VPIC407_TAG "9a64531e")         # Jul 2019
 
 #
@@ -134,6 +138,7 @@ include (umbrella/mercury)
 include (umbrella/mercury-runner)
 include (umbrella/mssg)
 include (umbrella/nexus-runner)
+include (umbrella/osu-micro-benchmarks)
 include (umbrella/trecon-reader)
 include (umbrella/vpic407)
 
@@ -147,3 +152,6 @@ ExternalProject_Add (scripts
 
     UPDATE_COMMAND ""
 )
+
+# don't build osu-micro-benchmarks by default
+set_property (TARGET osu-micro-benchmarks PROPERTY EXCLUDE_FROM_ALL True)
