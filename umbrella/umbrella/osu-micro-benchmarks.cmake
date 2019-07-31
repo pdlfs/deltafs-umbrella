@@ -65,4 +65,18 @@ ExternalProject_Add (osu-micro-benchmarks
     BUILD_IN_SOURCE 1   # XXX: -I's do not support out of tree builds ...
     UPDATE_COMMAND "")
 
+#
+# add extra autogen prepare step to avoid rerunning configure during
+# the build step due to the timestamps getting messed up.  not using
+# ensure-autogen because the tar file does come with a configure script.
+#
+if (NOT "${OSU_MICRO_BENCHMARKS_REPO}" STREQUAL "")
+    ExternalProject_Add_Step (osu-micro-benchmarks prepare
+        COMMAND autoreconf -fi
+        COMMENT "preparing source for configure"
+        DEPENDEES update
+        DEPENDERS configure
+        WORKING_DIRECTORY <SOURCE_DIR>)
+endif()
+
 endif (NOT TARGET osu-micro-benchmarks)
