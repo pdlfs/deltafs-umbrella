@@ -1,5 +1,7 @@
 /cache/*tar.gz
 /nbproject/
+/bootstrap/cmake-bu*/
+/bootstrap/bu*/
 /cmake-bu*/
 /bu*/
 /.idea/
