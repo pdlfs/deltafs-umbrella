@@ -39,7 +39,7 @@ Written atop cmake, deltafs-umbrella is expected to work with major computing pl
   * libch-placement (http://xgitlab.cels.anl.gov/codes/ch-placement.git)
   * mssg (https://github.com/pdlfs/mssg.git)
   * mercury-rpc (https://github.com/mercury-hpc/mercury.git)
-  * bmi (http://git.mcs.anl.gov/bmi.git)
+  * bmi (https://xgitlab.cels.anl.gov/sds/bmi.git)
   * libfabric (https://github.com/ofiwg/libfabric.git)
   * cci (https://github.com/CCI/cci.git)
 * deltafs
@@ -52,6 +52,7 @@ Written atop cmake, deltafs-umbrella is expected to work with major computing pl
   * vpic v407 (https://github.com/pdlfs/vpic407.git)
   * vpic (https://github.com/pdlfs/vpic.git)
 * support
+  * osu-micro-benchmarks (https://github.com/pdlfs/osu-micro-benchmarks.git)
   * mercury-runner (https://github.com/pdlfs/mercury-runner.git)
   * nexus-runner (https://github.com/pdlfs/nexus-runner.git)
 
