@@ -37,6 +37,7 @@ addons:
       - g++-6
       - g++-7
       - g++-8
+      - g++-9
 
 env:
   global:
@@ -48,6 +49,7 @@ env:
     - GCC=6
     - GCC=7
     - GCC=8
+    - GCC=9
 
 install:
   - export CXX="g++-${GCC}"
