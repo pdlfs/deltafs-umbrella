@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@dev.pdl.cmu.edu:pdlfs/umbrella
+	remote = git@github.com:pdlfs/umbrella.git
 	branch = master
-	commit = 65058fc0ae3af82fbf4aed053e015bfd980270f6
-	parent = 625ce0566faedcb27c101fcc87c14331d0787043
-	cmdver = 0.4.0
+	commit = 8a09b108793cb83b8858bc2c36ca086513e2559f
+	parent = de077a0157036d85bb7fe4df9ee8b258a7887fcd
 	method = merge
+	cmdver = 0.4.0
