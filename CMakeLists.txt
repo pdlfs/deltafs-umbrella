@@ -111,7 +111,7 @@ umbrella_opt_default (OSU_MICRO_BENCHMARKS_TAG "v5.6.1")
 #
 set(VPIC407 ON CACHE BOOL "Use depreciate VPIC407 code")
 if(VPIC407)
-    umbrella_opt_default (VPIC407_TAG "9a64531e")         # Jul 2019
+    umbrella_opt_default (VPIC407_TAG "0a1c2c50")         # Aug 2019
     set (my-vpic-inc trecon-reader)                       # pulls vpic407
     message (STATUS "  vpic: vpic 407 selected (depreciated)")
 else()
