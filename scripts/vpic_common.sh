@@ -77,6 +77,16 @@ vpic_build_deck() {
     cp -r ${dfsu_prefix}/decks ${ddir}   # copy in deck templates
     deckpath=`dirname $bd_id`
     deckfile=`basename $bd_id`
+    deckext=`echo $deckfile | sed -n 's/.*\.//p'`
+    if [ x${deckext} = x ]; then
+        if [ -f ${ddir}/${deckpath}/${deckfile}.cxx ] ; then
+            deckext=cxx
+        elif [ -f ${ddir}/${deckpath}/${deckfile}.cc ] ; then
+            deckext=cc
+        elif [ -f ${ddir}/${deckpath}/${deckfile}.cpp ] ; then
+            deckext=cpp
+        fi
+    fi
 
     # must generate a new config.h
     mv ${ddir}/${deckpath}/config.h ${ddir}/${deckpath}/config.bkp || \
@@ -112,11 +122,11 @@ vpic_build_deck() {
       sed 's/VPIC_PARTICLE_Z.*/VPIC_PARTICLE_Z '$bd_pz'/' > \
          ${ddir}/${deckpath}/config.h || die "config.h editing failed"
 
-cat ${ddir}/${deckpath}/config.h
+    cat ${ddir}/${deckpath}/config.h
 
     # Compile input deck
     (cd ${ddir}/${deckpath} && \
-       ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.cxx 2>&1 | \
+       ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.${deckext} 2>&1 | \
        tee -a $exp_logfile | tee -a $logfile) || \
            die "compilation failed"
 
