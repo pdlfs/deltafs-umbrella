@@ -25,6 +25,7 @@
 #  $vpic_cpubind - cpu binding for vpic run (arg 3 to do_mpirun)
 #  $vpic_epochs - number of frames/epochs for VPIC runs (int)
 #  $vpic_steps - number of time steps for VPIC runs (int)
+#  $vpic_use_vpic407 - if "1" then use vpic407 script interface
 #  $vpic_do_querying - whether we will perform particle queries (bool - 0 or 1)
 #
 # functions:
@@ -125,13 +126,24 @@ vpic_build_deck() {
     cat ${ddir}/${deckpath}/config.h
 
     # Compile input deck
-    (cd ${ddir}/${deckpath} && \
-       ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.${deckext} 2>&1 | \
-       tee -a $exp_logfile | tee -a $logfile) || \
-           die "compilation failed"
+    if [ x${vpic_use_vpic407} = x1 ]; then
+        (cd ${ddir}/${deckpath} && \
+           ${dfsu_prefix}/bin/vpic-build.op ./${deckfile}.${deckext} 2>&1 | \
+           tee -a $exp_logfile | tee -a $logfile) || \
+               die "compilation failed"
 
-    mv ${ddir}/${deckpath}/${deckfile}.op ${jobdir}/current-deck.op || \
-        die "install new current deck failed"
+        mv ${ddir}/${deckpath}/${deckfile}.op ${jobdir}/current-deck.op || \
+            die "install new current deck failed"
+    else
+        (cd ${ddir}/${deckpath} && \
+           ${dfsu_prefix}/bin/vpic ./${deckfile}.${deckext} 2>&1 | \
+           tee -a $exp_logfile | tee -a $logfile) || \
+               die "compilation failed"
+
+        mv ${ddir}/${deckpath}/${deckfile}.`uname` \
+                                             ${jobdir}/current-deck.op || \
+            die "install new current deck failed"
+    fi
 
     message ""
     message "[DECK] --- $(ls -lni --full-time ${jobdir}/current-deck.op)"

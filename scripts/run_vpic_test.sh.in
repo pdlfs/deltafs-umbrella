@@ -57,6 +57,7 @@ nodes="$arg_nodes"
 vpic_cpubind="$arg_cpubind"
 vpic_epochs="$arg_num_vpic_dumps"
 vpic_steps="$arg_num_vpic_steps"
+vpic_use_vpic407="@VPIC407@"          # lets vpic_common.sh know what to use
 bbos_buddies="$arg_bbos_buddies"
 
 message "Script begin..."

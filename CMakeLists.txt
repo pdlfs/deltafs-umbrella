@@ -113,11 +113,13 @@ set(VPIC407 ON CACHE BOOL "Use depreciate VPIC407 code")
 if(VPIC407)
     umbrella_opt_default (VPIC407_TAG "0a1c2c50")         # Aug 2019
     set (my-vpic-inc trecon-reader)                       # pulls vpic407
+    set (my-scripts-cache "${UMBRELLA_CMAKECACHE};-DVPIC407:STRING=1")
     message (STATUS "  vpic: vpic 407 selected (depreciated)")
 else()
     umbrella_opt_default (VPIC_TAG "master")
     umbrella_opt_default (VPIC_DECKS_TAG "master")
     set (my-vpic-inc vpic-decks)                          # pulls vpic
+    set (my-scripts-cache "${UMBRELLA_CMAKECACHE};-DVPIC407:STRING=0")
     message (STATUS "  vpic: vpic main selected")
 endif()
 
@@ -161,7 +163,7 @@ include (umbrella/${my-vpic-inc})
 ExternalProject_Add (scripts
     DOWNLOAD_COMMAND true    # no need to download, comes with umbrella
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/scripts
-    CMAKE_CACHE_ARGS "${UMBRELLA_CMAKECACHE};-DVPIC407:BOOL=${VPIC407}"
+    CMAKE_CACHE_ARGS "${my-scripts-cache}"
 
     UPDATE_COMMAND ""
 )
