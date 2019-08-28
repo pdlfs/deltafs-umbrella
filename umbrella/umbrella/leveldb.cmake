@@ -21,6 +21,13 @@ umbrella_defineopt (LEVELDB_TAG "master" STRING "LEVELDB GIT tag")
 umbrella_defineopt (LEVELDB_TAR "leveldb-${LEVELDB_TAG}.tar.gz" STRING
                     "LEVELDB cache tar file")
 
+# we know revs "v1.X" where X < 21 use makefile instead of cmake
+if ("${LEVELDB_TAG}" MATCHES "^v1\\.([0-9]+)$" AND CMAKE_MATCH_1 LESS 21)
+    umbrella_defineopt (LEVELDB_USE_MAKEFILE "ON" BOOL "Build with makefile")
+else ()
+    umbrella_defineopt (LEVELDB_USE_MAKEFILE "OFF" BOOL "Build with makefile")
+endif ()
+
 #
 # generate parts of the ExternalProject_Add args...
 #
@@ -32,14 +39,24 @@ umbrella_patchcheck (LEVELDB_PATCHCMD leveldb)
 #
 # create leveldb target
 #
-ExternalProject_Add (leveldb ${LEVELDB_DOWNLOAD} ${LEVELDB_PATCHCMD}
-    CONFIGURE_COMMAND ""
-    BUILD_IN_SOURCE 1      # old school makefiles
-    BUILD_COMMAND make
-    INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib
-      COMMAND cd <SOURCE_DIR>/out-shared && 
-      sh -c "cp libleveldb.* ${CMAKE_INSTALL_PREFIX}/lib"
-      COMMAND cp -r <SOURCE_DIR>/include/leveldb ${CMAKE_INSTALL_PREFIX}/include
-    UPDATE_COMMAND "")
+if (LEVELDB_USE_MAKEFILE)
+    message (STATUS "  leveldb: building with makefile")
+    ExternalProject_Add (leveldb ${LEVELDB_DOWNLOAD} ${LEVELDB_PATCHCMD}
+        CONFIGURE_COMMAND ""
+        BUILD_IN_SOURCE 1      # old school makefiles
+        BUILD_COMMAND make
+        INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib
+          COMMAND cd <SOURCE_DIR>/out-shared &&
+          sh -c "cp libleveldb.* ${CMAKE_INSTALL_PREFIX}/lib"
+          COMMAND cp -r <SOURCE_DIR>/include/leveldb
+                                           ${CMAKE_INSTALL_PREFIX}/include
+        UPDATE_COMMAND "")
+else()
+    message (STATUS "  leveldb: building with cmake")
+    ExternalProject_Add (leveldb ${LEVELDB_DOWNLOAD} ${LEVELDB_PATCHCMD}
+        CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
+        CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
+        UPDATE_COMMAND "")
+endif()
 
 endif (NOT TARGET leveldb)
