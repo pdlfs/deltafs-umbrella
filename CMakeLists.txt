@@ -96,6 +96,7 @@ umbrella_opt_default (DELTAFS_COMMON_TAG "v19.8")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.16")
 umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.83")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
+umbrella_opt_default (MERCURY_PROGRESSOR_TAG "89c47dc8") # Nov 2019
 umbrella_opt_default (MERCURY_RUNNER_TAG "a024caba")  # Apr 2019
 umbrella_opt_default (MERCURY_TAG "a7f4d191")         # Nov 2019
 umbrella_opt_default (MSSG_TAG "v1.4")
@@ -151,6 +152,7 @@ include (umbrella/deltafs-common)
 include (umbrella/deltafs-nexus)
 include (umbrella/deltafs-vpic-preload)
 include (umbrella/mercury)
+include (umbrella/mercury-progressor)
 include (umbrella/mercury-runner)
 include (umbrella/mssg)
 include (umbrella/nexus-runner)
