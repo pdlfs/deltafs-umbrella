@@ -38,7 +38,7 @@ include (umbrella/deltafs-nexus)
 include (umbrella/mercury)
 
 #
-# create mercury-runner target
+# create nexus-runner target
 #
 ExternalProject_Add (nexus-runner DEPENDS mercury deltafs-nexus
     ${NEXUS_RUNNER_DOWNLOAD} ${NEXUS_RUNNER_PATCHCMD}
