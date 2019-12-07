@@ -44,6 +44,7 @@ include (umbrella/mercury)
 #
 ExternalProject_Add (deltafs-shuffle DEPENDS mercury deltafs-nexus
     ${DELTAFS_SHUFFLE_DOWNLOAD} ${DELTAFS_SHUFFLE_PATCHCMD}
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
 )
