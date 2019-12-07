@@ -35,12 +35,13 @@ umbrella_patchcheck (NEXUS_RUNNER_PATCHCMD nexus-runner)
 # depends
 #
 include (umbrella/deltafs-nexus)
+include (umbrella/deltafs-shuffle)
 include (umbrella/mercury)
 
 #
 # create nexus-runner target
 #
-ExternalProject_Add (nexus-runner DEPENDS mercury deltafs-nexus
+ExternalProject_Add (nexus-runner DEPENDS mercury deltafs-nexus deltafs-shuffle
     ${NEXUS_RUNNER_DOWNLOAD} ${NEXUS_RUNNER_PATCHCMD}
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
