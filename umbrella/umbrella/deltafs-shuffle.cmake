@@ -37,12 +37,12 @@ umbrella_patchcheck (DELTAFS_SHUFFLE_PATCHCMD deltafs-shuffle)
 # depends
 #
 include (umbrella/deltafs-nexus)
-include (umbrella/mercury)
+include (umbrella/mercury-progressor)
 
 #
 # create deltafs-shuffle target
 #
-ExternalProject_Add (deltafs-shuffle DEPENDS mercury deltafs-nexus
+ExternalProject_Add (deltafs-shuffle DEPENDS mercury-progressor deltafs-nexus
     ${DELTAFS_SHUFFLE_DOWNLOAD} ${DELTAFS_SHUFFLE_PATCHCMD}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}

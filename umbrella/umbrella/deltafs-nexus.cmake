@@ -37,12 +37,12 @@ umbrella_testcommand (DELTAFS_NEXUS_TESTCMD
 #
 # depends
 #
-include (umbrella/mercury)
+include (umbrella/mercury-progressor)
 
 #
 # create deltafs-nexus target
 #
-ExternalProject_Add (deltafs-nexus DEPENDS mercury
+ExternalProject_Add (deltafs-nexus DEPENDS mercury-progressor
     ${DELTAFS_NEXUS_DOWNLOAD} ${DELTAFS_NEXUS_PATCHCMD}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}

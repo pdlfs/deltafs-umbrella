@@ -41,13 +41,14 @@ umbrella_testcommand (DELTAFS_VPIC_PRELOAD_TESTCMD
 include (umbrella/ch-placement)
 include (umbrella/deltafs)
 include (umbrella/deltafs-nexus)
+include (umbrella/deltafs-shuffle)
 include (umbrella/mssg)
 
 #
 # create deltafs-vpic-preload target
 #
 ExternalProject_Add (deltafs-vpic-preload
-    DEPENDS deltafs deltafs-nexus ch-placement mssg
+    DEPENDS deltafs deltafs-nexus deltafs-shuffle ch-placement mssg
     ${DELTAFS_VPIC_PRELOAD_DOWNLOAD} ${DELTAFS_VPIC_PRELOAD_PATCHCMD}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
