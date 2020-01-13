@@ -88,14 +88,14 @@ list(APPEND UMBRELLA_CMAKECACHE -DMPI_CXX_SKIP_MPICXX:BOOL=${MPI_CXX_SKIP_MPICXX
 #
 # set git tags to the versions we want to stick to by default...
 #
-umbrella_opt_default (BMI_TAG "11ac9e74")             # Apr 2019
+umbrella_opt_default (BMI_TAG "6ea0b78f")             # Jan 2020
 umbrella_opt_default (CCI_TAG "3ab663e0")
 umbrella_opt_default (CH_PLACEMENT_TAG "97fd3158")    # Jul 2019
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v19.8")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.18")
 umbrella_opt_default (DELTAFS_SHUFFLE_TAG "778c38bf") # Dec 2019
-umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.84")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.85")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
 umbrella_opt_default (MERCURY_PROGRESSOR_TAG "89c47dc8") # Nov 2019
 umbrella_opt_default (MERCURY_RUNNER_TAG "b277a2df")  # Nov 2019
