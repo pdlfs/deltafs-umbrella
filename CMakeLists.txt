@@ -94,14 +94,14 @@ umbrella_opt_default (CH_PLACEMENT_TAG "97fd3158")    # Jul 2019
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v19.8")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.18")
-umbrella_opt_default (DELTAFS_SHUFFLE_TAG "3eba6bda") # Feb 2020
+umbrella_opt_default (DELTAFS_SHUFFLE_TAG "c2e7b5c4") # Feb 2020
 umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.85")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
 umbrella_opt_default (MERCURY_PROGRESSOR_TAG "89c47dc8") # Nov 2019
 umbrella_opt_default (MERCURY_RUNNER_TAG "b277a2df")  # Nov 2019
 umbrella_opt_default (MERCURY_TAG "a7f4d191")         # Nov 2019
 umbrella_opt_default (MSSG_TAG "v1.4")
-umbrella_opt_default (NEXUS_RUNNER_TAG "bff6675f")    # Dec 2019
+umbrella_opt_default (NEXUS_RUNNER_TAG "a4399100")    # Feb 2020
 umbrella_opt_default (OFI_TAG "a593d160")             # Jun 2019
 umbrella_opt_default (OSU_MICRO_BENCHMARKS_REPO
           "https://github.com/pdlfs/osu-micro-benchmarks.git")
