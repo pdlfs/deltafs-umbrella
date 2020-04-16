@@ -728,7 +728,7 @@ sub hms {
 sub guess_subnet {
     my($hn) = $hostname;
     return "11.128" if ($hn =~ /^tt-fey/);
-    return "10.92" if ($hn =~ /narwhal/);
+    return "10.111" if ($hn =~ /narwhal/);
     return "10.53" if ($hn =~ /susitna/);
     return undef;
 }

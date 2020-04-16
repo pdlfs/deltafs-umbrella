@@ -25,7 +25,7 @@ set -euo pipefail
 ####################
 # Input parameters #
 ####################
-# 10.92=narwhal, 10.53=susitna_fge, 11.128=trinitite
+# 10.111=narwhal, 10.53=susitna_fge, 11.128=trinitite
 # default is to use "hostname -i" ip
 subnet=${1:-""}
 
