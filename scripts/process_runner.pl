@@ -39,7 +39,7 @@ while (<STDIN>) {
     }
 
     # look for client final output
-    if (/: client-(\d+)-(\d+)-(c|s|cs)-(\d+)-(\d+):.*(\d+)\.(\d+) sec per /) {
+    if (/: client-(\d+)-(\d+)-(c|s|cs)-(\d+)-(\d+):.*\((\d+)\.(\d+) sec per /) {
         $ninst = $1;           # instances number
         $count = $2;           # number of RPCs we did
         $mode = $3;            # c (client)
