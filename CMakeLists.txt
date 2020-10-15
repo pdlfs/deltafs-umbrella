@@ -97,7 +97,7 @@ umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.19")
 umbrella_opt_default (DELTAFS_SHUFFLE_TAG "bba0a2f6") # Feb 2020
 umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.86")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
-umbrella_opt_default (MERCURY_PROGRESSOR_TAG "89c47dc8") # Nov 2019
+umbrella_opt_default (MERCURY_PROGRESSOR_TAG "6892c220") # Oct 2020
 umbrella_opt_default (MERCURY_RUNNER_TAG "86318e9b")  # Mar 2020
 umbrella_opt_default (MERCURY_TAG "41caa143")         # Mar 2020
 umbrella_opt_default (MSSG_TAG "v1.4")
