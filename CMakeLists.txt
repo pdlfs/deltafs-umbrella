@@ -99,7 +99,7 @@ umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.86")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
 umbrella_opt_default (MERCURY_PROGRESSOR_TAG "6892c220") # Oct 2020
 umbrella_opt_default (MERCURY_RUNNER_TAG "381abae2")  # Oct 2020
-umbrella_opt_default (MERCURY_TAG "41caa143")         # Mar 2020
+umbrella_opt_default (MERCURY_TAG "df2fef78")         # Oct 2020
 umbrella_opt_default (MSSG_TAG "v1.4")
 umbrella_opt_default (NEXUS_RUNNER_TAG "40003c0d")    # Feb 2020
 umbrella_opt_default (OFI_TAG "a593d160")             # Jun 2019
@@ -140,7 +140,7 @@ message (STATUS "  deltafs_verbose: ${DELTAFS_VERBOSE}")
 
 # note: NA_INITIALLY_ON is only applied as the defaults the first time
 # you run cmake.  if you want to reconfigure, change MERCURY_BMI, et al.
-umbrella_opt_default (MERCURY_NA_INITIALLY_ON "bmi;cci;ofi;sm")
+umbrella_opt_default (MERCURY_NA_INITIALLY_ON "bmi;ofi;sm")
 
 set (PDLFS_OPTIONS -DPDLFS_MERCURY_RPC=ON -DPDLFS_SNAPPY=OFF
                    -DPDLFS_GFLAGS=OFF -DPDLFS_GLOG=OFF
