@@ -19,8 +19,8 @@
 #
 #  MERCURY_NA_INITIALLY_ON - cmake list of NAs that are initally enabled
 #                            the first time cmake is run
-#  MERCURY_BMI, MERCURY_CCI, MERCURY_OFI, MERCURY_SM - settings for each NA
-#     (they will override MERCURY_NA_INITIALLY_ON)
+#  MERCURY_BMI, MERCURY_CCI, MERCURY_OFI, MERCURY_PSM, MERCURY_SM - settings
+#     for each NA (they will override MERCURY_NA_INITIALLY_ON)
 #
 
 if (NOT TARGET mercury)
@@ -61,11 +61,13 @@ umbrella_defineopt (MERCURY_NA_INITIALLY_ON "bmi;cci;ofi;sm" STRING
 umbrella_onlist (MERCURY_NA_INITIALLY_ON bmi MERCURY_DEFBMI)
 umbrella_onlist (MERCURY_NA_INITIALLY_ON cci MERCURY_DEFCCI)
 umbrella_onlist (MERCURY_NA_INITIALLY_ON ofi MERCURY_DEFOFI)
+umbrella_onlist (MERCURY_NA_INITIALLY_ON psm MERCURY_DEFPSM)
 umbrella_onlist (MERCURY_NA_INITIALLY_ON sm  MERCURY_DEFSM)
 
 umbrella_defineopt (MERCURY_BMI ${MERCURY_DEFBMI} BOOL "Enable Mercury bmi na")
 umbrella_defineopt (MERCURY_CCI ${MERCURY_DEFCCI} BOOL "Enable Mercury cci na")
 umbrella_defineopt (MERCURY_OFI ${MERCURY_DEFOFI} BOOL "Enable Mercury ofi na")
+umbrella_defineopt (MERCURY_PSM ${MERCURY_DEFPSM} BOOL "Enable Mercury psm na")
 umbrella_defineopt (MERCURY_SM  ${MERCURY_DEFSM}  BOOL "Enable Mercury sm na")
 
 # generic mercury cmake options
@@ -78,7 +80,7 @@ set (MERCURY_CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_SM=${MERCURY_SM}
      -DMERCURY_ENABLE_VERBOSE_ERROR:BOOL=${MERCURY_VERBOSE_ERROR}
      -DMERCURY_ENABLE_STATS:BOOL=${MERCURY_STATS}
      -DNA_USE_BMI=${MERCURY_BMI} -DNA_USE_CCI=${MERCURY_CCI}
-     -DNA_USE_OFI=${MERCURY_OFI})
+     -DNA_USE_OFI=${MERCURY_OFI} -DNA_USE_PSM=${MERCURY_PSM})
 
 # now handle the NAs
 if (MERCURY_BMI)
@@ -107,6 +109,11 @@ if (MERCURY_OFI)
     include (umbrella/ofi)
 endif (MERCURY_OFI)
 
+if (MERCURY_PSM)
+    list (APPEND MERCURY_DEPENDS psm)
+    include (umbrella/psm)
+endif (MERCURY_PSM)
+
 #
 # report config to user
 #
@@ -117,7 +124,8 @@ message (STATUS "    HG stats: ${MERCURY_STATS}")
 message (STATUS "    HG post limit: ${MERCURY_POST_LIMIT}")
 message (STATUS "    HG force OPA: ${MERCURY_OPA}")
 message (STATUS "    NAs: bmi=${MERCURY_BMI} cci=${MERCURY_CCI}")
-message (STATUS "    NAs: ofi=${MERCURY_OFI} sm=${MERCURY_SM}")
+message (STATUS "    NAs: ofi=${MERCURY_OFI} psm=${MERCURY_PSM}")
+message (STATUS "    NAs: sm=${MERCURY_SM}")
 if (DEFINED ENV{CRAYPE_VERSION})
     message (STATUS "    NAs: ofi_udreg=${MERCURY_GNI_USEUDREG}")
 endif ()
