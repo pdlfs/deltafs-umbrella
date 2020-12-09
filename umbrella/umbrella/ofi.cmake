@@ -20,6 +20,10 @@ umbrella_defineopt (OFI_REPO "https://github.com/ofiwg/libfabric.git"
 umbrella_defineopt (OFI_TAG "master" STRING "OFI GIT tag")
 umbrella_defineopt (OFI_TAR "ofi-${OFI_TAG}.tar.gz" STRING "OFI cache tar file")
 
+umbrella_defineopt (UMBRELLA_REQUIRE_RDMALIBS "OFF" BOOL
+                   "Require RDMA libraries")
+
+
 #
 # XXX: we are currently hardwiring extra stuff on the cray
 # XXX: have to explicitly disable verbs on ANL theta or we get link errors
@@ -39,10 +43,21 @@ umbrella_download (OFI_DOWNLOAD ofi ${OFI_TAR}
                    GIT_TAG ${OFI_TAG})
 umbrella_patchcheck (OFI_PATCHCMD ofi)
 
+if (UMBRELLA_REQUIRE_RDMALIBS)
+    #
+    # depends
+    #
+    include (umbrella/rdma-core)
+    set (ofi_xtra DEPENDS rdma-core)
+else ()
+    unset (ofi_xtra)
+endif()
+
 #
 # create ofi target
 #
-ExternalProject_Add (ofi ${OFI_DOWNLOAD} ${OFI_PATCHCMD}
+ExternalProject_Add (ofi ${ofi_xtra}
+    ${OFI_DOWNLOAD} ${OFI_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}

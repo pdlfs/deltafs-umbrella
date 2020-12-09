@@ -194,6 +194,19 @@ function(umbrella_get_prefixpath pkgcfglist outvar)
             list(APPEND rv "${path}")
         endif()
     endforeach()
+    #
+    # XXX: we shouldn't have to put CMAKE_INSTALL_PREFIX in
+    #      UMBRELLA_PREFIX_PATH since cmake already searches
+    #      the install prefix in most cases (as CMAKE_INSTALL_PREFIX
+    #      gets added to CMAKE_SYSTEM_PREFIX_PATH and that is searched).
+    #      unfortunately, FindPkgConfig.cmake builds its search
+    #      path only from CMAKE_PREFIX_PATH and ignores
+    #      CMAKE_INSTALL_PREFIX... since we need to use FindPkgConfig.cmake
+    #      and we want it to search CMAKE_INSTALL_PREFIX, we have to
+    #      add the install prefix to the prefix path to work around
+    #      the PkgConfig issue.
+    #
+    list(APPEND rv "${CMAKE_INSTALL_PREFIX}")
     if(rv)
         list(REMOVE_DUPLICATES rv)
     endif()
@@ -210,6 +223,7 @@ endfunction()
 #   UMBRELLA_PREFIX: base directory for umbrella files
 #   UMBRELLA_MPI: user sets this if we are using MPI (default=off)
 #   UMBRELLA_BUILD_TESTS: build unit tests (default=on)
+#   UMBRELLA_HAS_GNULIBDIRS: built pkg has non-"lib" dir (eg. "lib64") (def=off)
 #   UMBRELLA_PATCHDIR: system-level patchdir (def=UMBRELLA_PREFIX/patchdir)
 #   UMBRELLA_SKIP_TESTS: skip running tests (default=OFF)
 #   UMBRELLA_USER_PATCHDIR: user patch dir (def=CMAKE_SOURCE_DIR/patches)
@@ -287,6 +301,23 @@ set (UMBRELLA_USER_PATCHDIR "${CMAKE_SOURCE_DIR}/patches"
      CACHE STRING "User patch directory")
 
 #
+# UMBRELLA_HAS_GNULIBDIRS: if we use a package that installs libs
+# in some GNU-style directory other than $prefix/lib (e.g. $prefix/lib64)
+# then set this in order to make sure that directory gets added to RPATH
+# in any binaries we generate.   most packges don't do this, so
+# we don't enable it by default.
+#
+set (UMBRELLA_LIBDIRS "${CMAKE_INSTALL_PREFIX}/lib")  # default
+if (UMBRELLA_HAS_GNULIBDIRS)
+    include (GNUInstallDirs)
+    if (NOT "${CMAKE_INSTALL_LIBDIR}" STREQUAL "lib")
+        set (UMBRELLA_LIBDIRS
+             "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+             "${CMAKE_INSTALL_PREFIX}/lib")
+    endif ()
+endif()
+
+#
 # init UMBRELLA_PREFIX_PATH with our CMAKE_PREFIX_PATH and possible
 # additional prefixes from PKG_CONFIG_PATH-like variables.  this is
 # passed down to projects as their CMAKE_PREFIX_PATH...
@@ -299,11 +330,10 @@ umbrella_get_prefixpath("${UMBRELLA_PKGCFGLIST}" UMBRELLA_PREFIX_PATH)
 # to the ./configure script command line...  we build it as a cmake
 # list and then convert it to a string.
 #
-# XXX: assume we only create "lib" (no "lib64") in install prefix.
-# if we start doing lib64 too, may need to provide an extra cfg
-# variable to help us.
-#
-set(UMBRELLA_PKGCFGPATH "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+unset(UMBRELLA_PKGCFGPATH)
+foreach (prefix ${UMBRELLA_LIBDIRS})
+    list(APPEND UMBRELLA_PKGCFGPATH "${prefix}/pkgconfig")
+endforeach()
 foreach(prefix ${CMAKE_PREFIX_PATH})
     if(EXISTS "${prefix}/lib64/pkgconfig")
         list(APPEND UMBRELLA_PKGCFGPATH "${prefix}/lib64/pkgconfig")
@@ -337,15 +367,17 @@ set(UMBRELLA_CPPFLAGS "CPPFLAGS=${UMBRELLA_CPPFLAGS}")
 # UMBRELLA_LDFLAGS: linker flags for autoconfig projects.
 # we assume we just need CMAKE_INSTALL_PREFIX, CMAKE_PREFIX_PATH,
 # and CMAKE_LIBRARY_PATH.  for other stuff autoconfig will use
-# pkg-config to find additional header paths...  the main question
-# is do we go with prefix/lib64 or prefix/lib?  for what we are building
-# we assume it is always going to be "lib" (can't know for sure, since
-# we may be running before anything gets installed)... for the
-# CMAKE_PREFIX_PATH we test for lib64 and use if present, otherwise we
-# stick with plain old lib.
+# pkg-config to find additional header paths...
 #
-set(UMBRELLA_LDFLAGS
-    "-L${CMAKE_INSTALL_PREFIX}/lib -Wl,-rpath,${CMAKE_INSTALL_PREFIX}/lib")
+unset(UMBRELLA_LDFLAGS)
+foreach(umbrella_val ${UMBRELLA_LIBDIRS})
+    if(NOT DEFINED UMBRELLA_LDFLAGS)
+      set(UMBRELLA_LDFLAGS "-L${umbrella_val} -Wl,-rpath,${umbrella_val}")
+    else()
+      set(UMBRELLA_LDFLAGS
+          "${UMBRELLA_LDFLAGS} -L${umbrella_val} -Wl,-rpath,${umbrella_val}")
+    endif()
+endforeach()
 foreach(umbrella_val ${CMAKE_LIBRARY_PATH})
     set(UMBRELLA_LDFLAGS
         "${UMBRELLA_LDFLAGS} -L${umbrella_val} -Wl,-rpath,${umbrella_val}")
@@ -399,7 +431,7 @@ set (UMBRELLA_CMAKECACHE
                 -DCMAKE_INCLUDE_PATH:STRING=${CMAKE_INCLUDE_PATH}
                 -DCMAKE_LIBRARY_PATH:STRING=${CMAKE_LIBRARY_PATH}
                 -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=1
-                -DCMAKE_INSTALL_RPATH:STRING=${CMAKE_INSTALL_PREFIX}/lib
+                -DCMAKE_INSTALL_RPATH:STRING=${UMBRELLA_LIBDIRS}
                 -DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=TRUE
      )
 
@@ -414,6 +446,7 @@ message (STATUS "  target OS: ${CMAKE_SYSTEM_NAME} "
 message (STATUS "  host OS: ${CMAKE_HOST_SYSTEM_NAME} "
                            "${CMAKE_HOST_SYSTEM_VERSION}")
 message (STATUS "  build type: ${CMAKE_BUILD_TYPE}")
+message (STATUS "  install lib dirs: ${UMBRELLA_LIBDIRS}")
 if (EXISTS "${UMBRELLA_USER_PATCHDIR}")
     message (STATUS "  user patch dir: ${UMBRELLA_USER_PATCHDIR}")
 endif ()
