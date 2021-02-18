@@ -336,9 +336,9 @@ vpic_do_run() {
             "PRELOAD_Sample_threshold" ${XX_SAMP_TH:-"64"}
             "PRELOAD_No_sys_probing" ${XX_NO_SCAN:-"0"}
             "PRELOAD_No_paranoid_checks" ${XX_NO_CHECKS:-"1"}
-            "PRELOAD_No_paranoid_barrier" ${XX_NO_BAR:-"1"}
+            "PRELOAD_No_paranoid_barrier" ${XX_NO_BAR:-"0"}
             "PRELOAD_No_paranoid_post_barrier" ${XX_NO_POST_BAR:-"0"}
-            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BAR:-"1"}
+            "PRELOAD_No_paranoid_pre_barrier" ${XX_NO_PRE_BAR:-"0"}
             "PRELOAD_No_epoch_pre_flushing" ${XX_NO_PRE_FLUSH:-"0"}
             "PRELOAD_No_epoch_pre_flushing_wait" ${XX_NO_PRE_FLUSH_WAIT:-"1"}
             "PRELOAD_No_epoch_pre_flushing_sync" ${XX_NO_PRE_FLUSH_SYNC:-"1"}
@@ -347,10 +347,11 @@ vpic_do_run() {
             "PRELOAD_Enable_bg_pause" ${XX_BG_PAUSE:-"0"}
             "PRELOAD_Bg_threads" ${XX_BG_DEPTH:-"4"}
             "PRELOAD_Enable_bloomy" ${XX_FMT_BLOOM:-"0"}
+            "PRELOAD_Enable_CARP" ${XX_CARP_ON:-"1"}
             "PRELOAD_Enable_wisc" ${XX_FMT_WISC:-"0"}
             "PRELOAD_Particle_buf_size" ${XX_PARTICLE_BUF_SIZE-"$((2*1024*1024))"}
-            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"19"}
-            "PRELOAD_Particle_size" ${XX_PARTICLE_SIZE:-"40"}
+            "PRELOAD_Particle_id_size" ${XX_PARTICLE_ID_SIZE:-"8"}
+            "PRELOAD_Particle_size" ${XX_PARTICLE_SIZE:-"56"}
             "PRELOAD_Particle_extra_size" ${XX_PARTICLE_EXTRA_SIZE:-"0"}
             "PRELOAD_Number_particles_per_rank" $(($p/$cores))
             "SHUFFLE_Mercury_proto" ${XX_HG_PROTO:-"bmi+tcp"}
@@ -385,7 +386,7 @@ vpic_do_run() {
             "SHUFFLE_Paranoid_checks" ${XX_RPC_CHECKS:-"0"}
             "SHUFFLE_Random_flush" ${XX_RPC_RANDOM_FLUSH:-"0"}
             "SHUFFLE_Recv_radix" ${XX_RECV_RADIX:-"0"}
-            "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"0"}
+            "SHUFFLE_Use_multihop" ${XX_SH_THREE_HOP:-"1"}
             "PLFSDIR_Skip_checksums" ${XX_SKIP_CRC:-"1"}
             "PLFSDIR_Memtable_size" ${XX_MEMTABLE_SIZE:-"48MiB"}
             "PLFSDIR_Compaction_buf_size" ${XX_COMP_BUF:-"4MiB"}
@@ -400,16 +401,22 @@ vpic_do_run() {
             "PLFSDIR_Unordered_storage" ${XX_SKIP_SORT:-"0"}
             "PLFSDIR_Use_plaindb" ${XX_USE_PLAINDB:-"0"}
             "PLFSDIR_Use_leveldb" ${XX_USE_LEVELDB:-"0"}
+            "PLFSDIR_Use_rangedb" ${XX_USE_LEVELDB:-"1"}
             "PLFSDIR_Ldb_force_l0" ${XX_LEVELDB_L0ONLY:-"0"}
             "PLFSDIR_Ldb_use_bf" ${XX_LEVELDB_WITHBF:-"0"}
             "PLFSDIR_Env_name" ${XX_ENV_NAME:-"posix.unbufferedio"}
             "NEXUS_ALT_LOCAL" ${XX_NX_LOCAL:-"na+sm"}
-            "NEXUS_BYPASS_LOCAL" ${XX_NX_ONEHG:-"0"}
+            "NEXUS_BYPASS_LOCAL" ${XX_NX_ONEHG:-"1"}
             "DELTAFS_TC_RATE" ${XX_IMD_RATELIMIT:-"0"}
             "DELTAFS_TC_SERIALIO" ${XX_IMD_SERIALIO:-"0"}
             "DELTAFS_TC_SYNCONCLOSE" ${XX_IMD_SYNCONCLOSE:-"0"}
             "DELTAFS_TC_IGNORESYNC" ${XX_IMD_IGNORESYNC:-"0"}
             "DELTAFS_TC_DROPDATA" ${XX_IMD_DROPDATA:-"0"}
+            "RANGE_Enable_dynamic" 0
+            "RANGE_Reneg_interval" 250000
+            "RANGE_Pvtcnt_s1" 256
+            "RANGE_Pvtcnt_s2" 256
+            "RANGE_Pvtcnt_s3" 256
         )
 
         do_mpirun $cores $ppn "$vpic_cpubind" env_vars[@] \

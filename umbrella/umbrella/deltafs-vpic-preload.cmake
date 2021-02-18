@@ -16,7 +16,7 @@ if (NOT TARGET deltafs-vpic-preload)
 # umbrella option variables
 #
 umbrella_defineopt (DELTAFS_VPIC_PRELOAD_REPO
-     "https://github.com/pdlfs/deltafs-vpic-preload.git"
+     "https://github.com/anku94/deltafs-vpic-preload.git"
      STRING "deltafs-vpic-preload GIT repository")
 umbrella_defineopt (DELTAFS_VPIC_PRELOAD_TAG "master"
      STRING "deltafs-vpic-preload GIT tag")

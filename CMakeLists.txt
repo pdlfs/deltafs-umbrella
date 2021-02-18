@@ -95,8 +95,8 @@ umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v19.8")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.19")
 umbrella_opt_default (DELTAFS_SHUFFLE_TAG "bba0a2f6") # Feb 2020
-umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.86")
-umbrella_opt_default (DELTAFS_TAG "v2019.7")
+umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "8f51d56")
+umbrella_opt_default (DELTAFS_TAG "fb28f25")
 umbrella_opt_default (MERCURY_PROGRESSOR_TAG "6892c220") # Oct 2020
 umbrella_opt_default (MERCURY_RUNNER_TAG "381abae2")  # Oct 2020
 umbrella_opt_default (MERCURY_TAG "df2fef78")         # Oct 2020
