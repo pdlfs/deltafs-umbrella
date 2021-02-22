@@ -107,8 +107,8 @@ case $arg_test_type in
     export NEXUS_BYPASS_LOCAL=1
     export XX_SH_THREE_HOP=1
     export XX_CARP_DYNTRIG=0
-    export XX_BYPASS_WRITE=$arg_intvl
-    export XX_BYPASS_WRITE=$arg_pvtcnt
+    export XX_CARP_INTVL=$arg_intvl
+    export XX_RTP_PVTCNT=$arg_pvtcnt
     ;;
 
 esac
