@@ -21,13 +21,24 @@ use strict;
 ##############################################################################
 # define experiments here
 ##############################################################################
-my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c, @cs19d, @cs19e, @cs19f,
+my(%TOC, @carp8m, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c, @cs19d, @cs19e, @cs19f,
 @pd18a, @pd18b, @pd18c, @pd18d, @pd18e, @pd18f, @pd18h,
 @pd18i, @pd18j, @pd18x, @pd18y, @sc18a, @sc18b, @sc18c,
 @sc18d, @sc18e, @sc18f, @sc18k, @sc18l, @sc18r, @sc18n,
 @sc18s, @sc18w, @sc17a, @sc17b, @sc17ba, @sc17bb,
 @sc17bi, @sc17bj, @sc17br, @sc17bx, @sc17c,
 @sc17cx);
+
+# carp8m for a basic param sweep with the "BigCARP" trace
+# last 3 params not set properly
+@carp8m = (
+#         vpic   vpic                                                     max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, pvtcnt, intvl, time, xtra, dwsize
+[     1,     1,    1,   4,   2,   0,   0,   1,   1,   64,   256,   250000,  10,    5, "32GiB"],
+[     1,     1,    1,   4,   2,   0,   0,   1,   1,   64,   256,   500000,  10,    5, "32GiB"],
+[     1,     1,    1,   4,   2,   0,   0,   1,   1,   64,   256,   750000,  10,    5, "32GiB"],
+[     1,     1,    1,   4,   2,   0,   0,   1,   1,   64,   256,   1000000,  10,    5, "32GiB"],
+);
 
 # minimal: for quick tests of script infrastructure
 @minimal = (
@@ -605,6 +616,7 @@ my(%TOC, @minimal, @dwtest, @fanrun, @cs19a, @cs19b, @cs19c, @cs19d, @cs19e, @cs
 
 # table of contents (experiments available)
 %TOC = (
+    "carp8m"  => [ \@carp8m,  \&stdpost_2d ],
     "minimal" => [ \@minimal, \&stdpost_2d ],
     "dwtest"  => [ \@dwtest,  \&stdpost_2d ],
     "cs19a"   => [ \@cs19a,   \&stdpost_2d ],
@@ -796,7 +808,8 @@ $scaletime = 1.0;
 $script = "run_vpic_test.sh";
 $skipreads = 0;
 $tag = "vpic";
-$tests = "baseline,deltafs";
+# TODO: support a baseline expt?
+$tests = "carp";
 
 $rv = GetOptions(
     "account=s"      =>  \$account,
@@ -949,9 +962,9 @@ if ($postruncmd ne '') {
 }
 
 usage("bad scale time") if ($scaletime <= 0.0);
-usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "deltafs" &&
-                              $tests ne "baseline,deltafs" &&
-                              $tests ne "deltafs,baseline");
+usage("bad tests $tests") if ($tests ne "baseline" && $tests ne "carp" &&
+                              $tests ne "baseline,carp" &&
+                              $tests ne "carp,baseline");
 foreach (@envs) {
   usage("bad env var $_") unless (/^(\w+)=(.*)/);
   usage("use --addrunopts and --extraopts to set EXTRA_MPIOPTS")
@@ -1033,7 +1046,8 @@ if ($addrunopts ne '') {
 # regular expression to use to build EXPPARAMS
 #
 $EXPPARAMS_regex = '^test=|^ipsubnet=|^nodes=|^ppn=|^vpicdumps=|^cpubind=|' .
-                   '^vpicsteps=|^px=|^py=|^pz=|^tx=|^ty=|^tz=|^deckid=|' .
+                   '^vpicsteps=|^px=|^py=|^pz=|^tx=|^ty=|^tz=|' .
+                   '^pvtcnt=|^intvl=|^deckid=|' .
                    '^bbosbuddies=|^skipreads=|^maxtime=|^basextra=|^dwsize=';
 
 #
@@ -1046,16 +1060,16 @@ if (!$dryrun && ! -d $ARGV[0]) {
 #
 # now start generating batch files
 #
-#         vpic   vpic                       max  base
-# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, time, xtra, dwsize
+#         vpic   vpic                                                     max  base
+# nodes, dumps, steps,  px,  py,  pz,  tx,  ty,  tz, ppn, pvtcnt, intvl, time, xtra, dwsize
 if ($dryrun) {
     print "r# nodes dumps steps    px    py    pz " .
-          "   tx    ty    tz ppn time xtra dwsize\n";
+          "   tx    ty    tz ppn pvtcnt  intvl  time xtra dwsize\n";
 }
 for (my($r) = 0 ; $r <= $#$exp ; $r++) {
     next if ($run ne '' && $wantrun{$r} == 0);
     my($nodes, $vpicdumps, $vpicsteps, $fpx, $fpy, $fpz, $ftx, $fty, $ftz,
-       $ppn, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
+       $ppn, $pvtcnt, $intvl, $maxtime, $basextra, $dwsize) = @{$$exp[$r]};
     my($px, $py, $pz, $tx, $ty, $tz);
 
     # allow user function to post process a row...
@@ -1073,9 +1087,9 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
             unless ($dwsize =~ /\d+.ib$/i);
     }
     if ($dryrun) {
-        printf "%2d %5d %5d %5d %5d %5d %5d %5d %5d %5d %3d %4d %4d %s\n",
+        printf "%2d %5d %5d %5d %5d %5d %5d %5d %5d %5d %3d %3d %10d %4d %4d %s\n",
         $r, $nodes, $vpicdumps, $vpicsteps, $px, $py, $pz, $tx, $ty, $tz,
-        $ppn, $maxtime, $basextra, $dwsize;
+        $ppn, $pvtcnt, $intvl, $maxtime, $basextra, $dwsize;
         next;
     }
 
@@ -1084,7 +1098,7 @@ for (my($r) = 0 ; $r <= $#$exp ; $r++) {
         $dwl = "#DW jobdw access_mode=striped capacity=$dwsize type=scratch";
         $dwl = "$dwl optimization_strategy=interference" if ($dw eq 'int');
     }
-    foreach $t ("baseline", "deltafs") {
+    foreach $t ("baseline", "carp") {
         next unless (index($tests, $t) != -1);
         $fn = "$ARGV[0]/$tag-$experiment-$r-$t.sh";
         @out = ();
@@ -1189,6 +1203,8 @@ pz=$pz
 tx=$tx
 ty=$ty
 tz=$tz
+pvtcnt=$pvtcnt
+intvl=$intvl
 deckid=$deckid
 bbosbuddies=$bbosbuddies
 skipreads=$skipreads
@@ -1255,7 +1271,7 @@ do
         ip_subnet="\$ipsubnet" nodes=\$nodes cpubind=\$cpubind \\
         procs_per_node=\$ppn num_vpic_dumps=\$vpicdumps \\
         num_vpic_steps=\$vpicsteps px=\$px py=\$py pz=\$pz \\
-        tx=\$tx ty=\$ty tz=\$tz deckid=\$deckid \\
+        tx=\$tx ty=\$ty tz=\$tz pvtcnt=\$pvtcnt intvl=\$intvl deckid=\$deckid \\
         bbos_buddies=\$bbosbuddies \\
         should_skip_query=\$skipreads
 

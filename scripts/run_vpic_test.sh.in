@@ -30,6 +30,8 @@ arg_pz="1"
 arg_tx="$((arg_nodes * arg_procs_per_node))"
 arg_ty="1"
 arg_tz="1"
+arg_pvtcnt="256"
+arg_intvl="250000"
 arg_deckid="trecon-part/turbulence"
 arg_bbos_buddies="0"
 arg_should_skip_query="0"
@@ -99,6 +101,14 @@ esac
 case $arg_test_type in
 "shuffle_test")
     export XX_BYPASS_WRITE=1
+    ;;
+"carp")
+    export XX_CARP_ON=1
+    export NEXUS_BYPASS_LOCAL=1
+    export XX_SH_THREE_HOP=1
+    export XX_CARP_DYNTRIG=0
+    export XX_BYPASS_WRITE=$arg_intvl
+    export XX_BYPASS_WRITE=$arg_pvtcnt
     ;;
 
 esac

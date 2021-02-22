@@ -412,11 +412,11 @@ vpic_do_run() {
             "DELTAFS_TC_SYNCONCLOSE" ${XX_IMD_SYNCONCLOSE:-"0"}
             "DELTAFS_TC_IGNORESYNC" ${XX_IMD_IGNORESYNC:-"0"}
             "DELTAFS_TC_DROPDATA" ${XX_IMD_DROPDATA:-"0"}
-            "RANGE_Enable_dynamic" 0
-            "RANGE_Reneg_interval" 250000
-            "RANGE_Pvtcnt_s1" 256
-            "RANGE_Pvtcnt_s2" 256
-            "RANGE_Pvtcnt_s3" 256
+            "RANGE_Enable_dynamic" ${XX_CARP_DYNTRIG:-"0"}
+            "RANGE_Reneg_interval" ${XX_CARP_INTVL:-"250000"}
+            "RANGE_Pvtcnt_s1" ${XX_RTP_PVTCNT:-"256"}
+            "RANGE_Pvtcnt_s2" ${XX_RTP_PVTCNT:-"256"}
+            "RANGE_Pvtcnt_s3" ${XX_RTP_PVTCNT:-"256"}
         )
 
         do_mpirun $cores $ppn "$vpic_cpubind" env_vars[@] \
