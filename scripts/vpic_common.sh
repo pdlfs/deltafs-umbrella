@@ -196,7 +196,8 @@ vpic_do_run() {
         pp="$p"
     fi
 
-    exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
+    # exp_tag="${runtype}_P${pp}_C${cores}_N${nodes}"
+    exp_tag = "${runtype}_P${pp}_intvl${intvl}"
     cd $jobdir || die "cd to $jobdir failed"
     exp_jobdir="$jobdir/$exp_tag"   ### NOTE !! still on Lustre !! ###
     mkdir -p $exp_jobdir || die "mkdir $exp_jobdir failed"
