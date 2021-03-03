@@ -433,6 +433,7 @@ set (UMBRELLA_CMAKECACHE
                 -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=1
                 -DCMAKE_INSTALL_RPATH:STRING=${UMBRELLA_LIBDIRS}
                 -DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=TRUE
+                -DUMBRELLA_BINARY_DIR:STRING=${CMAKE_BINARY_DIR}
      )
 
 message (STATUS "The umbrella framework is enabled")
