@@ -107,6 +107,7 @@ umbrella_opt_default (OSU_MICRO_BENCHMARKS_REPO
           "https://github.com/pdlfs/osu-micro-benchmarks.git")
           # forces a load from git repo
 umbrella_opt_default (OSU_MICRO_BENCHMARKS_TAG "v5.6.1")
+umbrella_opt_default (PDLFS_SCRIPTS_TAG "main")
 
 #
 # vpic selection.  vpic407 is the old depreciated vpic code base.
@@ -115,13 +116,13 @@ set(VPIC407 ON CACHE BOOL "Use depreciate VPIC407 code")
 if(VPIC407)
     umbrella_opt_default (VPIC407_TAG "0a1c2c50")         # Aug 2019
     set (my-vpic-inc trecon-reader)                       # pulls vpic407
-    set (my-scripts-cache "${UMBRELLA_CMAKECACHE};-DVPIC407:STRING=1")
+    umbrella_opt_default (PDLFS_SCRIPTS_VPIC407 1)
     message (STATUS "  vpic: vpic 407 selected (depreciated)")
 else()
     umbrella_opt_default (VPIC_TAG "master")
     umbrella_opt_default (VPIC_DECKS_TAG "master")
     set (my-vpic-inc vpic-decks)                          # pulls vpic
-    set (my-scripts-cache "${UMBRELLA_CMAKECACHE};-DVPIC407:STRING=0")
+    umbrella_opt_default (PDLFS_SCRIPTS_VPIC407 0)
     message (STATUS "  vpic: vpic main selected")
 endif()
 
@@ -159,18 +160,8 @@ include (umbrella/mercury-runner)
 include (umbrella/mssg)
 include (umbrella/nexus-runner)
 include (umbrella/osu-micro-benchmarks)
+include (umbrella/pdlfs-scripts)
 include (umbrella/${my-vpic-inc})
-
-#
-# scripts -- live here in deltafs-umbrella
-#
-ExternalProject_Add (scripts
-    DOWNLOAD_COMMAND true    # no need to download, comes with umbrella
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/scripts
-    CMAKE_CACHE_ARGS "${my-scripts-cache}"
-
-    UPDATE_COMMAND ""
-)
 
 # don't build osu-micro-benchmarks by default
 set_property (TARGET osu-micro-benchmarks PROPERTY EXCLUDE_FROM_ALL True)
