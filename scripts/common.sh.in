@@ -422,7 +422,8 @@ gen_hostfile() {
     elif [ -f "/share/testbed/bin/emulab-listall" ]; then
 
         # Generate hostfile on Emulab and store on disk
-        exp_hosts="`/share/testbed/bin/emulab-listall | tr ',' '\n'`"
+        # XXX: temporary hack for sus function
+        exp_hosts="`/share/testbed/bin/emulab-listall | sed -e 's/,/-dfge,/g' -e 's/$/-dfge/g' | tr ',' '\n'`"
 
         echo "$exp_hosts" > $jobdir/hosts.txt || \
             die "failed to create hosts.txt file"
