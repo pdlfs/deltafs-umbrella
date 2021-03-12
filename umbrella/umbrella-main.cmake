@@ -222,10 +222,10 @@ endfunction()
 #
 #   UMBRELLA_PREFIX: base directory for umbrella files
 #   UMBRELLA_MPI: user sets this if we are using MPI (default=off)
-#   UMBRELLA_BUILD_TESTS: build unit tests (default=on)
+#   UMBRELLA_BUILD_TESTS: build unit tests (default=off)
 #   UMBRELLA_HAS_GNULIBDIRS: built pkg has non-"lib" dir (eg. "lib64") (def=off)
 #   UMBRELLA_PATCHDIR: system-level patchdir (def=UMBRELLA_PREFIX/patchdir)
-#   UMBRELLA_SKIP_TESTS: skip running tests (default=OFF)
+#   UMBRELLA_SKIP_TESTS: skip running tests (default=on)
 #   UMBRELLA_USER_PATCHDIR: user patch dir (def=CMAKE_SOURCE_DIR/patches)
 #   UMBRELLA_PKGCFGLIST: (internal) list of pkgconfig directories from env
 #   UMBRELLA_PREFIX_PATH: passed down as CMAKE_PREFIX_PATH (see below)
@@ -290,13 +290,13 @@ if (NOT CMAKE_BUILD_TYPE)
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
 
-set (UMBRELLA_BUILD_TESTS "ON" CACHE BOOL "Build unit tests")
+set (UMBRELLA_BUILD_TESTS "OFF" CACHE BOOL "Build unit tests")
 find_file (UMBRELLA_CACHEDIR cache PATH ${CMAKE_SOURCE_DIR}
            DOC "Cache directory of tar files" NO_DEFAULT_PATH)
 set (UMBRELLA_PATCHDIR "${UMBRELLA_PREFIX}/patches"
      CACHE STRING "Internal patch directory")
 mark_as_advanced (UMBRELLA_PATCHDIR)
-set (UMBRELLA_SKIP_TESTS "OFF" CACHE BOOL "Skip running unit tests")
+set (UMBRELLA_SKIP_TESTS "ON" CACHE BOOL "Skip running unit tests")
 set (UMBRELLA_USER_PATCHDIR "${CMAKE_SOURCE_DIR}/patches"
      CACHE STRING "User patch directory")
 
