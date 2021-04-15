@@ -94,7 +94,7 @@ umbrella_opt_default (CH_PLACEMENT_TAG "97fd3158")    # Jul 2019
 umbrella_opt_default (DELTAFS_BB_TAG "8c7091ea")      # Oct 2017
 umbrella_opt_default (DELTAFS_COMMON_TAG "v19.8")
 umbrella_opt_default (DELTAFS_NEXUS_TAG "v1.19")
-umbrella_opt_default (DELTAFS_SHUFFLE_TAG "bba0a2f6") # Feb 2020
+umbrella_opt_default (DELTAFS_SHUFFLE_TAG "a20890d9") # Apr 2021
 umbrella_opt_default (DELTAFS_VPIC_PRELOAD_TAG "v1.86")
 umbrella_opt_default (DELTAFS_TAG "v2019.7")
 umbrella_opt_default (MERCURY_PROGRESSOR_TAG "6892c220") # Oct 2020
