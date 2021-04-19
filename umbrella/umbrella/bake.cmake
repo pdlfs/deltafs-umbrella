@@ -16,7 +16,7 @@ if (NOT TARGET bake)
 # umbrella option variables
 #
 umbrella_defineopt (BAKE_REPO
-     "https://xgitlab.cels.anl.gov/sds/bake.git"
+     "https://github.com/mochi-hpc/mochi-bake.git"
      STRING "bake GIT repository")
 umbrella_defineopt (BAKE_TAG "master" STRING "bake GIT tag")
 umbrella_defineopt (BAKE_TAR "bake-${BAKE_TAG}.tar.gz"

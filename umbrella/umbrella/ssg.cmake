@@ -15,7 +15,7 @@ if (NOT TARGET ssg)
 #
 # umbrella option variables
 #
-umbrella_defineopt (SSG_REPO "https://xgitlab.cels.anl.gov/sds/ssg.git"
+umbrella_defineopt (SSG_REPO "https://github.com/mochi-hpc/mochi-ssg.git"
      STRING "SSG GIT repository")
 umbrella_defineopt (SSG_TAG "master" STRING "SSG GIT tag")
 umbrella_defineopt (SSG_TAR "ssg-${SSG_TAG}.tar.gz" STRING "SSG cache tar file")

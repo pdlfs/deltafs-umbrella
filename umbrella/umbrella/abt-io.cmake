@@ -15,7 +15,7 @@ if (NOT TARGET abt-io)
 #
 # umbrella option variables
 #
-umbrella_defineopt (ABT_IO_REPO "https://xgitlab.cels.anl.gov/sds/abt-io.git"
+umbrella_defineopt (ABT_IO_REPO "https://github.com/mochi-hpc/mochi-abt-io.git"
      STRING "ABT_IO GIT repository")
 umbrella_defineopt (ABT_IO_TAG "master" STRING "ABT_IO GIT tag")
 umbrella_defineopt (ABT_IO_TAR "abt-io-${ABT_IO_TAG}.tar.gz"
@@ -30,13 +30,12 @@ umbrella_download (ABT_IO_DOWNLOAD abt-io ${ABT_IO_TAR}
 umbrella_patchcheck (ABT_IO_PATCHCMD abt-io)
 
 # abt-io requirements
-include (umbrella/abt-snoozer)
 include (umbrella/argobots)
 
 #
 # create abt-io target
 #
-ExternalProject_Add (abt-io DEPENDS argobots abt-snoozer
+ExternalProject_Add (abt-io DEPENDS argobots
     ${ABT_IO_DOWNLOAD} ${ABT_IO_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_MPICOMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}

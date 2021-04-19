@@ -16,7 +16,7 @@ if (NOT TARGET margo)
 # umbrella option variables
 #
 umbrella_defineopt (MARGO_REPO
-     "https://xgitlab.cels.anl.gov/sds/margo.git"
+     "https://github.com/mochi-hpc/mochi-margo.git"
      STRING "margo GIT repository")
 umbrella_defineopt (MARGO_TAG "master" STRING "margo GIT tag")
 umbrella_defineopt (MARGO_TAR "margo-${MARGO_TAG}.tar.gz"
@@ -34,13 +34,12 @@ umbrella_testcommand (MARGO_TESTCMD TEST_COMMAND make check)
 #
 # depends
 #
-include (umbrella/abt-snoozer)
 include (umbrella/mercury)
 
 #
 # create margo target
 #
-ExternalProject_Add (margo DEPENDS abt-snoozer mercury
+ExternalProject_Add (margo DEPENDS mercury
     ${MARGO_DOWNLOAD} ${MARGO_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}

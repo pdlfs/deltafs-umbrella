@@ -15,17 +15,9 @@ if (NOT TARGET argobots)
 #
 # umbrella option variables
 #
-
-### real REPO is --> https://github.com/pmodels/argobots
-# XXX: this is TMP until argobots issue #26 is fixed
-# https://xgitlab.cels.anl.gov/sds/abt-snoozer#dependencies
-# https://github.com/pmodels/argobots/issues/26
-# --> use branch dev-get-dev-basic instead of master
-###
-umbrella_defineopt (ARGOBOTS_REPO
-     "https://github.com/carns/argobots.git"
+umbrella_defineopt (ARGOBOTS_REPO "https://github.com/pmodels/argobots.git"
      STRING "argobots GIT repository")
-umbrella_defineopt (ARGOBOTS_TAG "dev-get-dev-basic" STRING "argobots GIT tag")
+umbrella_defineopt (ARGOBOTS_TAG "master" STRING "argobots GIT tag")
 umbrella_defineopt (ARGOBOTS_TAR "argobots-${ARGOBOTS_TAG}.tar.gz"
      STRING "argobots cache tar file")
 
