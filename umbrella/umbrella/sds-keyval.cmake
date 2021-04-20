@@ -18,7 +18,7 @@ if (NOT TARGET sds-keyval)
 umbrella_defineopt (SDS_KEYVAL_REPO
      "https://github.com/mochi-hpc/mochi-sdskv.git"
      STRING "SDS_KEYVAL GIT repository")
-umbrella_defineopt (SDS_KEYVAL_TAG "master" STRING "SDS_KEYVAL GIT tag")
+umbrella_defineopt (SDS_KEYVAL_TAG "main" STRING "SDS_KEYVAL GIT tag")
 umbrella_defineopt (SDS_KEYVAL_TAR "sds-keyval-${SDS_KEYVAL_TAG}.tar.gz"
                     STRING "SDS_KEYVAL cache tar file")
 

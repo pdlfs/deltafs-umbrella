@@ -18,7 +18,7 @@ if (NOT TARGET bake)
 umbrella_defineopt (BAKE_REPO
      "https://github.com/mochi-hpc/mochi-bake.git"
      STRING "bake GIT repository")
-umbrella_defineopt (BAKE_TAG "master" STRING "bake GIT tag")
+umbrella_defineopt (BAKE_TAG "main" STRING "bake GIT tag")
 umbrella_defineopt (BAKE_TAR "bake-${BAKE_TAG}.tar.gz"
      STRING "bake cache tar file")
 
@@ -33,14 +33,15 @@ umbrella_patchcheck (BAKE_PATCHCMD bake)
 #
 # depends
 #
-include (umbrella/margo)
-include (umbrella/nvml)
+include (umbrella/abt-io)
 include (umbrella/libuuid)
+include (umbrella/margo)
+include (umbrella/pmdk)
 
 #
 # create bake target
 #
-ExternalProject_Add (bake DEPENDS margo nvml libuuid
+ExternalProject_Add (bake DEPENDS abt-io libuuid margo pmdk
     ${BAKE_DOWNLOAD} ${BAKE_PATCHCMD}
     CONFIGURE_COMMAND <SOURCE_DIR>/configure ${UMBRELLA_COMP}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
