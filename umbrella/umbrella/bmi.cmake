@@ -10,6 +10,8 @@
 #  BMI_TAR  - cache tar file name (default should be ok)
 #
 
+umbrella_prebuilt_check(bmi FILE bmi.h)
+
 if (NOT TARGET bmi)
 
 #

@@ -21,6 +21,7 @@ umbrella_defineopt (DELTAFS_REPO "https://github.com/pdlfs/deltafs.git"
 umbrella_defineopt (DELTAFS_TAG "master" STRING "deltafs GIT tag")
 umbrella_defineopt (DELTAFS_TAR "deltafs-${DELTAFS_TAG}.tar.gz"
      STRING "deltafs cache tar file")
+umbrella_buildtests(deltafs DELTAFS_BUILDTESTS)
 
 #
 # generate parts of the ExternalProject_Add args...
@@ -29,7 +30,7 @@ umbrella_download (DELTAFS_DOWNLOAD deltafs ${DELTAFS_TAR}
                    GIT_REPOSITORY ${DELTAFS_REPO}
                    GIT_TAG ${DELTAFS_TAG})
 umbrella_patchcheck (DELTAFS_PATCHCMD deltafs)
-umbrella_testcommand (DELTAFS_TESTCMD TEST_COMMAND
+umbrella_testcommand (deltafs DELTAFS_TESTCMD TEST_COMMAND
       ctest -E "gigaplus_test|autocompact_test|db_test|index_block_test" )
 
 #
@@ -44,7 +45,7 @@ include (umbrella/deltafs-common)
 ExternalProject_Add (deltafs DEPENDS mercury deltafs-common
     ${DELTAFS_DOWNLOAD} ${DELTAFS_PATCHCMD}
     CMAKE_ARGS ${PDLFS_OPTIONS} -DBUILD_SHARED_LIBS=ON
-        -DBUILD_TESTS=${UMBRELLA_BUILD_TESTS}
+        -DBUILD_TESTS=${DELTAFS_BUILDTESTS}
         -DDELTAFS_COMMON_INTREE=OFF
         -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
         -DMPI_C_COMPILER=${MPI_C_COMPILER}

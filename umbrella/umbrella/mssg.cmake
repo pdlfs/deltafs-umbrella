@@ -30,7 +30,7 @@ umbrella_download (MSSG_DOWNLOAD mssg ${MSSG_TAR}
                    GIT_REPOSITORY ${MSSG_REPO}
                    GIT_TAG ${MSSG_TAG})
 umbrella_patchcheck (MSSG_PATCHCMD mssg)
-umbrella_testcommand (MSSG_TESTCMD
+umbrella_testcommand (mssg MSSG_TESTCMD
     ### TEST_COMMAND "ctest -R mssg -V"
     TEST_COMMAND "" )
 

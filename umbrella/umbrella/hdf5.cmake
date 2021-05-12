@@ -27,20 +27,19 @@ umbrella_defineopt (HDF5_REPO
 umbrella_defineopt (HDF5_TAG "develop" STRING "HDF5 GIT tag")
 umbrella_defineopt (HDF5_TAR "hdf5-${HDF5_TAG}.tar.gz"
      STRING "HDF5 cache tar file")
+umbrella_buildtests(hdf5 HDF5_BUILDTESTS)
 
 #
 # build options
 #
 umbrella_defineopt (HDF5_BUILD_EXAMPLES "ON" BOOL "Build HDF5 example code")
-umbrella_defineopt (HDF5_BUILD_TESTING "${UMBRELLA_BUILD_TESTS}" 
-                                       BOOL "Build HDF5 testing code")
 umbrella_defineopt (HDF5_ENABLE_PARALLEL "OFF" BOOL "Build MPI parallel code")
 umbrella_defineopt (HDF5_GENERATE_HEADERS "default"
                                        STRING "Generate HDF5 headers override")
 
 # generic hdf5 cmake options
 set (HDF5_CMAKE_ARGS -DHDF5_BUILD_EXAMPLES=${HDF5_BUILD_EXAMPLES}
-                     -DBUILD_TESTING=${HDF5_BUILD_TESTING}
+                     -DBUILD_TESTING=${HDF5_BUILDTESTS}
                      -DHDF5_ENABLE_PARALLEL=${HDF5_ENABLE_PARALLEL})
 if (NOT "${HDF5_GENERATE_HEADERS}" STREQUAL "default")
     set (HDF5_CMAKE_ARGS ${HDF5_CMAKE_ARGS}
@@ -52,7 +51,7 @@ endif ()
 #
 message (STATUS "  HDF5 config:")
 message (STATUS "    build examples: ${HDF5_BUILD_EXAMPLES}")
-message (STATUS "    build tests: ${HDF5_BUILD_TESTING}")
+message (STATUS "    build tests: ${HDF5_BUILDTESTS}")
 message (STATUS "    build parallel: ${HDF5_ENABLE_PARALLEL}")
 message (STATUS "    generate headers: ${HDF5_GENERATE_HEADERS}")
 

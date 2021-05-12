@@ -34,6 +34,7 @@ umbrella_defineopt (MERCURY_REPO "https://github.com/mercury-hpc/mercury.git"
 umbrella_defineopt (MERCURY_TAG "master" STRING "mercury GIT tag")
 umbrella_defineopt (MERCURY_TAR "mercury-${MERCURY_TAG}.tar.gz"
      STRING "MERCURY cache tar file")
+umbrella_buildtests(mercury MERCURY_BUILDTESTS)
 
 #
 # non-na options
@@ -76,7 +77,7 @@ umbrella_defineopt (MERCURY_SM  ${MERCURY_DEFSM}  BOOL "Enable Mercury sm na")
 
 # generic mercury cmake options
 set (MERCURY_CMAKE_ARGS -DNA_USE_MPI=OFF -DNA_USE_SM=${MERCURY_SM}
-     -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${UMBRELLA_BUILD_TESTS}
+     -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=${MERCURY_BUILDTESTS}
      -DMERCURY_USE_OPA:BOOL=${MERCURY_OPA}
      -DMERCURY_USE_SELF_FORWARD:BOOL=${MERCURY_SELF_FORWARD}
      -DMERCURY_ENABLE_POST_LIMIT:BOOL=${MERCURY_POST_LIMIT}

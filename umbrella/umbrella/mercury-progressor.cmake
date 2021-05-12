@@ -32,7 +32,7 @@ umbrella_download (MERCURY_PROGRESSOR_DOWNLOAD
                    GIT_REPOSITORY ${MERCURY_PROGRESSOR_REPO}
                    GIT_TAG ${MERCURY_PROGRESSOR_TAG})
 umbrella_patchcheck (MERCURY_PROGRESSOR_PATCHCMD mercury-progressor)
-umbrella_testcommand (MERCURY_PROGRESSOR_TESTCMD
+umbrella_testcommand (mercury-progressor MERCURY_PROGRESSOR_TESTCMD
     TEST_COMMAND ctest )
 
 #

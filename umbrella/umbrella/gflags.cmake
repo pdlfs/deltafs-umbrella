@@ -21,6 +21,7 @@ umbrella_defineopt (GFLAGS_REPO
 umbrella_defineopt (GFLAGS_TAG "master" STRING "gflags GIT tag")
 umbrella_defineopt (GFLAGS_TAR "gflags-${GFLAGS_TAG}.tar.gz"
      STRING "gflags cache tar file")
+umbrella_buildtests(gflags GFLAGS_BUILDTESTS)
 
 #
 # generate parts of the ExternalProject_Add args...
@@ -29,7 +30,7 @@ umbrella_download (GFLAGS_DOWNLOAD gflags ${GFLAGS_TAR}
                    GIT_REPOSITORY ${GFLAGS_REPO}
                    GIT_TAG ${GFLAGS_TAG})
 umbrella_patchcheck (GFLAGS_PATCHCMD gflags)
-umbrella_testcommand (GFLAGS_TESTCMD TEST_COMMAND make test)
+umbrella_testcommand (gflags GFLAGS_TESTCMD TEST_COMMAND make test)
 
 #
 # create gflags target
@@ -37,7 +38,7 @@ umbrella_testcommand (GFLAGS_TESTCMD TEST_COMMAND make test)
 ExternalProject_Add (gflags
     ${GFLAGS_DOWNLOAD} ${GFLAGS_PATCHCMD}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON
-               -DBUILD_TESTING=${UMBRELLA_BUILD_TESTS}
+               -DBUILD_TESTING=${GFLAGS_BUILDTESTS}
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
     ${GFLAGS_TESTCMD}

@@ -20,6 +20,7 @@ umbrella_defineopt (LIBCUCKOO_REPO "https://github.com/efficient/libcuckoo.git"
 umbrella_defineopt (LIBCUCKOO_TAG "master" STRING "libcuckoo GIT tag")
 umbrella_defineopt (LIBCUCKOO_TAR "libcuckoo-${LIBCUCKOO_TAG}.tar.gz"
      STRING "libcuckoo cache tar file")
+umbrella_buildtests(libcuckoo LIBCUCKOO_BUILDTESTS)
 
 #
 # generate parts of the ExternalProject_Add args...
@@ -35,7 +36,7 @@ umbrella_patchcheck (LIBCUCKOO_PATCHCMD libcuckoo)
 ExternalProject_Add (libcuckoo 
     ${LIBCUCKOO_DOWNLOAD} ${LIBCUCKOO_PATCHCMD}
     CMAKE_ARGS ${PDLFS_OPTIONS}
-        -DBUILD_TESTS=${UMBRELLA_BUILD_TESTS}
+        -DBUILD_TESTS=${LIBCUCKOO_BUILDTESTS}
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
 )

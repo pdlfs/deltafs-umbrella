@@ -15,6 +15,186 @@ endif ()
 #
 
 #
+# umbrella_onlist: set rv to "ON" if lookfor is on the given list
+# (note "list" should be the name of the list variable, not the list itself)
+#
+function (umbrella_onlist list lookfor rv)
+    list (FIND ${list} "${lookfor}" result)
+    if (${result} EQUAL -1)
+        set (${rv} "OFF" PARENT_SCOPE)
+    else ()
+        set (${rv} "ON" PARENT_SCOPE)
+    endif ()
+endfunction ()
+
+#
+# umbrella_targetvar_prefix: generate a target variable prefix from
+# a target name.  e.g. "bmi" => "BMI_", "ch-placement" => "CH_PLACEMENT_"
+#
+function (umbrella_targetvar_prefix target retval)
+    string(REPLACE "-" "_" prefix "${target}")
+    string(TOUPPER "${prefix}" prefix)
+    set(${retval} "${prefix}_" PARENT_SCOPE)
+endfunction()
+
+#
+# umbrella option variables are built on top of cmake CACHE
+# and normal variables.  we put the basic definition of the
+# option variable in the umbrella/*.cmake file, but we allow
+# the user to override the variable's default value by loading
+# it into a normal variable and using that to define the
+# cache variable.   users can also directly set a normal
+# variable to override all the defaults (including -D from
+# the cmake command line).
+#
+
+#
+# umbrella_defineopt: define an umbrella option variable in
+# the cmake cache.  this has no effect on the option variable
+# if it has already been defined (first define wins).  when
+# defining options, we use the given default value unless one
+# was previously defined (e.g. with umbrella_opt_default), in
+# which case we use that.
+#
+function (umbrella_defineopt var val type docstring)
+    if (DEFINED ${var})   # user provided their own default value
+        set (${var} ${${var}} CACHE ${type} ${docstring})
+    else ()
+        set (${var} ${val} CACHE ${type} ${docstring})
+    endif ()
+endfunction()
+
+#
+# umbrella_opt_default: set a user-provided default value for an
+# umbrella option variable.  we convey this to umbrella_defineopt
+# using a normal (non-cache) cmake variable.  but we don't change
+# anything if the variable is already defined (it could be a "-D"
+# from the command line, that should override this function).
+#
+function (umbrella_opt_default var newdefault)
+    if (NOT DEFINED ${var})
+        set (${var} ${newdefault} PARENT_SCOPE)
+    endif ()
+endfunction ()
+
+#
+# umbrella-wide settings: an umbrella-wide setting is defined by
+# a name and a set of possible values (the default set of possible
+# values are "ON" and "OFF").   the name and possible values are
+# used to generate a set of cmake variables starting with "UMBRELLA_"
+# that can be searched for a given target to see if the setting applies
+# to the target.  each umbrella-wide setting has a list of targets
+# for each possible value of the form "UMBRELLA_name_value" ...
+# in addition, each umbrella-wide setting can have a variable
+# "UMBRELLA_name" that can be used to establish a global default
+# for that setting.
+#
+# example: an umbrella-wide setting "FOO" can be "ON" or "OFF" or
+# undefined for a target.  the setting will use the following
+# variables:
+#   UMBRELLA_FOO_ON  -- cmake list of targets to set FOO to ON
+#   UMBRELLA_FOO_OFF -- cmake list of targets to set FOO to OFF
+#   UMBRELLA_FOO     -- global default setting for FOO (ON or OFF)
+#
+# to search the FOO umbrella-wide setting for a given target "bar" we
+# first check to see if "bar" is on UMBRELLA_FOO_ON or UMBRELLA_FOO_OFF.
+# if "bar" is not in either list, we then check the global UMBRELLA_FOO
+# setting.  if "bar" is not in UMBRELLA_FOO_ON or UMBRELLA_FOO_OFF and
+# the global UMBRELLA_FOO is not defined, then the setting does not
+# apply to "bar" ...
+#
+# umbrella-wide settings can be used to link a target's default value
+# for an option variable to an umbrella-wide setting.   Note that
+# putting a target on more than one "UMBRELLA_name_value" list will
+# generate a WARNING message.
+#
+
+#
+# umbrella_setting: check an umbrella-wide setting for a given target.
+# returns target's setting in "retvar" ... if "retvar" is already defined
+# then we do nothing (user is overriding the setting).
+#
+function (umbrella_setting setting targ retvar)
+
+    if (NOT DEFINED ${retvar})    # if not defined: look at umbrella settings
+
+        # allow user to provide possible values; default to ON and OFF
+        if (${ARGC} EQUAL 4)
+            set(vals ${ARGV3})
+        else()
+            set(vals ON OFF)
+        endif()
+
+        # check in UMBRELLA_${setting}_value lists (foreach value in ${vals})
+        foreach (list ${vals})
+            list(FIND UMBRELLA_${setting}_${list} "${targ}" result)
+            if (NOT ${result} EQUAL -1)
+                if (DEFINED ${retvar})
+                    message(WARNING
+                            "getopt_setting: dup define ${targ} ${setting}")
+                endif()
+                set (${retvar} "${list}")
+            endif()
+        endforeach()
+
+        # check for global setting in UMBRELLA_${setting}
+        if (DEFINED UMBRELLA_${setting} AND NOT DEFINED ${retvar})
+            set (${retvar} ${UMBRELLA_${setting}})
+        endif()
+
+        # push up any values we found to parent
+        if (DEFINED ${retvar})
+            set (${retvar} "${${retvar}}" PARENT_SCOPE)
+        endif()
+
+    endif()
+endfunction()
+
+#
+# umbrella_prebuilt_check_mktarg: helper function.  does the checks
+# and makes a custom target for prebuilt targets.
+#
+function (umbrella_prebuilt_check_mktarg t check checkarg)
+    if("${check}" STREQUAL "")
+        set(UMBRELLA_PREBUILT_CHECK_${t} 1)       # no check requested
+    elseif ("${check}" STREQUAL FILE)
+        find_file(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+    elseif("${check}" STREQUAL LIBRARY)
+        find_library(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+    elseif("${check}" STREQUAL PROGRAM)
+        find_program(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+    else()
+        message(FATAL_ERROR "umbrella_prebuilt_check bad type arg ${check}")
+    endif()
+    if(NOT UMBRELLA_PREBUILT_CHECK_${t})
+        message(FATAL_ERROR
+        "${t} failed prebuilt check ${check} ${checkarg} - check paths")
+    endif()
+    add_custom_target(${t} ALL
+                      COMMAND ""
+                      COMMENT "Prebuilt ${t} target")
+    message(STATUS "Using prebuilt ${t} target")
+endfunction()
+
+#
+# umbrella_prebuilt_check: if target has its prebuilt setting on
+# then generate a custom target for it.   we have the option of
+# checking for a lib, include file, or program (to make sure the
+# target we think is prebuilt is somewhere we can find it).
+#
+function (umbrella_prebuilt_check targ)
+    if (NOT TARGET "${targ}")
+        umbrella_targetvar_prefix("${targ}" prefix)
+        set(var "${prefix}PREBUILT")
+        umbrella_setting(PREBUILT "${targ}" "${var}")
+        umbrella_defineopt("${var}" OFF BOOL "${targ} is prebuilt")
+        if (${var})
+            umbrella_prebuilt_check_mktarg("${targ}" "${ARGV1}" "${ARGV2}")
+        endif()
+    endif()
+endfunction()
+
+#
 # umbrella_patchcheck: look for patch files and return patch command
 # if any are found.  we look in the system patch directory and then
 # the user's patch directory.  the patch file names are $target.patch
@@ -89,71 +269,37 @@ function (umbrella_download result target localtar)
 endfunction ()
 
 #
-# umbrella_onlist: set rv to "ON" if lookfor is on the given list
-# (note "list" should be the name of the list variable, not the list itself)
+# umbrella_buildtests: if a target has a standalone "build tests" setting,
+# we use this to link it to the BUILDTESTS umbrella setting.
 #
-function (umbrella_onlist list lookfor rv)
-    list (FIND ${list} "${lookfor}" result)
-    if (${result} EQUAL -1)
-        set (${rv} "OFF" PARENT_SCOPE)
-    else ()
-        set (${rv} "ON" PARENT_SCOPE)
-    endif ()
-endfunction ()
-
-
-# umbrella_testcommand: generate test-args output only if 1) we are not
-# cross compiling (so we can avoid trying to run target crosscompiled
-# binaries on the host), and 2) skip_tests are not set.
-#
-function (umbrella_testcommand result)
-    if (NOT CMAKE_CROSSCOMPILING AND UMBRELLA_BUILD_TESTS
-                                 AND NOT UMBRELLA_SKIP_TESTS)
-        set (${result} ${ARGN} PARENT_SCOPE)
-    else ()
-        set (${result} "" PARENT_SCOPE)
-    endif ()
-endfunction ()
-
-#
-# umbrella option variables are built on top of cmake CACHE
-# and normal variables.  we put the basic definition of the
-# option variable in the umbrella/*.cmake file, but we allow
-# the user to override the variable's default value by loading
-# it into a normal variable and using that to define the
-# cache variable.   users can also directly set a normal
-# variable to override all the defaults (including -D from
-# the cmake command line).
-#
-
-#
-# umbrella_defineopt: define an umbrella option variable in
-# the cmake cache.  this has no effect on the option variable
-# if it has already been defined (first define wins).  when
-# defining options, we use the given default value unless one
-# was previously defined (e.g. with umbrella_opt_default), in
-# which case we use that.
-#
-function (umbrella_defineopt var val type docstring)
-    if (DEFINED ${var})   # user provided their own default value
-        set (${var} ${${var}} CACHE ${type} ${docstring})
-    else ()
-        set (${var} ${val} CACHE ${type} ${docstring})
-    endif ()
+function (umbrella_buildtests target retvar)
+    umbrella_setting(BUILDTESTS ${target} ${retvar})
+    umbrella_defineopt(${retvar} OFF BOOL "Build ${target} unit tests")
 endfunction()
 
 #
-# umbrella_opt_default: set a user-provided default value for an
-# umbrella option variable.  we convey this to umbrella_defineopt
-# using a normal (non-cache) cmake variable.  but we don't change
-# anything if the variable is already defined (it could be a "-D"
-# from the command line, that should override this function).
+# umbrella_testcommand: generate test-args output if requested.
+# we generate test-args if we are not cross compiling, the target
+# built the tests (if that was an option), and we are requested to
+# run the tests.
 #
-function (umbrella_opt_default var newdefault)
-    if (NOT DEFINED ${var})
-        set (${var} ${newdefault} PARENT_SCOPE)
-    endif ()
-endfunction ()
+function (umbrella_testcommand target retvar)
+
+    # first setup the target_RUNTESTS variable
+    umbrella_targetvar_prefix("${target}" prefix)
+    set(var "${prefix}RUNTESTS")
+    umbrella_setting(RUNTESTS "${target}" "${var}")
+    umbrella_defineopt("${var}" OFF BOOL "Run ${target} unit tests")
+
+    # now see if we need to do it
+    if (NOT CMAKE_CROSSCOMPILING AND
+        (NOT DEFINED ${prefix}BUILDTESTS OR ${prefix}BUILDTESTS) AND
+        ${prefix}RUNTESTS)
+        set (${retvar} ${ARGN} PARENT_SCOPE)
+    else()
+        set (${retvar} "" PARENT_SCOPE)
+    endif()
+endfunction()
 
 #
 # umbrella_get_pkgcfglist: get list of package cfg directories
@@ -222,10 +368,10 @@ endfunction()
 #
 #   UMBRELLA_PREFIX: base directory for umbrella files
 #   UMBRELLA_MPI: user sets this if we are using MPI (default=off)
-#   UMBRELLA_BUILD_TESTS: build unit tests (default=off)
+#   UMBRELLA_BUILDTESTS: default setting for building unit tests (default=off)
+#   UMBRELLA_RUNTESTS: default setting for running unit tests (default=off)
 #   UMBRELLA_HAS_GNULIBDIRS: built pkg has non-"lib" dir (eg. "lib64") (def=off)
 #   UMBRELLA_PATCHDIR: system-level patchdir (def=UMBRELLA_PREFIX/patchdir)
-#   UMBRELLA_SKIP_TESTS: skip running tests (default=on)
 #   UMBRELLA_USER_PATCHDIR: user patch dir (def=CMAKE_SOURCE_DIR/patches)
 #   UMBRELLA_PKGCFGLIST: (internal) list of pkgconfig directories from env
 #   UMBRELLA_PREFIX_PATH: passed down as CMAKE_PREFIX_PATH (see below)
@@ -262,6 +408,17 @@ endfunction()
 # all this needs to be reflected back out on the command line for
 # autoconfig-based packages.
 #
+# note that UMBRELLA_BUILDTESTS and UMBRELLA_BUILDTESTS are umbrella
+# ON/OFF settings, so additional target info can be specified in
+# cmake lists in UMBRELLA_BUILDTESTS_ON, UMBRELLA_BUILDTESTS_OFF,
+# UMBRELLA_RUNTESTS_ON, and UMBRELLA_RUNTESTS_OFF.   Targets that
+# support testing also have target variables (e.g. DELTAFS_RUNTESTS
+# can be set to ON or OFF).
+#
+# targets that support being prebuilt can be set to use a prebuilt
+# version by adding the target to the UMBRELLA_PREBUILD_ON cmake list
+# or by setting the target's PREBUILT variable to on (e.g.
+# FOO_PREBUILT=ON).
 
 #
 # get umbrella prefix/base directory
@@ -290,13 +447,13 @@ if (NOT CMAKE_BUILD_TYPE)
                   "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
 
-set (UMBRELLA_BUILD_TESTS "OFF" CACHE BOOL "Build unit tests")
+set (UMBRELLA_BUILDTESTS "OFF" CACHE BOOL "Default for build unit tests")
 find_file (UMBRELLA_CACHEDIR cache PATH ${CMAKE_SOURCE_DIR}
            DOC "Cache directory of tar files" NO_DEFAULT_PATH)
 set (UMBRELLA_PATCHDIR "${UMBRELLA_PREFIX}/patches"
      CACHE STRING "Internal patch directory")
 mark_as_advanced (UMBRELLA_PATCHDIR)
-set (UMBRELLA_SKIP_TESTS "ON" CACHE BOOL "Skip running unit tests")
+set (UMBRELLA_RUNTESTS "OFF" CACHE BOOL "Default for running unit tests")
 set (UMBRELLA_USER_PATCHDIR "${CMAKE_SOURCE_DIR}/patches"
      CACHE STRING "User patch directory")
 
@@ -465,10 +622,6 @@ if (UMBRELLA_MPI)
     message (STATUS "  MPI C wrapper:  ${MPI_C_COMPILER}")
 endif ()
 message (STATUS "  crosscompiling: ${CMAKE_CROSSCOMPILING}")
-message (STATUS "  build tests: ${UMBRELLA_BUILD_TESTS}")
-if (UMBRELLA_BUILD_TESTS)
-    message (STATUS "  skip running tests: ${UMBRELLA_SKIP_TESTS}")
-else ()
-    message (STATUS "  skip running tests: <off, build disabled>")
-endif ()
+message (STATUS "  build tests default: ${UMBRELLA_BUILDTESTS}")
+message (STATUS "  run tests default: ${UMBRELLA_RUNTESTS}")
 message (STATUS "  ${UMBRELLA_PKGCFGPATH}")

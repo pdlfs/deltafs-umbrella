@@ -20,6 +20,7 @@ umbrella_defineopt (ONETBB_REPO "https://github.com/oneapi-src/oneTBB"
 umbrella_defineopt (ONETBB_TAG "master" STRING "onetbb GIT tag")
 umbrella_defineopt (ONETBB_TAR "onetbb-${ONETBB_TAG}.tar.gz"
      STRING "onetbb cache tar file")
+umbrella_buildtests(onetbb ONETBB_BUILDTESTS)
 
 #
 # generate parts of the ExternalProject_Add args...
@@ -33,7 +34,7 @@ umbrella_patchcheck (ONETBB_PATCHCMD onetbb)
 # create onetbb target
 #
 ExternalProject_Add (onetbb ${ONETBB_DOWNLOAD} ${ONETBB_PATCHCMD}
-    CMAKE_ARGS -DTBB_TEST=${UMBRELLA_BUILD_TESTS}
+    CMAKE_ARGS -DTBB_TEST=${ONETBB_BUILDTESTS}
     CMAKE_CACHE_ARGS ${UMBRELLA_CMAKECACHE}
     UPDATE_COMMAND ""
 )

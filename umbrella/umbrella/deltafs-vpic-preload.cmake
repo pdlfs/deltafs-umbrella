@@ -32,7 +32,7 @@ umbrella_download (DELTAFS_VPIC_PRELOAD_DOWNLOAD deltafs-vpic-preload
                    GIT_REPOSITORY ${DELTAFS_VPIC_PRELOAD_REPO}
                    GIT_TAG ${DELTAFS_VPIC_PRELOAD_TAG})
 umbrella_patchcheck (DELTAFS_VPIC_PRELOAD_PATCHCMD deltafs-vpic-preload)
-umbrella_testcommand (DELTAFS_VPIC_PRELOAD_TESTCMD
+umbrella_testcommand (deltafs-vpic-preload DELTAFS_VPIC_PRELOAD_TESTCMD
     TEST_COMMAND ctest -R preload -V )
 
 #
