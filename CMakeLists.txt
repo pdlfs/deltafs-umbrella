@@ -21,8 +21,8 @@
 #   -DCMAKE_BUILD_TYPE=RelWithDebInfo     # or Release, Debug, etc.
 #      (XXX: currently only applied to cmake-based builds)
 #
-#   -DUMBRELLA_BUILD_TESTS=ON             # build unit tests?
-#   -DUMBRELLA_SKIP_TESTS=OFF             # skip running unit tests?
+#   -DUMBRELLA_BUILDTESTS=OFF             # build unit tests?
+#   -DUMBRELLA_RUNTESTS=OFF               # skip running unit tests?
 #
 # finding dependencies:
 #
