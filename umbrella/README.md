@@ -80,8 +80,8 @@ as described in this comment:
 #   -DCMAKE_BUILD_TYPE=RelWithDebInfo      # or Release, Debug, etc.
 #      (XXX: currently only applied to cmake-based builds)
 #
-#   -DUMBRELLA_BUILD_TESTS=OFF             # build unit tests?
-#   -DUMBRELLA_SKIP_TESTS=ON               # skip running unit tests?
+#   -DUMBRELLA_BUILDTESTS=OFF              # build unit tests?
+#   -DUMBRELLA_RUNTESTS=OFF                # skip running unit tests?
 #
 # finding dependencies:
 #
@@ -202,10 +202,10 @@ The umbrella-main.cmake script contains all the common umbrella code.
 It uses or sets up config variables including:
 * UMBRELLA_PREFIX - root of umbrella directory
 * UMBRELLA_MPI - set to enable MPI
+* UMBRELLA_BUILDTESTS: default setting for building unit tests
+* UMBRELLA_RUNTESTS: default setting for running unit tests
 * CMAKE_BUILD_TYPE - Debug, Release, RelWithDebInfo, MinSizeRel
-* UMBRELLA_BUILD_TESTS - set to build tests
 * UMBRELLA_PATCHDIR - internal directory for patches
-* UMBRELLA_SKIP_TESTS - set to skip running tests (e.g. for crosscompile)
 * UMBRELLA_USER_PATCHDIR - set for user-level patch directory
 * UMBRELLA_CPPFLAGS - C preprocessor flags for autotool config scripts
 * UMBRELLA_LDFLAGS - link flags for autotool config scripts
@@ -214,13 +214,29 @@ It uses or sets up config variables including:
 * UMBRELLA_PKGCFGPATH - PKG_CONFIG_PATH for pkg-config/autotool config scripts
 * UMBRELLA_CMAKECACHE - init cmake cache vars for cmake-based builds
 
+UMBRELLA_BUILDTESTS and UMBRELLA_BUILDTESTS are umbrella settings.
+Additional target info can be specified in cmake lists in 
+UMBRELLA_BUILDTESTS_ON, UMBRELLA_BUILDTESTS_OFF,
+UMBRELLA_RUNTESTS_ON, and UMBRELLA_RUNTESTS_OFF.   Targets that
+support testing also have target variables (e.g. DELTAFS_RUNTESTS
+can be set to ON or OFF).
+
+Targets that support being prebuilt can be set to use a prebuilt
+version by adding the target to the UMBRELLA_PREBUILD_ON cmake list
+or by setting the target's PREBUILT variable to on (e.g.
+FOO_PREBUILT=ON).
+
 The umbrella-main.cmake script contains common functions including:
-* umbrella_patchcheck(result target) - look for target's patch files
-* umbrella_download(result target localtar) - gen download config, honor cache
 * umbrella_onlist(list lookfor rv) - look if lookfor is on a list
-* umbrella_testcommand(result) - ret command if testing is enabled
+* umbrella_targetvar_prefix(target result) - gen target var prefix from target
 * umbrella_defineopt(var val type doc) - define umbrella option variable
 * umbrella_opt_default(var newdefault) - set new default value for option var
+* umbrella_setting(setting target result) - check for UMBRELLA_* setting vars
+* umbrella_prebuilt_check(target ...) - allow target to be prebuilt
+* umbrella_patchcheck(result target) - look for target's patch files
+* umbrella_download(result target localtar) - gen download config, honor cache
+* umbrella_buildtests(target result) - support buildtests for a target
+* umbrella_testcommand(target result) - ret command if testing is enabled
 
 The ensure-autogen script is used to run autotools to generate
 a configure script (for projects that ship without a pre-generated one).
@@ -315,6 +331,6 @@ be used with ExternalProject_Add's CMAKE_CACHE_ARGS command to
 load the environment into the project.  (bmi uses autotools, so
 this is not needed.)
 
-For packages that provide tests, we have the umbrella_testcommand ()
-function that sets the test command if we are not cross-compiling
-and UMBRELLA_BUILD_TESTS is set and UMBRELLA_SKIP_TESTS is not set.
+For packages that provide tests, we have the umbrella_testcommand()
+function that sets the test command if we are not cross-compiling.
+The umbrella_testcommand() honors the RUNTESTS setting.
