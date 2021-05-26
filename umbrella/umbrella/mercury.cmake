@@ -125,6 +125,12 @@ if (MERCURY_PSM2)
     include (umbrella/psm2)
 endif (MERCURY_PSM2)
 
+# also handle OPA
+if (MERCURY_OPA)
+    list (APPEND MERCURY_DEPENDS openpa)
+    include (umbrella/openpa)
+endif ()
+
 #
 # report config to user
 #
