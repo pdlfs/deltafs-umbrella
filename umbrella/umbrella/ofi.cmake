@@ -20,6 +20,9 @@ umbrella_defineopt (OFI_REPO "https://github.com/ofiwg/libfabric.git"
 umbrella_defineopt (OFI_TAG "master" STRING "OFI GIT tag")
 umbrella_defineopt (OFI_TAR "ofi-${OFI_TAG}.tar.gz" STRING "OFI cache tar file")
 
+# udocumented hook to allow us to add extra config args
+umbrella_defineopt (OFI_EXTRA_CFG "" STRING "Extra OFI config opts")
+
 umbrella_defineopt (UMBRELLA_REQUIRE_RDMALIBS "OFF" BOOL
                    "Require RDMA libraries")
 
@@ -62,6 +65,7 @@ ExternalProject_Add (ofi ${ofi_xtra}
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       ${OFI_CRAY_EXTRA}
+                      ${OFI_EXTRA_CFG}
     UPDATE_COMMAND "")
 
 #
