@@ -102,7 +102,7 @@ umbrella_opt_default (MERCURY_RUNNER_TAG "cbe7a219")  # Apr 2021
 umbrella_opt_default (MERCURY_TAG "71672b0d")         # Apr 2021
 umbrella_opt_default (MSSG_TAG "v1.4")
 umbrella_opt_default (NEXUS_RUNNER_TAG "04ee7e8a")    # Apr 2021
-umbrella_opt_default (OFI_TAG "a593d160")             # Jun 2019
+umbrella_opt_default (OFI_TAG "1a89deaa")             # Feb 2022
 umbrella_opt_default (OSU_MICRO_BENCHMARKS_REPO
           "https://github.com/pdlfs/osu-micro-benchmarks.git")
           # forces a load from git repo
