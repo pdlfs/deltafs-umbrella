@@ -10,6 +10,8 @@
 #  HWLOC_TAR  - cache tar file name (default should be ok)
 #
 
+umbrella_prebuilt_check(hwloc FILE hwloc.h)
+
 if (NOT TARGET hwloc)
 
 #

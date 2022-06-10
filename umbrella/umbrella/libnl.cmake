@@ -17,7 +17,7 @@ if (NOT TARGET libnl)
 #
 umbrella_defineopt (LIBNL_REPO "https://github.com/thom311/libnl"
                     STRING "LIBNL GIT repository")
-umbrella_defineopt (LIBNL_TAG "master" STRING "LIBNL GIT tag")
+umbrella_defineopt (LIBNL_TAG "main" STRING "LIBNL GIT tag")
 umbrella_defineopt (LIBNL_TAR "libnl-${LIBNL_TAG}.tar.gz"
                                 STRING "LIBNL cache tar file")
 

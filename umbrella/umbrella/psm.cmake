@@ -10,6 +10,8 @@
 #  PSM_TAR  - cache tar file name (default should be ok)
 #
 
+umbrella_prebuilt_check(psm FILE psm.h)
+
 if (NOT TARGET psm)
 
 #

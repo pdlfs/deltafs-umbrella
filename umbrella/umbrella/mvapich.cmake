@@ -22,9 +22,9 @@ umbrella_defineopt (MVAPICH_BASEURL
     "http://mvapich.cse.ohio-state.edu/download/mvapich"
     STRING "base url for mvapich")
 umbrella_defineopt (MVAPICH_URLDIR "mv2" STRING "mvapich subdir")
-umbrella_defineopt (MVAPICH_URLFILE "mvapich2-2.3.4.tar.gz"
+umbrella_defineopt (MVAPICH_URLFILE "mvapich2-2.3.6.tar.gz"
     STRING "mvapich tar file name")
-umbrella_defineopt (MVAPICH_URLMD5 "5010211c7aa6349e6308593145763d9f"
+umbrella_defineopt (MVAPICH_URLMD5 "3972f5db02bd4b30e073bb092fa5deb1"
     STRING "MD5 of tar file")
 #
 # XXX: default dev is ch3:mrail
@@ -61,6 +61,10 @@ elseif ("${MVAPICH_DEVICE}" STREQUAL "ch3:psm" OR
     include (umbrella/psm)
     set (mvapich_xtradeps "psm")
     set (mvapich_withdev "--with-device=ch3:psm")
+elseif ("${MVAPICH_DEVICE}" STREQUAL "ch3:nemesis" OR
+    "${MVAPICH_DEVICE}" STREQUAL "nemesis")
+    message(STATUS "  MVAPICH nemesis device selected")
+    set (mvapich_withdev "--with-device=ch3:nemesis")
 else ()
      message(FATAL_ERROR "MVAPICH unknown device ${MVAPICH_DEVICE}")
 endif ()
