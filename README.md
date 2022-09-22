@@ -2,7 +2,7 @@
 
 [[README for LANL Trinity]](#lanl-trinitytrinitite) | [[README for LANL Grizzly]](#lanl-grizzly)
 
-[![Build Status](https://travis-ci.org/pdlfs/deltafs-umbrella.svg?branch=master)](https://travis-ci.org/pdlfs/deltafs-umbrella)
+[![CI](https://github.com/pdlfs/deltafs-umbrella/actions/workflows/ci.yml/badge.svg)](https://github.com/pdlfs/deltafs-umbrella/actions/workflows/ci.yml)
 [![GitHub (pre-)release](https://img.shields.io/github/release-pre/pdlfs/deltafs-umbrella.svg)](https://github.com/pdlfs/deltafs-umbrella/releases)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](LICENSE.txt)
 
