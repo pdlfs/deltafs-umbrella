@@ -22,7 +22,7 @@ if (NOT TARGET hdf5)
 # NOTE: hdf5 guys use "develop" for their main branch, not master
 #
 umbrella_defineopt (HDF5_REPO 
-                    "https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git"
+                    "https://github.com/HDFGroup/hdf5.git"
                     STRING "HDF5 GIT repository")
 umbrella_defineopt (HDF5_TAG "develop" STRING "HDF5 GIT tag")
 umbrella_defineopt (HDF5_TAR "hdf5-${HDF5_TAG}.tar.gz"
