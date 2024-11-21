@@ -30,7 +30,7 @@ umbrella_download (DELTAFS_DOWNLOAD deltafs ${DELTAFS_TAR}
                    GIT_REPOSITORY ${DELTAFS_REPO}
                    GIT_TAG ${DELTAFS_TAG})
 umbrella_patchcheck (DELTAFS_PATCHCMD deltafs)
-umbrella_testcommand (deltafs DELTAFS_TESTCMD TEST_COMMAND
+umbrella_testcommand (deltafs DELTAFS_TESTCMD
       ctest -E "gigaplus_test|autocompact_test|db_test|index_block_test" )
 
 #

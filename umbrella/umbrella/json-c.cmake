@@ -30,8 +30,7 @@ umbrella_download (JSON_C_DOWNLOAD json-c ${JSON_C_TAR}
                    GIT_REPOSITORY ${JSON_C_REPO}
                    GIT_TAG ${JSON_C_TAG})
 umbrella_patchcheck (JSON_C_PATCHCMD json-c)
-umbrella_testcommand (json-c JSON_C_TESTCMD
-    TEST_COMMAND "" )
+umbrella_testcommand (json-c JSON_C_TESTCMD "" )
 
 #
 # create deltafs-nexus target

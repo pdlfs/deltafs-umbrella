@@ -22,9 +22,9 @@ umbrella_defineopt (MVAPICH_BASEURL
     "http://mvapich.cse.ohio-state.edu/download/mvapich"
     STRING "base url for mvapich")
 umbrella_defineopt (MVAPICH_URLDIR "mv2" STRING "mvapich subdir")
-umbrella_defineopt (MVAPICH_URLFILE "mvapich2-2.3.6.tar.gz"
+umbrella_defineopt (MVAPICH_URLFILE "mvapich2-2.3.7-1.tar.gz"
     STRING "mvapich tar file name")
-umbrella_defineopt (MVAPICH_URLMD5 "3972f5db02bd4b30e073bb092fa5deb1"
+umbrella_defineopt (MVAPICH_URLMD5 "22f78ec18d417781ff803943ae62d6a9"
     STRING "MD5 of tar file")
 #
 # XXX: default dev is ch3:mrail

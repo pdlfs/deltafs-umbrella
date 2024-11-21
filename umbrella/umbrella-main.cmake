@@ -4,6 +4,124 @@
 #
 
 #
+# we establish a cmake target for each software package we want built
+# using the ExternalProject module's ExternalProject_Add() function.
+# each target has an umbrella file whose name matches the target.
+# example: target 'foo' has an umbrella file 'umbrella/foo.cmake'
+#
+# targets are configured using variables whose names are prefixed
+# by the target name (in upper case, with dashes replaced by underlines).
+# example: target 'foo' variables start with 'FOO_'
+#          target 'ch-placement' varibles start with 'CH_PLACEMENT_'
+#
+# global umbrella configuration variables are prefixed with 'UMBRELLA_'
+#
+#
+# umbrella option variables:
+#
+#   umbrella option variables are built on top of cmake CACHE
+#   and normal variables.  note that the values of variables stored
+#   in the cmake CACHE persist between runs (in file CMakeCache.txt).
+#   we put the baseline definition of an umbrella option variable
+#   in the target's umbrella/*.cmake file, but we allow the user
+#   to override the variable's baseline default value with a new
+#   default value by loading it into a normal variable (which is
+#   used to define a CACHE variable).  users can also directly set
+#   a normal variable to override an umbrella option variable's
+#   default value (this includes setting it with -D from the
+#   cmake command line).
+#
+#   APIs/example:
+#     >> set umbrella option variable (as a cmake CACHE variable)
+#     umbrella_defineopt(variable-name baseline-default type docstring)
+#
+#     >> override baseline-default of an umbrella option variable
+#     umbrella_opt_default(variable-name new-default)
+#
+#     typical usage, using target foo as example:
+#
+#     >> in umbrella/foo.cmake - set baseline default value to "main"
+#     umbrella_defineopt(FOO_TAG "main" STRING "Foo GIT tag")
+#
+#     >> in umbrella's CMakeLists.txt, update default to "v1.1"
+#     >> for this project's umbrella
+#     umbrella_opt_default(FOO_TAG "v1.1")   # lock version down
+#
+#     user can override this by setting FOO_TAG or by
+#     using -DFOO_TAG="v2.0" on the cmake command line.
+#
+#
+# umbrella settings:
+#
+# a setting is a named config intended to be applied to multiple
+# umbrella targets (vs the option variable which is for one target).
+# setting values are limited to one item from a fixed list (the
+# default fixed list is 'ON;OFF').  the setting name and the list
+# of setting values are used to name a set of cmake variables starting
+# with 'UMBRELLA_' that can be searched for a given target name
+# to deterime the settings value for that target.  each setting
+# has a variable for each possible setting value with a list of
+# targets.  the variables are named like this: "UMBRELLA_name_value".
+# in addition, each setting has a variable named "UMBRELLA_name"
+# that can be used to establish a global setting default value.
+#
+# example: for a setting named 'BUILDTESTS' that allows values
+# of 'ON' or 'OFF' the variables used are:
+#
+#   UMBRELLA_BUILDTESTS_ON  -- cmake list of targets with setting ON
+#   UMBRELLA_BUILDTESTS_OFF -- cmake list of targets with setting OFF
+#   UMBRELLA_BUILDTESTS     -- global default, set to ON or OFF
+#
+# a setting for a target may be undefined if the target isn't on
+# one of the value lists and no global default value is set.
+#
+# to read the BUILDTEST umbrella setting for a target 'foo' we first check
+# if 'foo' is on one of the UMBRELLA_BUILDTESTS_ON or
+# UMBRELLA_BUILDTESTS_OFF lists (it is an error if a target is on
+# more than one list).   if the target isn't on a list, then
+# the global default value is used (if defined).
+#
+#   APIs/example:
+#     >> read setting, value-list is optional (default='ON;OFF')
+#     umbrella_setting(setting-name target return-variable value-list)
+#
+#     >> read target 'foo' BUILDTESTS setting into variable FOO_BUILDTESTS
+#     umbrella_setting(BUILDTESTS foo FOO_BUILDTESTS)
+#
+# target setting variables:
+#
+# umbrella settings are often combined with option variables to create
+# target setting variables.   a target setting variable is a per-target
+# option variable whose value is linked to an umbrella setting.
+#
+#   APIs/example:
+#     >> create variable with name based on 'setting-name' and 'target'
+#     >> that is linked to the setting 'setting-name' ... the 'value-list'
+#     >> is optional and defaults to 'ON;OFF' ... this call would typically
+#     >> be in an umbrella/*.cmake file
+#     umbrella_target_setting(setting-name target
+#                              initial-default type doc-string value-list)
+#
+#
+#     for example, for an 'ON;OFF' setting named 'MYSETTING' and target 'foo':
+#
+#       umbrella_target_setting(MYSETTING foo ON BOOL "mysetting for foo")
+#
+#     will create an option variable named 'FOO_MYSETTING' that is
+#     set in the following way (listed in ~priority order):
+#       1. using -DFOO_MYSETTING=ON (or OFF) on the command line
+#       2. set with umbrella_opt_default(FOO_MYSETTING ON)
+#       3. set to ON with UMBRELLA_MYSETTING_ON=foo  or
+#          set to OFF with UMBRELLA_MYSETTING_OFF=foo
+#       4. set to ON with global UMBRELLA_MYSETTING=ON  (or OFF)
+#       5. FOO_MYSETTING will be undefined if none of the above applies
+#
+#   aside: internally the above translates to:
+#          umbrella_setting(MYSETTING foo FOO_MYSETTING)
+#          umbrella_defineopt(FOO_MYSETTING OFF BOOL "mysetting for foo")
+#
+
+#
 # check to make sure umbrella-init ran
 #
 if (NOT UMBRELLA_INIT_DONE)
@@ -38,17 +156,6 @@ function (umbrella_targetvar_prefix target retval)
 endfunction()
 
 #
-# umbrella option variables are built on top of cmake CACHE
-# and normal variables.  we put the basic definition of the
-# option variable in the umbrella/*.cmake file, but we allow
-# the user to override the variable's default value by loading
-# it into a normal variable and using that to define the
-# cache variable.   users can also directly set a normal
-# variable to override all the defaults (including -D from
-# the cmake command line).
-#
-
-#
 # umbrella_defineopt: define an umbrella option variable in
 # the cmake cache.  this has no effect on the option variable
 # if it has already been defined (first define wins).  when
@@ -78,119 +185,203 @@ function (umbrella_opt_default var newdefault)
 endfunction ()
 
 #
-# umbrella-wide settings: an umbrella-wide setting is defined by
-# a name and a set of possible values (the default set of possible
-# values are "ON" and "OFF").   the name and possible values are
-# used to generate a set of cmake variables starting with "UMBRELLA_"
-# that can be searched for a given target to see if the setting applies
-# to the target.  each umbrella-wide setting has a list of targets
-# for each possible value of the form "UMBRELLA_name_value" ...
-# in addition, each umbrella-wide setting can have a variable
-# "UMBRELLA_name" that can be used to establish a global default
-# for that setting.
-#
-# example: an umbrella-wide setting "FOO" can be "ON" or "OFF" or
-# undefined for a target.  the setting will use the following
-# variables:
-#   UMBRELLA_FOO_ON  -- cmake list of targets to set FOO to ON
-#   UMBRELLA_FOO_OFF -- cmake list of targets to set FOO to OFF
-#   UMBRELLA_FOO     -- global default setting for FOO (ON or OFF)
-#
-# to search the FOO umbrella-wide setting for a given target "bar" we
-# first check to see if "bar" is on UMBRELLA_FOO_ON or UMBRELLA_FOO_OFF.
-# if "bar" is not in either list, we then check the global UMBRELLA_FOO
-# setting.  if "bar" is not in UMBRELLA_FOO_ON or UMBRELLA_FOO_OFF and
-# the global UMBRELLA_FOO is not defined, then the setting does not
-# apply to "bar" ...
-#
-# umbrella-wide settings can be used to link a target's default value
-# for an option variable to an umbrella-wide setting.   Note that
-# putting a target on more than one "UMBRELLA_name_value" list will
-# generate a WARNING message.
-#
-
-#
 # umbrella_setting: check an umbrella-wide setting for a given target.
 # returns target's setting in "retvar" ... if "retvar" is already defined
 # then we do nothing (user is overriding the setting).
 #
+# note that we access all the possible UMBRELLA_${setting}* variables
+# here even if we do not need their values.  this is to work around cmake
+# warnings about unused cli -D variables.  e.g. if user does:
+#
+#   -DUMBRELLA_MYSETTING=OFF   # on command line
+#   set(FOO_MYSETTING ON)      # override for target 'foo' in CMakeLists.txt
+#
+# strictly speaking a call to umbrella_setting(MYSETTING foo FOO_MYSETTING)
+# does not need to look at the value of ${UMBRELLA_MYSETTING} because
+# the value of ${FOO_MYSETTING} overrides it.   but in that case, if
+# nothing else looks at ${UMBRELLA_MYSETTING} then you'll get an unused var
+# warning for it.  it is true that in this case ${UMBRELLA_MYSETTING}
+# is unused, but it is a legit case of that variable being overridden
+# and so we don't really want a warning about it.
+#
 function (umbrella_setting setting targ retvar)
 
-    if (NOT DEFINED ${retvar})    # if not defined: look at umbrella settings
+    # set rv to empty string to start (means we have not found a val yet)
+    set(rv "")
 
-        # allow user to provide possible values; default to ON and OFF
-        if (${ARGC} EQUAL 4)
-            set(vals ${ARGV3})
-        else()
-            set(vals ON OFF)
-        endif()
-
-        # check in UMBRELLA_${setting}_value lists (foreach value in ${vals})
-        foreach (list ${vals})
-            list(FIND UMBRELLA_${setting}_${list} "${targ}" result)
-            if (NOT ${result} EQUAL -1)
-                if (DEFINED ${retvar})
-                    message(WARNING
-                            "getopt_setting: dup define ${targ} ${setting}")
-                endif()
-                set (${retvar} "${list}")
-            endif()
-        endforeach()
-
-        # check for global setting in UMBRELLA_${setting}
-        if (DEFINED UMBRELLA_${setting} AND NOT DEFINED ${retvar})
-            set (${retvar} ${UMBRELLA_${setting}})
-        endif()
-
-        # push up any values we found to parent
-        if (DEFINED ${retvar})
-            set (${retvar} "${${retvar}}" PARENT_SCOPE)
-        endif()
-
+    # allow user to provide possible values; default to ON and OFF
+    if (${ARGC} EQUAL 3)
+        set(vals ON OFF)     # default if no list specified
+    else()
+        set(vals ${ARGN})    # treat extra args as list of setting values
     endif()
+
+    # check in UMBRELLA_${setting}_value lists (foreach value in ${vals})
+    foreach (list ${vals})
+        list(FIND UMBRELLA_${setting}_${list} "${targ}" result)
+        if (NOT ${result} EQUAL -1)
+            if (NOT "${rv}" STREQUAL "")
+                message(WARNING
+                        "umbrella_setting: dup define ${targ} ${setting}")
+            endif()
+            set (rv "${list}")
+        endif()
+    endforeach()
+
+    # check for global setting in UMBRELLA_${setting}, apply it if no rv
+    if (NOT "${UMBRELLA_${setting}}" STREQUAL "" AND "${rv}" STREQUAL "")
+        set (rv ${UMBRELLA_${setting}})
+    endif()
+
+    # if we found a value and parent has not overriden us, push value up
+    if (NOT "${rv}" STREQUAL "" AND NOT DEFINED ${retvar})
+        set (${retvar} "${rv}" PARENT_SCOPE)
+    endif()
+
+endfunction()
+
+#
+# umbrella_target_setting: combine umbrella setting with option
+# variable.  this links a global setting value to a target variable.
+# takes an optional value-list at the end (for settings that are not
+# 'ON;OFF').
+#
+function (umbrella_target_setting setting target initdefault type docstring)
+
+    # use target to get prefix, then build varname by appending setting name
+    umbrella_targetvar_prefix("${target}" prefix)
+    set(varname "${prefix}${setting}")
+
+    # if setting is set, read it into ${varname}.  o.w. ${varname} is !set
+    umbrella_setting(${setting} ${target} ${varname} ${ARGN})
+
+    # create variable in cache using setting value already loaded in
+    # variable varname, or if that is !set use the initdefault
+    umbrella_defineopt(${varname} ${initdefault} ${type} "${docstring}")
+
+endfunction()
+
+#
+# umbrella_buildtests: BUILDTESTS target setting.  if a target has a
+# "build tests" configuration, we can link it to the BUILDTESTS setting.
+# the developer writing the target's umbrella/*.cmake file is responsible
+# for using the value of this to configure target's build flags.
+#
+# note: we used to take the output variable name as an additional
+# arg - but now we let umbrella_target_setting() determine the name
+# and any additional args are ignored.
+#
+function (umbrella_buildtests target)
+    umbrella_target_setting(BUILDTESTS ${target} OFF BOOL
+        "Build ${target} tests")
+endfunction()
+
+#
+# umbrella_runtests: RUNTESTS target setting.  if a target supports
+# running tests (e.g. unit tests), we can link this to the
+# RUNTESTS setting.   this is used to support the umbrella_testcommand()
+# function.
+#
+function (umbrella_runtests target)
+    umbrella_target_setting(RUNTESTS ${target} OFF BOOL "Run ${target} tests")
+endfunction()
+
+#
+# umbrella_testcommand: generate test-args output if requested.
+# we generate test-args if we are not cross compiling, the target
+# built the tests (if that was an option), and we are requested to
+# run the tests.
+#
+function (umbrella_testcommand target retvar)
+
+    # get target prefix and read RUNTESTS target setting
+    umbrella_targetvar_prefix("${target}" prefix)
+    umbrella_runtests(${target})
+
+    # now see if we need to do it
+    if (NOT CMAKE_CROSSCOMPILING AND
+        (NOT DEFINED ${prefix}BUILDTESTS OR ${prefix}BUILDTESTS) AND
+        ${prefix}RUNTESTS)
+        # add TEST_COMMAND for ExternalProject_Add() if not present
+        if ("${ARGV2}" STREQUAL "TEST_COMMAND")
+            set (${retvar} ${ARGN} PARENT_SCOPE)
+        else()
+            set (${retvar} TEST_COMMAND ${ARGN} PARENT_SCOPE)
+        endif()
+    else()
+        set (${retvar} "" PARENT_SCOPE)
+    endif()
+endfunction()
+
+#
+# umbrella_prebuilt: PREBUILT target setting.  targets that support
+# PREBUILT can use a previously built version of the target instead
+# of building it themselves (e.g. to save time and/or avoid doing
+# a complex build).  possible PREBUILT values are:
+#    ON  - always use a prebuilt version of target (fails if !found)
+#    OFF - never use a prebuilt version of target (we always build it)
+#    TRY - use a prebuilt version of target if found, otherwise we build it
+#
+function (umbrella_prebuilt target)
+    umbrella_target_setting(PREBUILT ${target} OFF BOOL
+        "${target} is prebuilt" "ON;OFF;TRY")
 endfunction()
 
 #
 # umbrella_prebuilt_check_mktarg: helper function.  does the checks
 # and makes a custom target for prebuilt targets.
 #
-function (umbrella_prebuilt_check_mktarg t check checkarg)
+function(umbrella_prebuilt_check_mktarg target value check)
     if("${check}" STREQUAL "")
-        set(UMBRELLA_PREBUILT_CHECK_${t} 1)       # no check requested
+        set(UMBRELLA_PREBUILT_CHECK_${target} 1)       # no check requested
     elseif ("${check}" STREQUAL FILE)
-        find_file(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+        find_file(UMBRELLA_PREBUILT_CHECK_${target} ${ARGN})
     elseif("${check}" STREQUAL LIBRARY)
-        find_library(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+        find_library(UMBRELLA_PREBUILT_CHECK_${target} ${ARGN})
     elseif("${check}" STREQUAL PROGRAM)
-        find_program(UMBRELLA_PREBUILT_CHECK_${t} ${checkarg})
+        find_program(UMBRELLA_PREBUILT_CHECK_${target} ${ARGN})
     else()
-        message(FATAL_ERROR "umbrella_prebuilt_check bad type arg ${check}")
+        message(FATAL_ERROR "umbrella_prebuilt_check target ${target} "
+                            "bad type: ${check}")
     endif()
-    if(NOT UMBRELLA_PREBUILT_CHECK_${t})
-        message(FATAL_ERROR
-        "${t} failed prebuilt check ${check} ${checkarg} - check paths")
+
+    if (UMBRELLA_PREBUILT_CHECK_${target})
+        add_custom_target(${target} ALL
+                          COMMAND ""
+                          COMMENT "Prebuilt ${target} target")
+        message(STATUS "  Using prebuilt ${target} target")
+    else()
+        if (value STREQUAL "TRY")
+            message(STATUS "  No prebuilt ${target} target - "
+                             "will try to build it")
+        else()
+            message(FATAL_ERROR "${target} - cannot find prebuilt version "
+                    "(${check} ${ARGN}) - check paths")
+        endif()
     endif()
-    add_custom_target(${t} ALL
-                      COMMAND ""
-                      COMMENT "Prebuilt ${t} target")
-    message(STATUS "Using prebuilt ${t} target")
 endfunction()
 
 #
-# umbrella_prebuilt_check: if target has its prebuilt setting on
-# then generate a custom target for it.   we have the option of
-# checking for a lib, include file, or program (to make sure the
-# target we think is prebuilt is somewhere we can find it).
+# umbrella_prebuilt_check: determine target's PREBUILT setting and
+# apply it to the target (generating a custom target for it if we
+# are using a prebuilt version).  we have the option of checking for
+# a lib, include file, or program (to make sure the target we think
+# is prebuilt is somewhere we can find it).   the CMAKE_PREFIX_PATH
+# can be used to expand the search for prebuilt targets.
 #
-function (umbrella_prebuilt_check targ)
-    if (NOT TARGET "${targ}")
-        umbrella_targetvar_prefix("${targ}" prefix)
-        set(var "${prefix}PREBUILT")
-        umbrella_setting(PREBUILT "${targ}" "${var}")
-        umbrella_defineopt("${var}" OFF BOOL "${targ} is prebuilt")
-        if (${var})
-            umbrella_prebuilt_check_mktarg("${targ}" "${ARGV1}" "${ARGV2}")
+function(umbrella_prebuilt_check target)
+    if (NOT TARGET "${target}")
+
+        # get target prefix, read PREBUILT target setting, get target's value
+        umbrella_targetvar_prefix("${target}" prefix)
+        umbrella_prebuilt(${target})
+        set(value "${${prefix}PREBUILT}")    # ON;OFF;TRY
+
+        # try for a prebuilt target if we are ON or TRY
+        if ("${value}" STREQUAL "ON" OR "${value}" STREQUAL "TRY")
+            umbrella_prebuilt_check_mktarg("${target}" "${value}" ${ARGN})
         endif()
+
     endif()
 endfunction()
 
@@ -267,39 +458,6 @@ function (umbrella_download result target localtar)
         set (${result} ${ARGN} PARENT_SCOPE)
     endif ()
 endfunction ()
-
-#
-# umbrella_buildtests: if a target has a standalone "build tests" setting,
-# we use this to link it to the BUILDTESTS umbrella setting.
-#
-function (umbrella_buildtests target retvar)
-    umbrella_setting(BUILDTESTS ${target} ${retvar})
-    umbrella_defineopt(${retvar} OFF BOOL "Build ${target} unit tests")
-endfunction()
-
-#
-# umbrella_testcommand: generate test-args output if requested.
-# we generate test-args if we are not cross compiling, the target
-# built the tests (if that was an option), and we are requested to
-# run the tests.
-#
-function (umbrella_testcommand target retvar)
-
-    # first setup the target_RUNTESTS variable
-    umbrella_targetvar_prefix("${target}" prefix)
-    set(var "${prefix}RUNTESTS")
-    umbrella_setting(RUNTESTS "${target}" "${var}")
-    umbrella_defineopt("${var}" OFF BOOL "Run ${target} unit tests")
-
-    # now see if we need to do it
-    if (NOT CMAKE_CROSSCOMPILING AND
-        (NOT DEFINED ${prefix}BUILDTESTS OR ${prefix}BUILDTESTS) AND
-        ${prefix}RUNTESTS)
-        set (${retvar} ${ARGN} PARENT_SCOPE)
-    else()
-        set (${retvar} "" PARENT_SCOPE)
-    endif()
-endfunction()
 
 #
 # umbrella_get_pkgcfglist: get list of package cfg directories

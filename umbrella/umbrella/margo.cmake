@@ -29,7 +29,7 @@ umbrella_download (MARGO_DOWNLOAD margo ${MARGO_TAR}
                    GIT_REPOSITORY ${MARGO_REPO}
                    GIT_TAG ${MARGO_TAG})
 umbrella_patchcheck (MARGO_PATCHCMD margo)
-umbrella_testcommand (margo MARGO_TESTCMD TEST_COMMAND make check)
+umbrella_testcommand (margo MARGO_TESTCMD make check)
 
 #
 # depends

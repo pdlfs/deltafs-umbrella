@@ -30,7 +30,7 @@ umbrella_download (GFLAGS_DOWNLOAD gflags ${GFLAGS_TAR}
                    GIT_REPOSITORY ${GFLAGS_REPO}
                    GIT_TAG ${GFLAGS_TAG})
 umbrella_patchcheck (GFLAGS_PATCHCMD gflags)
-umbrella_testcommand (gflags GFLAGS_TESTCMD TEST_COMMAND make test)
+umbrella_testcommand (gflags GFLAGS_TESTCMD make test)
 
 #
 # create gflags target

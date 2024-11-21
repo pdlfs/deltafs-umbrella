@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:pdlfs/umbrella.git
 	branch = master
-	commit = 325b6ab6933828cdaaf02e61b025344795f5b8d9
-	parent = f806513c980ffd1e4b31f518e9a6fbead7555499
+	commit = 7123a7a0097c1ea1d68f3da9b73aec2784f041c0
+	parent = 9c4dcfb742b60d2614e5de0a41a045c9ed02368b
 	cmdver = 0.3.1

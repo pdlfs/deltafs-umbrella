@@ -33,18 +33,26 @@ umbrella_download (DELTAFS_COMMON_DOWNLOAD deltafs-common ${DELTAFS_COMMON_TAR}
                    GIT_REPOSITORY ${DELTAFS_COMMON_REPO}
                    GIT_TAG ${DELTAFS_COMMON_TAG})
 umbrella_patchcheck (DELTAFS_COMMON_PATCHCMD deltafs-common)
-umbrella_testcommand (deltafs-common DELTAFS_COMMON_TESTCMD TEST_COMMAND
+umbrella_testcommand (deltafs-common DELTAFS_COMMON_TESTCMD
       ctest -E "gigaplus_test|autocompact_test|db_test|index_block_test" )
 
 #
 # depends
 #
+set (DELTAFS_COMMON_DEPENDS mercury)
+
+# if UMBRELLA_USE_GLOG is set to ON, include it
+if (UMBRELLA_USE_GLOG)
+    include (umbrella/glog)
+    list (APPEND DELTAFS_COMMON_DEPENDS glog)
+endif (UMBRELLA_USE_GLOG)
+
 include (umbrella/mercury)
 
 #
 # create deltafs-common target
 #
-ExternalProject_Add (deltafs-common DEPENDS mercury
+ExternalProject_Add (deltafs-common DEPENDS ${DELTAFS_COMMON_DEPENDS}
     ${DELTAFS_COMMON_DOWNLOAD} ${DELTAFS_COMMON_PATCHCMD}
     CMAKE_ARGS ${PDLFS_OPTIONS} -DBUILD_SHARED_LIBS=ON
         -DBUILD_TESTS=${DELTAFS_COMMON_BUILDTESTS}

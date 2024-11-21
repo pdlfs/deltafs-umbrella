@@ -31,8 +31,8 @@ umbrella_download (DELTAFS_NEXUS_DOWNLOAD deltafs-nexus ${DELTAFS_NEXUS_TAR}
                    GIT_TAG ${DELTAFS_NEXUS_TAG})
 umbrella_patchcheck (DELTAFS_NEXUS_PATCHCMD deltafs-nexus)
 umbrella_testcommand (deltafs-nexus DELTAFS_NEXUS_TESTCMD
-    ### TEST_COMMAND "ctest -R nexus -V"
-    TEST_COMMAND "" )
+    ### "ctest -R nexus -V"
+    "" )
 
 #
 # depends

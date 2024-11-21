@@ -40,9 +40,10 @@ umbrella_patchcheck (CARP_PATCHCMD carp)
 #
 # depends
 #
-set (CARP_DEPENDS deltafs)
+set (CARP_DEPENDS deltafs vpic)
 
 include (umbrella/deltafs)
+include (umbrella/vpic)
 if (CARP_H5PART)
     umbrella_opt_default (HDF5_ENABLE_PARALLEL ON)
     if (NOT HDF5_ENABLE_PARALLEL)

@@ -28,7 +28,7 @@ umbrella_download (ARGOBOTS_DOWNLOAD argobots ${ARGOBOTS_TAR}
                    GIT_REPOSITORY ${ARGOBOTS_REPO}
                    GIT_TAG ${ARGOBOTS_TAG})
 umbrella_patchcheck (ARGOBOTS_PATCHCMD argobots)
-umbrella_testcommand(argobots ARGOBOTS_TESTCMD TEST_COMMAND make -C test check)
+umbrella_testcommand(argobots ARGOBOTS_TESTCMD make -C test check)
 
 #
 # create argobots target

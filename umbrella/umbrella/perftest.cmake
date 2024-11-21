@@ -44,6 +44,7 @@ ExternalProject_Add (perftest DEPENDS rdma-core
                       ${UMBRELLA_CPPFLAGS} ${UMBRELLA_LDFLAGS}
                       --prefix=${CMAKE_INSTALL_PREFIX}
                       --enable-shared
+    BUILD_IN_SOURCE 1   # XXX: work around man page handling, sent fix in
     UPDATE_COMMAND "")
 
 #

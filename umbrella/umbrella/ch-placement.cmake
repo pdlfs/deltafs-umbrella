@@ -29,7 +29,7 @@ umbrella_download (CH_PLACEMENT_DOWNLOAD ch-placement ${CH_PLACEMENT_TAR}
                    GIT_REPOSITORY ${CH_PLACEMENT_REPO}
                    GIT_TAG ${CH_PLACEMENT_TAG})
 umbrella_patchcheck (CH_PLACEMENT_PATCHCMD ch-placement)
-umbrella_testcommand(ch-placement CH_PLACEMENT_TESTCMD TEST_COMMAND make check)
+umbrella_testcommand(ch-placement CH_PLACEMENT_TESTCMD make check)
 
 #
 # create ch-placement target
